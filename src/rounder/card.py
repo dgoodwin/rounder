@@ -64,7 +64,7 @@ stringToSuit = {
     'h': HEART
 }
 
-def getRankDisplay(intRank):
+def get_rank_display(intRank):
     return rankToString[intRank]
 
 class Card:
