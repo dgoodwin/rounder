@@ -30,7 +30,7 @@ class Deck:
 
     def __init__(self):
         self.cards = []
-        for i in rounder.card.allSuits:
+        for i in rounder.card.ALL_SUITS:
             for j in range(2, 15):
                 self.cards.append(Card(j, i))
         self.__topCard = 0

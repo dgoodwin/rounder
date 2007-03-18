@@ -21,12 +21,12 @@ CLUB = Suit(2, "c", "club")
 HEART = Suit(3, "h", "heart")
 
 # Handy for iteration purposes:
-allSuits = [SPADE, DIAMOND, CLUB, HEART]
-ranksAcsending = range(2, 15)
-ranksDescending = range(14, 1, -1)
+ALL_SUITS = [SPADE, DIAMOND, CLUB, HEART]
+RANKS_ASCENDING = range(2, 15)
+RANKS_DESCENDING = range(14, 1, -1)
 
 # Maps card values to display values:
-rankToString = {
+RANK_TO_STRING = {
     2: '2',
     3: '3',
     4: '4',
@@ -41,7 +41,7 @@ rankToString = {
     13: 'K',
     14: 'A'
 }
-stringToRank = {
+STRING_TO_RANK = {
     '2': 2,
     '3': 3,
     '4': 4,
@@ -57,7 +57,7 @@ stringToRank = {
     'A': 14
 }
 
-stringToSuit = {
+STRING_TO_SUIT = {
     's': SPADE,
     'd': DIAMOND,
     'c': CLUB,
@@ -65,7 +65,7 @@ stringToSuit = {
 }
 
 def get_rank_display(intRank):
-    return rankToString[intRank]
+    return RANK_TO_STRING[intRank]
 
 class Card:
     """ Standard playing card. """
@@ -90,15 +90,15 @@ class Card:
     def __create_card(self, rank, suit):
         if type(rank) == types.IntType and rank >= 2 and rank <= 14:
             self.rank = rank
-        elif stringToRank.has_key(str(rank)):
-            self.rank = stringToRank.get(str(rank))
+        elif STRING_TO_RANK.has_key(str(rank)):
+            self.rank = STRING_TO_RANK.get(str(rank))
         else:
             raise RounderException("Bad card rank: " + str(rank))
 
         if isinstance(suit, Suit):
             self.suit = suit
-        elif stringToSuit.has_key(str(suit)):
-            self.suit = stringToSuit.get(str(suit))
+        elif STRING_TO_SUIT.has_key(str(suit)):
+            self.suit = STRING_TO_SUIT.get(str(suit))
         else:
             raise RounderException("Bad card suit: " + str(suit))
 
