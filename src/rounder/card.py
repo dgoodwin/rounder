@@ -85,9 +85,9 @@ class Card:
                 raise RounderException("Bad card: " + rank)
             suit = rank[-1:]
             rank = rank[:-1]
-        self.__createCard(rank,suit)
+        self.__create_card(rank,suit)
 
-    def __createCard(self, rank, suit):
+    def __create_card(self, rank, suit):
         if type(rank) == types.IntType and rank >= 2 and rank <= 14:
             self.rank = rank
         elif stringToRank.has_key(str(rank)):
@@ -103,7 +103,7 @@ class Card:
             raise RounderException("Bad card suit: " + str(suit))
 
     def __str__(self):
-        return "%s%s" % (self.getRankDisplay(), self.getSuitDisplay())
+        return "%s%s" % (self.get_rank_display(), self.get_suit_display())
 
     def __cmp__(self, other):
         if other.rank != self.rank:
@@ -116,11 +116,11 @@ class Card:
             else:
                 return 1
 
-    def getRankDisplay(self):
-        return getRankDisplay(self.rank)
+    def get_rank_display(self):
+        return get_rank_display(self.rank)
 
-    def getSuitDisplay(self):
+    def get_suit_display(self):
         return self.suit.display
 
-    def getLongSuitDisplay(self):
+    def get_long_suit_display(self):
         return self.suit.longDisplay
