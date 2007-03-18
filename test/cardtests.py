@@ -4,6 +4,56 @@ import unittest
 
 import settestpath
 
+import rounder.card
+
+from rounder.card import SPADE
+from rounder.card import DIAMOND
+from rounder.card import HEART
+from rounder.card import CLUB
+
+from rounder.card import Card
+from rounder.core import RounderException
+
+class CardTests(unittest.TestCase):
+
+    def testCreateCardByString(self):
+        self.__testCard(Card('2s'), 2, SPADE)
+        self.__testCard(Card('Ad'), 14, DIAMOND)
+        self.__testCard(Card('4', 'c'), 4, CLUB)
+        self.__testCard(Card(14, 'h'), 14, HEART)
+        self.__testCard(Card(13, SPADE), 13, SPADE)
+
+    def __testCard(self, card, rank, suit):
+        self.assertEquals(card.rank, rank)
+        self.assertEquals(card.suit, suit)
+
+    def testToString(self):
+        c = Card(2, CLUB)
+        self.assertEqual("2c", str(c))
+        c = Card(14, SPADE)
+        self.assertEqual("As", str(c))
+
+    def testInvalidCards(self):
+        self.assertRaises(RounderException, Card, 1, CLUB)
+        self.assertRaises(RounderException, Card, 15, CLUB)
+
+    def testGetCard(self):
+        # TODO: move these to a base class
+        aceOfSpades = Card("As")
+        self.assertEquals("As", str(aceOfSpades))
+
+        tenOfClubs = Card("Tc")
+        self.assertEquals("Tc", str(tenOfClubs))
+
+        twoOfHearts = Card("2h")
+        self.assertEquals("2h", str(twoOfHearts))
+
+        sixOfDiamonds = Card("6d")
+        self.assertEquals("6d", str(sixOfDiamonds))
+
+        kingOfHearts = Card("Kh")
+        self.assertEquals("Kh", str(kingOfHearts))
+
 class FakeTests(unittest.TestCase):
     def test_nothing(self):
         pass
@@ -12,7 +62,7 @@ class FakeTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(FakeTests))
+    suite.addTest(unittest.makeSuite(CardTests))
     return suite
 
 if __name__ == "__main__":
