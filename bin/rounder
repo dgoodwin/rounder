@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+""" Launches the main Rounder application. """
+
+__revision__ = "$Revision$"
+
+from optparse import OptionParser
+from rounder.log import setup_logging
+# Configure logging: (needs to be done before importing our modules)
+confFileLocations = ["~/.rounder/logging.conf", "./logging.conf"]
+setup_logging(confFileLocations)
+
+from rounder.core import RounderApplication
+
+if __name__ == "__main__":
+    parser = OptionParser(version='0.0.1')
+    (options, args) = parser.parse_args()
+    rounderApp = RounderApplication()
+    rounderApp.main()

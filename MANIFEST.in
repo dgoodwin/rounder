@@ -1,0 +1,4 @@
+include src/rounder/data/*.xml src/rounder/data/*.glade src/rounder/data/*.png
+include data/rounder.schema
+include testrounder.py logging.conf test/*.py
+include AUTHORS LICENSE README
