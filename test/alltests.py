@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import unittest
 import settestpath
 import configureLogging
@@ -5,6 +7,7 @@ import configureLogging
 # Import all test modules here:
 import cardtests
 import decktests
+import handtests
 
 from unittest import TestSuite
 
@@ -13,6 +16,7 @@ def suite():
     return TestSuite((
         cardtests.suite(),
         decktests.suite(),
+        handtests.suite(),
     ))
 
 if __name__ == "__main__":

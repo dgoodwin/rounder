@@ -1,10 +1,13 @@
-#!/usr/bin/env python
+""" Rounder module containing functionality related to a playing card. """
 
 import types
 
 from rounder.core import RounderException
 
 class Suit:
+    
+    """ Object representation of a card suit. """
+
     def __init__(self, uniqueInt, shortDisplay, longDisplay):
         self.uniqueInt = uniqueInt
         self.display = shortDisplay

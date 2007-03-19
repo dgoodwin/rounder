@@ -11,3 +11,8 @@ class RounderException(Exception):
     def __str__(self):
         return repr(self.value)
 
+def array_to_string(array):
+    output = ""
+    for c in array:
+        output = output + str(c) + " "
+    return output

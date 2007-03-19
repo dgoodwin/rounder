@@ -23,6 +23,8 @@ class DeckTests(unittest.TestCase):
         for i in range(0, 53):
             d.draw_card()
 	    
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(DeckTests))
