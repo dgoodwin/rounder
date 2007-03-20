@@ -235,42 +235,50 @@ class HandProcessor:
 
     pass
 
-def final_evaluate(cards):
+class DefaultHandProcessor:
     """
-    Returns the best possible hand made from the supplied cards. As this is a
-    final hand, atleast 5 cards must be supplied and exactly 5 returned.
-    """
-    if len(cards) < 5:
-        raise NotEnoughCardsException("5 cards required to evaluate" \
-            + " a hand, only " + str(len(cards)) + " present.")
-    evalResults = evaluate(cards)
-    finalCards = evalResults[1]
-    if len(finalCards) > 5:
-        raise RounderException("Too many cards returned during evaluation.")
-    elif len(finalCards) < 5:
-        finalCards.extend(get_kickers(5 - len(finalCards), cards,
-            finalCards))
-    return (evalResults[0], finalCards)
+    Evaluates hands according to the standard poker rules and hand rankings.
 
-def evaluate(cards):
-    """
-    Returns the currently best possible hand, and the cards that compose it.
-    This function can be called with less than 5 cards, and will naturally
-    only return the cards that are required to make the best hand thus far.
+    Contain no state and can safely be reused across any objects
+    requiring their functionality.
     """
 
-    availableCards = AvailableCards(cards)
+    def evaluate(self, cards):
+        """
+        Returns the best possible hand made from the supplied cards. As this is a
+        final hand, atleast 5 cards must be supplied and exactly 5 returned.
+        """
+        if len(cards) < 5:
+            raise NotEnoughCardsException("5 cards required to evaluate" \
+                + " a hand, only " + str(len(cards)) + " present.")
+        evalResults = self.__evaluate(cards)
+        finalCards = evalResults[1]
+        if len(finalCards) > 5:
+            raise RounderException("Too many cards returned during evaluation.")
+        elif len(finalCards) < 5:
+            finalCards.extend(get_kickers(5 - len(finalCards), cards,
+                finalCards))
+        return (evalResults[0], finalCards)
 
-    for rank in handRanks:
-        evalResults = rank.eval(availableCards)
-        if evalResults[0]:
-            logger.debug("Evaluated " + array_to_string(cards) + " to " + \
-                rank.displayName)
-            return (rank, evalResults[1])
+    def __evaluate(self, cards):
+        """
+        Returns the currently best possible hand, and the cards that compose it.
+        This function can be called with less than 5 cards, and will naturally
+        only return the cards that are required to make the best hand thus far.
+        """
 
-    # If we get to this point, something is very very wrong.
-    raise RounderException("Unable to determine hand rank for: " + \
-        array_to_string(cards))
+        availableCards = AvailableCards(cards)
+
+        for rank in handRanks:
+            evalResults = rank.eval(availableCards)
+            if evalResults[0]:
+                logger.debug("Evaluated " + array_to_string(cards) + " to " + \
+                    rank.displayName)
+                return (rank, evalResults[1])
+
+        # If we get to this point, something is very very wrong.
+        raise RounderException("Unable to determine hand rank for: " + \
+            array_to_string(cards))
 
 class NotEnoughCardsException(RounderException):
     """
@@ -317,9 +325,7 @@ def check_for_straight(sortedCards):
     return []
 
 def is_straight(fiveCards):
-    """
-    Scan the provided 5 cards and determine if they constitute a straight.
-    """
+    """ Check if the 5 provided cards constitute a straight. """
     if len(fiveCards) != 5:
         raise RounderException("Checking for straight on less than " +
             "five cards.")
