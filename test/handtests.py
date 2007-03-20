@@ -40,26 +40,26 @@ def testHand(test, expected, initialCards, handRank=None):
     populate the hand with, the second the expected outcome of the hand after
     processing.
     """
-    resultsTuple = rounder.hand.finalEvaluate(getCards(initialCards))
+    resultsTuple = rounder.hand.final_evaluate(getCards(initialCards))
     test.assert_(compareHands(expected, resultsTuple[1]))
     if handRank is not None:
         test.assertEqual(handRank, resultsTuple[0])
 
 class HandTests(unittest.TestCase):
 
-    def testCheckForStraight(self):
+    def testcheck_for_straight(self):
         """
-        Check the hand processor's internal checkForStraight function, not
+        Check the hand processor's internal check_for_straight function, not
         actually testing the full hand ranking of straights just yet.
         """
         self.assert_(compareHands("Ac Kd Qh Js Tc",
-            rounder.hand.checkForStraight(getCards("Ac Kd Qh Js Tc"))))
+            rounder.hand.check_for_straight(getCards("Ac Kd Qh Js Tc"))))
         self.assert_(compareHands("Ac Kd Qh Js Tc",
-            rounder.hand.checkForStraight(getCards("Ac Kd Ks Qh Js Tc"))))
+            rounder.hand.check_for_straight(getCards("Ac Kd Ks Qh Js Tc"))))
         self.assert_(compareHands("5s 4s 3s 2s As",
-            rounder.hand.checkForStraight(getCards("As 8c 8s 7s 5s 4s 3s 2s"))))
+            rounder.hand.check_for_straight(getCards("As 8c 8s 7s 5s 4s 3s 2s"))))
         self.assert_(compareHands("9h 8h 7h 6h 5h",
-            rounder.hand.checkForStraight(
+            rounder.hand.check_for_straight(
                 getCards("9h 9c 9s 8h 7h 6h 6c 5h 5c 5d"))))
 
     def testStraightFlushes(self):

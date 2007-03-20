@@ -31,7 +31,7 @@ class StraightFlush(HandRank):
         if len(cards.flushSuits) > 0:
             bestStrFlush = []
             for s in cards.flushSuits:
-                strFlushCards = checkForStraight(filterSuit(
+                strFlushCards = check_for_straight(filter_suit(
                     cards.sortedCards, s))
                 if len(strFlushCards) == 5:
                     if len(bestStrFlush) != 5 or \
@@ -51,7 +51,7 @@ class FourOfAKind(HandRank):
         quadsRank = -1
         for rank in rounder.card.RANKS_DESCENDING:
             if cards.rankCount[rank] == 4: 
-                finalHand.extend(filterRank(cards.sortedCards, rank))
+                finalHand.extend(filter_rank(cards.sortedCards, rank))
                 return (True, finalHand)
         return (False, [])
 
@@ -73,8 +73,8 @@ class FullHouse(HandRank):
                 if pairRank == -1:
                     pairRank = rank
         if (tripsRank != -1) and (pairRank != -1):
-            finalHand.extend(filterRank(cards.sortedCards, tripsRank))
-            finalHand.extend(filterRank(cards.sortedCards, pairRank, 2))
+            finalHand.extend(filter_rank(cards.sortedCards, tripsRank))
+            finalHand.extend(filter_rank(cards.sortedCards, pairRank, 2))
             return (True, finalHand)
         return (False, [])
 
@@ -92,7 +92,7 @@ class Flush(HandRank):
             # card. I know of no poker games where this situation is possible.
             bestFlush = []
             for s in cards.flushSuits:
-                flushCards = filterSuit(cards.sortedCards, s)
+                flushCards = filter_suit(cards.sortedCards, s)
                 if len(bestFlush) != 5 or \
                     flushCards[0].rank > bestFlush[0].rank:
                     bestFlush = flushCards
@@ -105,7 +105,7 @@ class Straight(HandRank):
         HandRank.__init__(self, 5, "straight")
 
     def eval(self, cards):
-        straightCards = checkForStraight(cards.sortedCards)
+        straightCards = check_for_straight(cards.sortedCards)
         if len(straightCards) == 5:
             return (True, straightCards)
 
@@ -123,7 +123,7 @@ class ThreeOfAKind(HandRank):
                 tripsRank = rank
                 break
         if tripsRank != -1:
-            finalHand.extend(filterRank(cards.sortedCards, tripsRank))
+            finalHand.extend(filter_rank(cards.sortedCards, tripsRank))
             return (True, finalHand)
 
         return (False, [])
@@ -142,8 +142,8 @@ class TwoPair(HandRank):
                     break
 
         if len(pairRanks) >= 2:
-            finalHand.extend(filterRank(cards.sortedCards, pairRanks[0]))
-            finalHand.extend(filterRank(cards.sortedCards, pairRanks[1]))
+            finalHand.extend(filter_rank(cards.sortedCards, pairRanks[0]))
+            finalHand.extend(filter_rank(cards.sortedCards, pairRanks[1]))
             return (True, finalHand)
 
         return (False, [])
@@ -156,7 +156,7 @@ class OnePair(HandRank):
         for rank in rounder.card.RANKS_DESCENDING:
             if cards.rankCount[rank] == 2:
                 finalHand = []
-                finalHand.extend(filterRank(cards.sortedCards, rank))
+                finalHand.extend(filter_rank(cards.sortedCards, rank))
                 return (True, finalHand)
         
         return (False, [])
@@ -224,9 +224,18 @@ class AvailableCards:
         for i in rounder.card.ALL_SUITS:
             if self.suitCount[i] >= 5:
                 self.flushSuits.append(i)
-                self.flushedCards = filterSuit(self.sortedCards, i)
+                self.flushedCards = filter_suit(self.sortedCards, i)
 
-def finalEvaluate(cards):
+class HandProcessor:
+
+    """ 
+    Base hand processor class, extended as necessary by poker variants
+    that require a non-standard interpretation of the hands.
+    """
+
+    pass
+
+def final_evaluate(cards):
     """
     Returns the best possible hand made from the supplied cards. As this is a
     final hand, atleast 5 cards must be supplied and exactly 5 returned.
@@ -239,7 +248,7 @@ def finalEvaluate(cards):
     if len(finalCards) > 5:
         raise RounderException("Too many cards returned during evaluation.")
     elif len(finalCards) < 5:
-        finalCards.extend(getKickers(5 - len(finalCards), cards,
+        finalCards.extend(get_kickers(5 - len(finalCards), cards,
             finalCards))
     return (evalResults[0], finalCards)
 
@@ -273,7 +282,7 @@ class NotEnoughCardsException(RounderException):
     def __str__(self):
         return repr(self.value)
 
-def checkForStraight(sortedCards):
+def check_for_straight(sortedCards):
     """
     Check all possible combinations of the given cards for any occurance of a
     straight. Suits are not considered, duplicate ranks get removed with the
@@ -283,7 +292,7 @@ def checkForStraight(sortedCards):
 
     sortedCards must be sorted!!!
     """
-    uniqueRankedCards = removeDuplicateRanks(sortedCards)
+    uniqueRankedCards = remove_duplicate_ranks(sortedCards)
     
     if (len(uniqueRankedCards) < 5):
         return []
@@ -291,7 +300,7 @@ def checkForStraight(sortedCards):
     lowIndex = 0
     highIndex = 5
     while highIndex <= len(uniqueRankedCards):
-        if isStraight(uniqueRankedCards[lowIndex:highIndex]):
+        if is_straight(uniqueRankedCards[lowIndex:highIndex]):
             return uniqueRankedCards[lowIndex:highIndex]
         lowIndex = lowIndex + 1
         highIndex = highIndex + 1
@@ -301,13 +310,13 @@ def checkForStraight(sortedCards):
         rounder.card.RANK_TO_STRING[uniqueRankedCards[-1].rank] == '2':
         potentialWheel = uniqueRankedCards[-4:]
         potentialWheel.append(uniqueRankedCards[0])
-        if isStraight(potentialWheel):
+        if is_straight(potentialWheel):
             return potentialWheel
 
     # Return an empty list if no straight was found:
     return []
 
-def isStraight(fiveCards):
+def is_straight(fiveCards):
     """
     Scan the provided 5 cards and determine if they constitute a straight.
     """
@@ -324,7 +333,7 @@ def isStraight(fiveCards):
         i = i + 1
     return True
 
-def filterSuit(cards, suit):
+def filter_suit(cards, suit):
     """
     Returns a list of all the cards found in the supplied list that match
     the suit requested.
@@ -335,7 +344,7 @@ def filterSuit(cards, suit):
             filteredCards.append(c)
     return filteredCards
 
-def filterRank(cards, rank, max=-1):
+def filter_rank(cards, rank, max=-1):
     """
     Returns a list of all cards found in the supplied list that match the
     rank requested.
@@ -347,7 +356,7 @@ def filterRank(cards, rank, max=-1):
                 filteredCards.append(c)
     return filteredCards
 
-def getKickers(howMany, cards, cardsToExclude=[]):
+def get_kickers(howMany, cards, cardsToExclude=[]):
     """
     Returns a list of kickers, as many as we need, excluding the ranks we
     don't want. List of cards absolutely must be sorted.
@@ -367,7 +376,7 @@ def getKickers(howMany, cards, cardsToExclude=[]):
             return kickers
     raise RounderException("Unable to find %s kickers!")
 
-def removeDuplicateRanks(cards):
+def remove_duplicate_ranks(cards):
     """
     Remove duplicate ranks, the first card of a rank is the one that remains.
     i.e. Suits don't matter to us.
