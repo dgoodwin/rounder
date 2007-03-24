@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 #   Rounder - Poker for the GNOME Desktop
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
@@ -20,30 +18,23 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
+""" Tests for the rounder.table module. """
+
 import unittest
+
 import settestpath
-import configureLogging
 
-# Import all test modules here:
-import cardtests
-import decktests
-import handtests
-import pokerroomtests
-import tabletests
-import playertests
+class TableTests(unittest.TestCase):
 
-from unittest import TestSuite
+    def test_something(self):
+        pass
+
+
 
 def suite():
-    # Append all test suites here:
-    return TestSuite((
-        cardtests.suite(),
-        decktests.suite(),
-        handtests.suite(),
-        pokerroomtests.suite(),
-        tabletests.suite(),
-        playertests.suite(),
-    ))
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TableTests))
+    return suite
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")
