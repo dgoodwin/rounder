@@ -74,10 +74,6 @@ class CardTests(unittest.TestCase):
         kingOfHearts = Card("Kh")
         self.assertEquals("Kh", str(kingOfHearts))
 
-class FakeTests(unittest.TestCase):
-    def test_nothing(self):
-        pass
-
 
 
 def suite():
