@@ -18,14 +18,33 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Table Module """
+""" Tests for the rounder.limit module. """
 
-class Table:
+import unittest
 
-    """ 
-    Representation of a table at which a poker game is taking place.
-    """
+import settestpath
 
-    def __init__(self, seats=10):
-        self.seats = seats
-        
+from rounder.limit import FixedLimit
+
+class FixedLimitTests(unittest.TestCase):
+
+    def test_two_four(self):
+        two_four = FixedLimit(small_bet=2, big_bet=4)
+        self.assertEqual(1, two_four.small_blind)
+        self.assertEqual(2, two_four.big_blind)
+
+    def test_micro_limits(self):
+        limit = FixedLimit(small_bet=0.10, big_bet=0.20)
+        self.assertEqual(0.05, limit.small_blind)
+        self.assertEqual(0.10, limit.big_blind)
+
+
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(FixedLimitTests))
+    return suite
+
+if __name__ == "__main__":
+    unittest.main(defaultTest="suite")
+

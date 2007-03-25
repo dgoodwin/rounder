@@ -18,14 +18,33 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Table Module """
+""" The Rounder Limit Module """
 
-class Table:
+class Limit:
 
-    """ 
-    Representation of a table at which a poker game is taking place.
-    """
+    """ Parent class of all poker limits. """
 
-    def __init__(self, seats=10):
-        self.seats = seats
-        
+    def __init__(self):
+        pass
+
+
+
+class FixedLimit(Limit):
+
+    def __init__(self, small_bet, big_bet, small_blind=None, big_blind=None):
+        Limit.__init__(self)
+        self.small_bet = small_bet
+        self.big_bet = big_bet
+
+        self.small_blind = None
+        if small_blind is not None:
+            self.small_blind = small_blind
+        else:
+            self.small_blind = self.small_bet / 2
+
+        if big_blind is not None:
+            self.big_blind = big_blind
+        else:
+            self.big_blind = self.small_bet
+
+

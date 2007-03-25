@@ -18,14 +18,29 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Table Module """
+""" The Rounder Game Module """
 
-class Table:
+class Game:
 
-    """ 
-    Representation of a table at which a poker game is taking place.
-    """
+    """ Parent class of all poker games. """
 
-    def __init__(self, seats=10):
-        self.seats = seats
+    def __init__(self):
+        pass
+
+    def start(self):
+        """ Begin the hand. """
+        pass
         
+
+
+class TexasHoldemGame(Game):
+
+    def __init__(self, limit, players, dealer):
+        Game.__init__(self)
+        self.limit = limit
+        self.players = players
+        self.dealer = dealer
+
+    def start(self):
+        pass
+

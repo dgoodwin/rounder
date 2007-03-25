@@ -24,10 +24,12 @@ import unittest
 
 import settestpath
 
+from rounder.table import Table
+
 class TableTests(unittest.TestCase):
 
-    def test_something(self):
-        pass
+    def test_create_table(self):
+        t = Table(seats=10)
 
 
 

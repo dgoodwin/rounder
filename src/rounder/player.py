@@ -28,6 +28,6 @@ class Player:
     created for each.
     """
 
-    def __init__(self):
+    def __init__(self, name, chips=0):
         pass
         
