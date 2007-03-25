@@ -25,18 +25,24 @@ import unittest
 import settestpath
 
 from rounder.limit import FixedLimit
+from rounder.currency import Currency
 
 class FixedLimitTests(unittest.TestCase):
 
     def test_two_four(self):
-        two_four = FixedLimit(small_bet=2, big_bet=4)
-        self.assertEqual(1, two_four.small_blind)
-        self.assertEqual(2, two_four.big_blind)
+        two_four = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        self.assertEqual(Currency(1), two_four.small_blind)
+        self.assertEqual(Currency(2), two_four.big_blind)
 
     def test_micro_limits(self):
-        limit = FixedLimit(small_bet=0.10, big_bet=0.20)
-        self.assertEqual(0.05, limit.small_blind)
-        self.assertEqual(0.10, limit.big_blind)
+        limit = FixedLimit(small_bet=Currency(0.10), big_bet=Currency(0.20))
+        self.assertEqual(Currency(0.05), limit.small_blind)
+        self.assertEqual(Currency(0.10), limit.big_blind)
+
+    def test_one_two(self):
+        limit = FixedLimit(small_bet=Currency(1), big_bet=Currency(2))
+        self.assertEqual(Currency(0.5), limit.small_blind)
+        self.assertEqual(Currency(1), limit.big_blind)
 
 
 

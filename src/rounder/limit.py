@@ -31,6 +31,8 @@ class Limit:
 
 class FixedLimit(Limit):
 
+    """ Representation of a fixed limit poker game. """
+
     def __init__(self, small_bet, big_bet, small_blind=None, big_blind=None):
         Limit.__init__(self)
         self.small_bet = small_bet
