@@ -27,17 +27,35 @@ import settestpath
 from rounder.player import Player
 from rounder.limit import FixedLimit
 from rounder.game import TexasHoldemGame
+from rounder.currency import Currency
+
+CHIPS = 1000
 
 class TexasHoldemTests(unittest.TestCase):
 
+    def __create_game(self, numPlayers, dealerIndex):
+        self.players = []
+        for i in range(numPlayers):
+            self.players.append(Player('player' + str(i), Currency(CHIPS)))
+        limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        self.game = TexasHoldemGame(limit=limit, players=self.players, 
+            dealer=dealerIndex)
+
+    def test_standard_post_blinds(self):
+        self.__create_game(3, 0)
+        self.game.post_blinds()
+        # TODO: check blinds were gathered
+        self.assertEquals(CHIPS - 1, self.players[1].chips)
+        self.assertEquals(CHIPS - 2, self.players[2].chips)
+        self.assertEquals(CHIPS, self.players[0].chips)
+
+
     def test_walkthrough(self):
-        p1 = Player('Player 1', 1000)
-        p2 = Player('Player 2', 1000)
-        p3 = Player('Player 3', 1000)
-        limit = FixedLimit(small_bet=2, big_bet=4)
-        players = [p1, p2, p3]
-        game = TexasHoldemGame(limit=limit, players=players, dealer=0)
-        game.start()
+        pass
+
+    # test_insufficient_funds_for_blinds
+    # test_blind_rejected
+    # test_blinds_wraparound
 
 
 

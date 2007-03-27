@@ -20,6 +20,9 @@
 
 """ The Rounder Game Module """
 
+from logging import getLogger
+logger = getLogger("rounder.game")
+
 class Game:
 
     """ Parent class of all poker games. """
@@ -30,10 +33,21 @@ class Game:
     def start(self):
         """ Begin the hand. """
         pass
+
+    def perform(self, user, action):
+        """ 
+        Receive and incoming action request from a player. 
+        This callback may be called directly in unit tests, but normally
+        would originate from a call to the server and trickle down.
+        """
+        pass
         
 
 
 class TexasHoldemGame(Game):
+
+    """ Texas Hold'em, the king of all poker games. """
+    # TODO: map pending player actions
 
     def __init__(self, limit, players, dealer):
         Game.__init__(self)
@@ -42,5 +56,17 @@ class TexasHoldemGame(Game):
         self.dealer = dealer
 
     def start(self):
+        pass
+
+    def post_blinds(self):
+        pass
+        blind_seats = self.__calculate_blind_seats()
+        blind_seats[0].chips = blind_seats[0].chips - self.limit.small_blind
+        blind_seats[1].chips = blind_seats[1].chips - self.limit.big_blind
+
+    def __calculate_blind_seats(self):
+        return (self.players[self.dealer + 1], self.players[self.dealer + 2])
+
+    def perform(self, user, action):
         pass
 

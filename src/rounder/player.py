@@ -20,6 +20,9 @@
 
 """ The Rounder Player Module """
 
+from rounder.core import NotImplementedException
+from rounder.action import PostBlind
+
 class Player:
 
     """ 
@@ -29,5 +32,38 @@ class Player:
     """
 
     def __init__(self, name, chips=0):
-        pass
+        self.name = name
+        self.chips = chips
         
+    def prompt(self, game, actions):
+        """ 
+        Prompt this player to make a choice among the given actions.
+        """
+        raise NotImplementedException()
+
+
+
+CALLING_STATION_PREFERRED_ACTIONS = [
+    PostBlind,
+]
+
+class CallingStation(Player):
+
+    """ Player who will always continue to showdown if he has the option. """
+
+    def __init__(name, chips=0):
+        Player.__init__(self, name, chips)
+
+    def prompt(self, game, actions):
+        for action in CALLING_STATION_PREFERRED_ACTIONS:
+            if self.__action_is_present(actions, action):
+                game.perform(user, action)
+                return
+        raise Exception("CallingStation couldn't find a suitable action: " +
+            actions)
+
+    def __action_is_present(self, action_list, action):
+        for a in action_list:
+            if type(a) == action:
+                return True
+        return False

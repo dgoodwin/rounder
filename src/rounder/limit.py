@@ -38,15 +38,14 @@ class FixedLimit(Limit):
         self.small_bet = small_bet
         self.big_bet = big_bet
 
-        self.small_blind = None
-        if small_blind is not None:
-            self.small_blind = small_blind
-        else:
+        if small_blind is None:
             self.small_blind = self.small_bet / 2
-
-        if big_blind is not None:
-            self.big_blind = big_blind
         else:
+            self.small_blind = small_blind
+
+        if big_blind is None:
             self.big_blind = self.small_bet
+        else:
+            self.big_blind = big_blind
 
 

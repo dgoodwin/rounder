@@ -18,28 +18,37 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" Tests for the rounder.player module. """
+""" The Rounder Action Module """
 
-import unittest
+class Action:
 
-import settestpath
+    """ 
+    Parent Action class. Actions represent any decision a player 
+    sitting at a table can be faced with.
+    """
 
-from rounder.player import Player
-from rounder.core import NotImplementedException
-from rounder.currency import Currency
-
-class PlayerTests(unittest.TestCase):
-
-    def test_prompt_not_implemented(self):
-        p = Player('Some Player', Currency(1000))
-        self.assertRaises(NotImplementedException, p.prompt, None, [])
+    def __init__(self, player):
+        self.player = player
+        
 
 
+class PostBlind(Action):
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PlayerTests))
-    return suite
+    """ 
+    Action a player can take to post a blind and take part in the
+    next hand.
+    """
+    # TODO: Can double as an Ante?
 
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")
+    def __init__(self, player, amount):
+        Action.__init__(self, player)
+        self.amount = amount
+
+
+
+class SitOut(Action):
+
+    """ Action a player can take to sit out of the next hand. """
+
+    def __init__(self):
+        Action.__init__(self)

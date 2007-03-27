@@ -44,6 +44,17 @@ class FixedLimitTests(unittest.TestCase):
         self.assertEqual(Currency(0.5), limit.small_blind)
         self.assertEqual(Currency(1), limit.big_blind)
 
+    def test_rounding(self):
+        limit = FixedLimit(small_bet=Currency(0.25), big_bet=Currency(0.5))
+        self.assertEqual(Currency(0.12), limit.small_blind)
+        self.assertEqual(Currency(0.25), limit.big_blind)
+
+    def test_custom_blinds(self):
+        limit = FixedLimit(small_bet=Currency(0.25), big_bet=Currency(0.5),
+            small_blind=Currency(0.10), big_blind=Currency(0.25))
+        self.assertEqual(Currency(0.10), limit.small_blind)
+        self.assertEqual(Currency(0.25), limit.big_blind)
+
 
 
 def suite():
