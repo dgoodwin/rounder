@@ -30,9 +30,8 @@ from rounder.currency import Currency
 
 class PlayerTests(unittest.TestCase):
 
-    def test_prompt_not_implemented(self):
-        p = Player('Some Player', Currency(1000))
-        self.assertRaises(NotImplementedException, p.prompt, None, [])
+    def test_something(self):
+        pass
 
 
 

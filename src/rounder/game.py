@@ -23,12 +23,18 @@
 from logging import getLogger
 logger = getLogger("rounder.game")
 
+from rounder.action import *
+
+
+GAME_ID_COUNTER = 1
+
 class Game:
 
     """ Parent class of all poker games. """
 
     def __init__(self):
-        pass
+        # Every hand played needs a unique ID:
+        self.id = ++GAME_ID_COUNTER
 
     def start(self):
         """ Begin the hand. """
@@ -59,14 +65,19 @@ class TexasHoldemGame(Game):
         pass
 
     def post_blinds(self):
-        pass
         blind_seats = self.__calculate_blind_seats()
-        blind_seats[0].chips = blind_seats[0].chips - self.limit.small_blind
-        blind_seats[1].chips = blind_seats[1].chips - self.limit.big_blind
+        post_sb = PostBlind(self, blind_seats[0], self.limit.small_blind)
+        post_bb = PostBlind(self, blind_seats[1], self.limit.big_blind)
+        blind_seats[0].prompt([post_sb])
+        blind_seats[1].prompt([post_bb])
 
     def __calculate_blind_seats(self):
         return (self.players[self.dealer + 1], self.players[self.dealer + 2])
 
-    def perform(self, user, action):
-        pass
+    def perform(self, action):
+        logger.info("ACTION: " + str(action))
+        
+        # TODO: Clean this up:
+        if isinstance(action, PostBlind):
+            action.player.chips = action.player.chips - action.amount
 

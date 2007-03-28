@@ -20,6 +20,9 @@
 
 """ The Rounder Player Module """
 
+from logging import getLogger
+logger = getLogger("rounder.game")
+
 from rounder.core import NotImplementedException
 from rounder.action import PostBlind
 
@@ -35,7 +38,7 @@ class Player:
         self.name = name
         self.chips = chips
         
-    def prompt(self, game, actions):
+    def prompt(self, actions):
         """ 
         Prompt this player to make a choice among the given actions.
         """
@@ -51,19 +54,23 @@ class CallingStation(Player):
 
     """ Player who will always continue to showdown if he has the option. """
 
-    def __init__(name, chips=0):
+    def __init__(self, name, chips=0):
         Player.__init__(self, name, chips)
 
-    def prompt(self, game, actions):
-        for action in CALLING_STATION_PREFERRED_ACTIONS:
-            if self.__action_is_present(actions, action):
-                game.perform(user, action)
+    def prompt(self, actions):
+        for search_action in CALLING_STATION_PREFERRED_ACTIONS:
+            action = self.__find_action(actions, search_action)
+            if action is not None:
+                # TODO: Supposed to be an asynchronous call here...
+                action.game.perform(action)
                 return
         raise Exception("CallingStation couldn't find a suitable action: " +
-            actions)
+            str(actions))
 
-    def __action_is_present(self, action_list, action):
+    def __find_action(self, action_list, action):
         for a in action_list:
-            if type(a) == action:
-                return True
-        return False
+            logger.debug(type(a))
+            logger.debug(action)
+            if isinstance(a, action):
+                return a
+        return None
