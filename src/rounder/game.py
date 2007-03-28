@@ -24,6 +24,7 @@ from logging import getLogger
 logger = getLogger("rounder.game")
 
 from rounder.action import *
+from rounder.core import *
 
 
 GAME_ID_COUNTER = 1
@@ -38,15 +39,21 @@ class Game:
 
     def start(self):
         """ Begin the hand. """
-        pass
+        raise NotImplementedException()
 
-    def perform(self, user, action):
+    def perform(self, action):
         """ 
-        Receive and incoming action request from a player. 
-        This callback may be called directly in unit tests, but normally
-        would originate from a call to the server and trickle down.
+        Perform a player action.
+
+        Assume that any parameters required for the action have already
+        been received from the player, parsed, and applied to the action.
+
+        NOTE: Be sure to validate the incoming action exists (i.e. we have
+        a record of sending this action to the player) and we validate
+        the parameters returned from the player. (to prevent users from
+        modifying the client source and returning bogus actions)
         """
-        pass
+        raise NotImplementedException()
         
 
 
@@ -61,6 +68,10 @@ class TexasHoldemGame(Game):
         self.players = players
         self.dealer = dealer
 
+        # Map player to their pending actions. Players are popped as they act
+        # so an empty map means no pending actions.
+        self.pending_actions = {}
+
     def start(self):
         pass
 
@@ -68,16 +79,43 @@ class TexasHoldemGame(Game):
         blind_seats = self.__calculate_blind_seats()
         post_sb = PostBlind(self, blind_seats[0], self.limit.small_blind)
         post_bb = PostBlind(self, blind_seats[1], self.limit.big_blind)
-        blind_seats[0].prompt([post_sb])
-        blind_seats[1].prompt([post_bb])
+        self.prompt_player(blind_seats[0], [post_sb])
+        self.prompt_player(blind_seats[1], [post_bb])
+
+    def prompt_player(self, player, actions_list):
+
+        """
+        Send a list of possible actions to a player and maintain our map
+        of requests for action that remain unanswered.
+        """
+
+        if (self.pending_actions.has_key(player)):
+            # Shouldn't happen, but just in case:
+            logger.error("Error adding pending actions for player: " +
+                str(player))
+            logger.error("   Pre-existing pending actions: " +
+                str(self.pending_actions[player]))
+            raise RounderException("Pending actions already exist")
+
+        self.pending_actions[player] = actions_list
+        player.prompt(actions_list)
 
     def __calculate_blind_seats(self):
         return (self.players[self.dealer + 1], self.players[self.dealer + 2])
 
     def perform(self, action):
         logger.info("ACTION: " + str(action))
+
+        # TODO: validate
         
         # TODO: Clean this up:
         if isinstance(action, PostBlind):
             action.player.chips = action.player.chips - action.amount
+
+    def __advance_game(self):
+        """ 
+        Check if we no longer have any actions pending and advance the
+        game state if so. 
+        """
+        pass
 

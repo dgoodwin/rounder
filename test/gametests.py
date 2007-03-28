@@ -24,6 +24,7 @@ import unittest
 
 import settestpath
 
+from rounder.core import RounderException
 from rounder.player import CallingStation
 from rounder.limit import FixedLimit
 from rounder.game import TexasHoldemGame
@@ -49,10 +50,18 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(CHIPS - 2, self.players[2].chips)
         self.assertEquals(CHIPS, self.players[0].chips)
 
+        # At this point, players should be dealt their hole cards:
+#        for player in self.players:
+#            self.assertEquals(2, len(player.cards))
 
-    def test_walkthrough(self):
-        pass
+    def test_prompt_player_actions_already_pending(self):
+        self.__create_game(3, 0)
+        self.game.post_blinds()
+        self.assertRaises(RounderException, self.game.post_blinds)
 
+    # test_fake_action_response
+    # test_invalid_action_response_params
+    # test_blinds_heads_up
     # test_insufficient_funds_for_blinds
     # test_blind_rejected
     # test_blinds_wraparound

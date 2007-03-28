@@ -37,6 +37,7 @@ class Player:
     def __init__(self, name, chips=0):
         self.name = name
         self.chips = chips
+        self.cards = []
         
     def prompt(self, actions):
         """ 
@@ -58,10 +59,16 @@ class CallingStation(Player):
         Player.__init__(self, name, chips)
 
     def prompt(self, actions):
+
+        logger.debug("Prompting player: " + str(self))
+        for a in actions:
+            logger.debug("   " + str(a))
+
         for search_action in CALLING_STATION_PREFERRED_ACTIONS:
             action = self.__find_action(actions, search_action)
             if action is not None:
                 # TODO: Supposed to be an asynchronous call here...
+                logger.debug("Returning action: " + str(action))
                 action.game.perform(action)
                 return
         raise Exception("CallingStation couldn't find a suitable action: " +
@@ -69,8 +76,6 @@ class CallingStation(Player):
 
     def __find_action(self, action_list, action):
         for a in action_list:
-            logger.debug(type(a))
-            logger.debug(action)
             if isinstance(a, action):
                 return a
         return None
