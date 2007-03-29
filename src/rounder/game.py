@@ -26,8 +26,54 @@ logger = getLogger("rounder.game")
 from rounder.action import *
 from rounder.core import *
 
-
 GAME_ID_COUNTER = 1
+
+class GameStateMachine:
+
+    """ 
+    State machine to represent the current game state. Game instances
+    create a state machine and populate it with various states, each
+    of which maps to a method to be called when transitioning into
+    that state.
+    """
+
+    def __init__(self):
+        # List of strings representing the state transitions:
+        self.states = []
+
+        # Pointer to current state:
+        self.current = None
+
+        # Map of state name to callback method:
+        self.actions = {}
+
+    def add_state(self, state_name, action):
+        """
+        Add the given state and method to call when transitioning into it.
+        """
+
+        # Can't add states after the machine has been started:
+        if self.current != None:
+            raise RounderException("Cannot add states after machine has been started.")
+
+        self.states.append(state_name)
+        self.actions[state_name] = action
+
+    def advance(self):
+        """
+        Advance to the next state and call the approriate callback.
+        """
+        if self.current == None:
+            self.current = 0
+        else:
+            self.current = self.current + 1
+        if self.current >= len(self.states):
+            raise RounderException("Attempted to advance beyond configured states.")
+
+        # Execute the callback method for this state:
+        self.actions[self.states[self.current]]()
+
+
 
 class Game:
 
@@ -82,6 +128,7 @@ class TexasHoldemGame(Game):
         self.prompt_player(blind_seats[0], [post_sb])
         self.prompt_player(blind_seats[1], [post_bb])
 
+    # TODO: candidate for pushing up to parent class
     def prompt_player(self, player, actions_list):
 
         """
