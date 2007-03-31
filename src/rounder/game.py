@@ -25,6 +25,7 @@ logger = getLogger("rounder.game")
 
 from rounder.action import *
 from rounder.core import *
+from rounder.deck import Deck
 
 GAME_ID_COUNTER = 1
 
@@ -54,21 +55,25 @@ class GameStateMachine:
 
         # Can't add states after the machine has been started:
         if self.current != None:
-            raise RounderException("Cannot add states after machine has been started.")
+            raise RounderException("Cannot add states after machine has " +
+                "been started.")
 
         self.states.append(state_name)
         self.actions[state_name] = action
 
     def advance(self):
         """
-        Advance to the next state and call the approriate callback.
+        Advance to the next state and call the appropriate callback.
         """
         if self.current == None:
             self.current = 0
         else:
             self.current = self.current + 1
         if self.current >= len(self.states):
-            raise RounderException("Attempted to advance beyond configured states.")
+            raise RounderException("Attempted to advance beyond configured " +
+                "states.")
+
+        logger.debug("Advancing to state: " + self.states[self.current])
 
         # Execute the callback method for this state:
         self.actions[self.states[self.current]]()
@@ -106,7 +111,6 @@ class Game:
 class TexasHoldemGame(Game):
 
     """ Texas Hold'em, the king of all poker games. """
-    # TODO: map pending player actions
 
     def __init__(self, limit, players, dealer):
         Game.__init__(self)
@@ -114,28 +118,51 @@ class TexasHoldemGame(Game):
         self.players = players
         self.dealer = dealer
 
+        logger.info("Starting new TexasHoldemGame: " + str(self.id))
+        logger.info("   Limit: " + str(limit))
+        logger.info("   Players:")
+        for p in self.players:
+            logger.info("      " + p.name)
+        
+
         # Map player to their pending actions. Players are popped as they act
         # so an empty map means no pending actions.
         self.pending_actions = {}
 
-    def start(self):
-        pass
+        self.__deck = Deck()
+        self.__deck.shuffle()
+
+        self.gsm = GameStateMachine()
+        self.gsm.add_state("postblinds", self.post_blinds)
+        self.gsm.add_state("preflop", self.deal_hole_cards)
 
     def post_blinds(self):
+        logger.debug("posting blinds")
         blind_seats = self.__calculate_blind_seats()
         post_sb = PostBlind(self, blind_seats[0], self.limit.small_blind)
         post_bb = PostBlind(self, blind_seats[1], self.limit.big_blind)
-        self.prompt_player(blind_seats[0], [post_sb])
-        self.prompt_player(blind_seats[1], [post_bb])
 
-    # TODO: candidate for pushing up to parent class
-    def prompt_player(self, player, actions_list):
+        # Queue all actions going out before actually sending anything:
+        prompts = []
+        prompts.append((blind_seats[0], [post_sb]))
+        prompts.append((blind_seats[1], [post_bb]))
+        self.prompt_players(prompts)
 
-        """
-        Send a list of possible actions to a player and maintain our map
-        of requests for action that remain unanswered.
-        """
+    def deal_hole_cards(self):
+        """ Deal 2 cards face down to each player. """
+        for p in self.players:
+            p.cards.append(self.__deck.draw_card())
+        for p in self.players:
+            p.cards.append(self.__deck.draw_card())
 
+    def prompt_players(self, prompts):
+        for player, actions_list in prompts:
+            self.__queue_actions(player, actions_list)
+
+        for player, actions_list in prompts:
+            player.prompt(actions_list)
+
+    def __queue_actions(self, player, actions_list):
         if (self.pending_actions.has_key(player)):
             # Shouldn't happen, but just in case:
             logger.error("Error adding pending actions for player: " +
@@ -143,15 +170,13 @@ class TexasHoldemGame(Game):
             logger.error("   Pre-existing pending actions: " +
                 str(self.pending_actions[player]))
             raise RounderException("Pending actions already exist")
-
         self.pending_actions[player] = actions_list
-        player.prompt(actions_list)
 
     def __calculate_blind_seats(self):
         return (self.players[self.dealer + 1], self.players[self.dealer + 2])
 
     def perform(self, action):
-        logger.info("ACTION: " + str(action))
+        logger.info("Incoming action: " + str(action))
 
         # TODO: validate
         
@@ -159,10 +184,23 @@ class TexasHoldemGame(Game):
         if isinstance(action, PostBlind):
             action.player.chips = action.player.chips - action.amount
 
-    def __advance_game(self):
+        # Remove this player from the pending actions map:
+        self.pending_actions.pop(action.player)
+
+        # Check if any actions are still pending, and if not advance the game:
+        self.advance()
+
+    def advance(self):
         """ 
         Check if we no longer have any actions pending and advance the
-        game state if so. 
+        game state if possible.
         """
-        pass
+        if len(self.pending_actions.keys()) == 0:
+            logger.debug("No actions pending, advancing game.")
+            self.gsm.advance()
+
+        else:
+            logger.debug("Actions still pending:")
+            for p in self.pending_actions.keys():
+                logger.debug("   " + p.name + " " + str(self.pending_actions[p]))
 

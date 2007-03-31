@@ -21,7 +21,7 @@
 """ The Rounder Player Module """
 
 from logging import getLogger
-logger = getLogger("rounder.game")
+logger = getLogger("rounder.player")
 
 from rounder.core import NotImplementedException
 from rounder.action import PostBlind
@@ -44,6 +44,9 @@ class Player:
         Prompt this player to make a choice among the given actions.
         """
         raise NotImplementedException()
+
+    def __repr__(self):
+        return "Player: " + self.name + " (chips: " + str(self.chips) + ")"
 
 
 

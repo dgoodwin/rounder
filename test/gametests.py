@@ -32,43 +32,6 @@ from rounder.currency import Currency
 
 CHIPS = 1000
 
-class TexasHoldemTests(unittest.TestCase):
-
-    def __create_game(self, numPlayers, dealerIndex):
-        self.players = []
-        for i in range(numPlayers):
-            self.players.append(CallingStation('player' + str(i), 
-                Currency(CHIPS)))
-        limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
-        self.game = TexasHoldemGame(limit=limit, players=self.players, 
-            dealer=dealerIndex)
-
-    def test_standard_post_blinds(self):
-        self.__create_game(3, 0)
-        self.game.post_blinds()
-        self.assertEquals(CHIPS - 1, self.players[1].chips)
-        self.assertEquals(CHIPS - 2, self.players[2].chips)
-        self.assertEquals(CHIPS, self.players[0].chips)
-
-        # At this point, players should be dealt their hole cards:
-#        for player in self.players:
-#            self.assertEquals(2, len(player.cards))
-
-    def test_prompt_player_actions_already_pending(self):
-        self.__create_game(3, 0)
-        self.game.post_blinds()
-        self.assertRaises(RounderException, self.game.post_blinds)
-
-    # test_fake_action_response
-    # test_invalid_action_response_params
-    # test_blinds_heads_up
-    # test_insufficient_funds_for_blinds
-    # test_blind_rejected
-    # test_blinds_wraparound
-    # test_empty_seats
-
-
-
 class GameStateMachineTests(unittest.TestCase):
 
     def callback(self):
@@ -114,7 +77,8 @@ class GameStateMachineTests(unittest.TestCase):
         machine = GameStateMachine()
         machine.add_state("postblinds", self.callback)
         machine.advance()
-        self.assertRaises(RounderException, machine.add_state, "any", self.callback)
+        self.assertRaises(RounderException, machine.add_state, "any", 
+            self.callback)
 
     def test_callback(self):
         self.called_back = False
@@ -122,6 +86,43 @@ class GameStateMachineTests(unittest.TestCase):
         machine.add_state("postblinds", self.callback)
         machine.advance()
         self.assertEquals(True, self.called_back)
+
+
+
+class TexasHoldemTests(unittest.TestCase):
+
+    def __create_game(self, numPlayers, dealerIndex):
+        self.players = []
+        for i in range(numPlayers):
+            self.players.append(CallingStation('player' + str(i), 
+                Currency(CHIPS)))
+        limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        self.game = TexasHoldemGame(limit=limit, players=self.players, 
+            dealer=dealerIndex)
+
+    def test_standard_post_blinds(self):
+        self.__create_game(3, 0)
+        self.game.advance()
+        self.assertEquals(CHIPS - 1, self.players[1].chips)
+        self.assertEquals(CHIPS - 2, self.players[2].chips)
+        self.assertEquals(CHIPS, self.players[0].chips)
+
+        # At this point, players should be dealt their hole cards:
+        for player in self.players:
+            self.assertEquals(2, len(player.cards))
+
+    def test_prompt_player_actions_already_pending(self):
+        self.__create_game(3, 0)
+        self.game.post_blinds()
+        self.assertRaises(RounderException, self.game.post_blinds)
+
+    # test_fake_action_response
+    # test_invalid_action_response_params
+    # test_blinds_heads_up
+    # test_insufficient_funds_for_blinds
+    # test_blind_rejected
+    # test_blinds_wraparound
+    # test_empty_seats
 
 
 
