@@ -48,4 +48,6 @@ class FixedLimit(Limit):
         else:
             self.big_blind = big_blind
 
+    def __repr__(self):
+        return "$" + str(self.small_bet) + "/" + str(self.big_bet) + " limit"
 
