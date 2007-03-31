@@ -24,6 +24,7 @@ import unittest
 
 import settestpath
 
+from rounder.action import SitOut
 from rounder.core import RounderException
 from rounder.player import CallingStation
 from rounder.limit import FixedLimit
@@ -97,7 +98,13 @@ class TexasHoldemTests(unittest.TestCase):
             self.players.append(CallingStation('player' + str(i), 
                 Currency(CHIPS)))
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
-        self.game = TexasHoldemGame(limit=limit, players=self.players, 
+
+        # Copy the players list, the game can modify it's own list and we
+        # need to maintain the references to the original players:
+        players_copy = []
+        players_copy.extend(self.players)
+
+        self.game = TexasHoldemGame(limit=limit, players=players_copy, 
             dealer=dealerIndex)
 
     def test_standard_post_blinds(self):
@@ -113,16 +120,27 @@ class TexasHoldemTests(unittest.TestCase):
 
     def test_prompt_player_actions_already_pending(self):
         self.__create_game(3, 0)
-        self.game.post_blinds()
-        self.assertRaises(RounderException, self.game.post_blinds)
+        self.game.prompt_small_blind()
+        self.assertRaises(RounderException, self.game.prompt_small_blind)
+
+    def test_big_blind_sitout(self):
+        self.__create_game(3, 0)
+        # Configure player 2 to reject the big blind, ensure 1 remains the
+        # small blind and 0 becomes the big (3 handed game)
+        self.players[2].preferred_actions.insert(0, SitOut)
+
+        self.assertEquals(3, len(self.game.players))
+        self.game.advance()
+        self.assertEquals(2, len(self.game.players))
+        self.assertEquals(3, len(self.players))
 
     # test_fake_action_response
     # test_invalid_action_response_params
     # test_blinds_heads_up
     # test_insufficient_funds_for_blinds
-    # test_blind_rejected
     # test_blinds_wraparound
     # test_empty_seats
+    # test_seats_sitting_out
 
 
 

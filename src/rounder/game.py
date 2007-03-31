@@ -29,6 +29,10 @@ from rounder.deck import Deck
 
 GAME_ID_COUNTER = 1
 
+STATE_SMALL_BLIND = "small_blind"
+STATE_BIG_BLIND = "big_blind"
+STATE_PREFLOP = "preflop"
+
 class GameStateMachine:
 
     """ 
@@ -78,6 +82,9 @@ class GameStateMachine:
         # Execute the callback method for this state:
         self.actions[self.states[self.current]]()
 
+    def get_current_state(self):
+        return self.states[self.current]
+
 
 
 class Game:
@@ -115,38 +122,59 @@ class TexasHoldemGame(Game):
     def __init__(self, limit, players, dealer):
         Game.__init__(self)
         self.limit = limit
-        self.players = players
         self.dealer = dealer
+
+        # List of players passed in should have empty seats and players
+        # sitting out filtered out:
+        self.players = players
+
+        # Pointers to the position in the players list that has accepted the
+        # small and big blind, initially nobody:
+        self.small_blind = None
+        self.big_blind = None
 
         logger.info("Starting new TexasHoldemGame: " + str(self.id))
         logger.info("   Limit: " + str(limit))
         logger.info("   Players:")
         for p in self.players:
             logger.info("      " + p.name)
-        
 
         # Map player to their pending actions. Players are popped as they act
-        # so an empty map means no pending actions.
+        # so an empty map means no pending actions and we're clear to advance
+        # to the next state.
+        # TODO: Looking like there's never more than one player with pending
+        # actions...
         self.pending_actions = {}
 
         self.__deck = Deck()
         self.__deck.shuffle()
 
         self.gsm = GameStateMachine()
-        self.gsm.add_state("postblinds", self.post_blinds)
-        self.gsm.add_state("preflop", self.deal_hole_cards)
+        self.gsm.add_state(STATE_SMALL_BLIND, self.prompt_small_blind)
+        self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
+        self.gsm.add_state(STATE_PREFLOP, self.deal_hole_cards)
 
-    def post_blinds(self):
-        logger.debug("posting blinds")
-        blind_seats = self.__calculate_blind_seats()
-        post_sb = PostBlind(self, blind_seats[0], self.limit.small_blind)
-        post_bb = PostBlind(self, blind_seats[1], self.limit.big_blind)
+    def prompt_small_blind(self):
+        logger.debug("posting small blind")
 
-        # Queue all actions going out before actually sending anything:
-        prompts = []
-        prompts.append((blind_seats[0], [post_sb]))
-        prompts.append((blind_seats[1], [post_bb]))
-        self.prompt_players(prompts)
+        # Modulus to handle wrapping around the end of the list:
+        self.small_blind = (self.dealer + 1) % len(self.players)
+
+        post_sb = PostBlind(self, self.players[self.small_blind], 
+            self.limit.small_blind)
+        sit_out = SitOut(self, self.players[self.small_blind])
+        self.prompt_player(self.players[self.small_blind], [post_sb, sit_out])
+
+    def prompt_big_blind(self):
+        logger.debug("posting big blind")
+
+        # Modulus to handle wrapping around the end of the list:
+        self.big_blind = (self.dealer + 2) % len(self.players)
+
+        post_bb = PostBlind(self, self.players[self.big_blind], 
+            self.limit.big_blind)
+        sit_out = SitOut(self, self.players[self.big_blind])
+        self.prompt_player(self.players[self.big_blind], [post_bb, sit_out])
 
     def deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
@@ -155,14 +183,7 @@ class TexasHoldemGame(Game):
         for p in self.players:
             p.cards.append(self.__deck.draw_card())
 
-    def prompt_players(self, prompts):
-        for player, actions_list in prompts:
-            self.__queue_actions(player, actions_list)
-
-        for player, actions_list in prompts:
-            player.prompt(actions_list)
-
-    def __queue_actions(self, player, actions_list):
+    def prompt_player(self, player, actions_list):
         if (self.pending_actions.has_key(player)):
             # Shouldn't happen, but just in case:
             logger.error("Error adding pending actions for player: " +
@@ -172,17 +193,31 @@ class TexasHoldemGame(Game):
             raise RounderException("Pending actions already exist")
         self.pending_actions[player] = actions_list
 
-    def __calculate_blind_seats(self):
-        return (self.players[self.dealer + 1], self.players[self.dealer + 2])
+        player.prompt(actions_list)
 
     def perform(self, action):
         logger.info("Incoming action: " + str(action))
 
-        # TODO: validate
+        # TODO: verify the action coming back has valid params?
+        # TODO: asserting the player responding to the action actually was
+        #   given the option, perhaps at another layer (server?)
         
         # TODO: Clean this up:
         if isinstance(action, PostBlind):
             action.player.chips = action.player.chips - action.amount
+        if isinstance(action, SitOut):
+            # SitOut actions should only be received while gathering blinds:
+            if self.gsm.get_current_state() == STATE_SMALL_BLIND:
+                logger.info("Sitting player out: " + str(action.player))
+                # Remove the player from the game and rerequest the small blind:
+                # TODO: should we check that the player is in the list?
+                self.players.remove(action.player)
+                self.prompt_small_blind()
+            if self.gsm.get_current_state() == STATE_BIG_BLIND:
+                logger.info("Sitting player out: " + str(action.player))
+                # Remove the player from the game and rerequest the big blind:
+                self.players.remove(action.player)
+                self.prompt_big_blind()
 
         # Remove this player from the pending actions map:
         self.pending_actions.pop(action.player)

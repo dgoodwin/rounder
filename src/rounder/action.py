@@ -68,4 +68,4 @@ class SitOut(Action):
         Action.__init__(self, game, player)
 
     def __repr__(self):
-        return "SitOut: " + game.id + " " + player.name
+        return "SitOut: " + str(self.game.id) + " " + self.player.name

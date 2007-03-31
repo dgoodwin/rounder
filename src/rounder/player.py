@@ -50,10 +50,6 @@ class Player:
 
 
 
-CALLING_STATION_PREFERRED_ACTIONS = [
-    PostBlind,
-]
-
 class CallingStation(Player):
 
     """ Player who will always continue to showdown if he has the option. """
@@ -61,13 +57,17 @@ class CallingStation(Player):
     def __init__(self, name, chips=0):
         Player.__init__(self, name, chips)
 
+        # List of preferred actions this player will try to respond to
+        # in order. Sometimes overridden in tests.
+        self.preferred_actions = [PostBlind]
+
     def prompt(self, actions):
 
         logger.debug("Prompting player: " + str(self))
         for a in actions:
             logger.debug("   " + str(a))
 
-        for search_action in CALLING_STATION_PREFERRED_ACTIONS:
+        for search_action in self.preferred_actions:
             action = self.__find_action(actions, search_action)
             if action is not None:
                 # TODO: Supposed to be an asynchronous call here...
