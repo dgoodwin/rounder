@@ -91,9 +91,15 @@ class Game:
 
     """ Parent class of all poker games. """
 
-    def __init__(self):
+    def __init__(self, callback):
         # Every hand played needs a unique ID:
         self.id = ++GAME_ID_COUNTER
+
+        # A callback method we can call when this game is finished to return
+        # control to the object that created us:
+        self.callback = callback
+
+        self.aborted = False
 
     def start(self):
         """ Begin the hand. """
@@ -112,6 +118,14 @@ class Game:
         modifying the client source and returning bogus actions)
         """
         raise NotImplementedException()
+
+    def abort(self):
+        """ 
+        Abort the current hand and return control to the object that 
+        created us.
+        """
+        self.aborted = True
+        self.callback()
         
 
 
@@ -119,8 +133,8 @@ class TexasHoldemGame(Game):
 
     """ Texas Hold'em, the king of all poker games. """
 
-    def __init__(self, limit, players, dealer):
-        Game.__init__(self)
+    def __init__(self, limit, players, dealer, callback):
+        Game.__init__(self, callback)
         self.limit = limit
         self.dealer = dealer
 
@@ -157,8 +171,12 @@ class TexasHoldemGame(Game):
     def prompt_small_blind(self):
         logger.debug("posting small blind")
 
-        # Modulus to handle wrapping around the end of the list:
-        self.small_blind = (self.dealer + 1) % len(self.players)
+        # If heads-up, dealer becomes the small blind:
+        if len(self.players) == 2:
+            self.small_blind = self.dealer
+        else:
+            # Modulus to handle wrapping around the end of the list:
+            self.small_blind = (self.dealer + 1) % len(self.players)
 
         post_sb = PostBlind(self, self.players[self.small_blind], 
             self.limit.small_blind)
@@ -168,8 +186,12 @@ class TexasHoldemGame(Game):
     def prompt_big_blind(self):
         logger.debug("posting big blind")
 
-        # Modulus to handle wrapping around the end of the list:
-        self.big_blind = (self.dealer + 2) % len(self.players)
+        # If heads-up, non-dealer becomes the big blind:
+        if len(self.players) == 2:
+            self.big_blind = (self.dealer + 1) % len(self.players)
+        else:
+            # Modulus to handle wrapping around the end of the list:
+            self.big_blind = (self.dealer + 2) % len(self.players)
 
         post_bb = PostBlind(self, self.players[self.big_blind], 
             self.limit.big_blind)
@@ -195,6 +217,11 @@ class TexasHoldemGame(Game):
 
         player.prompt(actions_list)
 
+    def __refund_small_blind(self):
+        # Refund the small blind:
+        sb = self.players[self.small_blind]
+        sb.chips = sb.chips + self.limit.small_blind
+
     def perform(self, action):
         logger.info("Incoming action: " + str(action))
 
@@ -206,17 +233,36 @@ class TexasHoldemGame(Game):
         if isinstance(action, PostBlind):
             action.player.chips = action.player.chips - action.amount
         if isinstance(action, SitOut):
+
+            if len(self.players) == 2:
+                if self.gsm.get_current_state() == STATE_BIG_BLIND:
+                    self.__refund_small_blind()
+                self.abort()
+                return
+
             # SitOut actions should only be received while gathering blinds:
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 logger.info("Sitting player out: " + str(action.player))
+                action.player.sittingOut = True
                 # Remove the player from the game and rerequest the small blind:
                 # TODO: should we check that the player is in the list?
                 self.players.remove(action.player)
                 self.prompt_small_blind()
             if self.gsm.get_current_state() == STATE_BIG_BLIND:
                 logger.info("Sitting player out: " + str(action.player))
+                action.player.sittingOut = True
                 # Remove the player from the game and rerequest the big blind:
                 self.players.remove(action.player)
+
+                # If the big blind just sat out in a three handed game, we've
+                # already collected the small blind, but in a heads up hand
+                # the dealer is supposed to be the small blind. For now we will
+                # cancel the hand to deal with this situation.
+                if len(self.players) == 2:
+                    self.__refund_small_blind()
+                    self.abort()
+                    return
+
                 self.prompt_big_blind()
 
         # Remove this player from the pending actions map:

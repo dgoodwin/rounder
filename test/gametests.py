@@ -92,6 +92,10 @@ class GameStateMachineTests(unittest.TestCase):
 
 class TexasHoldemTests(unittest.TestCase):
 
+    def game_over_callback(self):
+        self.game_over = True
+
+
     def __create_game(self, numPlayers, dealerIndex):
         self.players = []
         for i in range(numPlayers):
@@ -105,7 +109,8 @@ class TexasHoldemTests(unittest.TestCase):
         players_copy.extend(self.players)
 
         self.game = TexasHoldemGame(limit=limit, players=players_copy, 
-            dealer=dealerIndex)
+            dealer=dealerIndex, callback=self.game_over_callback)
+        self.game_over = False
 
     def test_standard_post_blinds(self):
         self.__create_game(3, 0)
@@ -123,16 +128,56 @@ class TexasHoldemTests(unittest.TestCase):
         self.game.prompt_small_blind()
         self.assertRaises(RounderException, self.game.prompt_small_blind)
 
-    def test_big_blind_sitout(self):
+    def test_small_blind_sitout_three_handed(self):
         self.__create_game(3, 0)
-        # Configure player 2 to reject the big blind, ensure 1 remains the
-        # small blind and 0 becomes the big (3 handed game)
-        self.players[2].preferred_actions.insert(0, SitOut)
+        # Configure player 1 to reject the small blind, ensure 0 becomes the
+        # small and 2 the big:
+        self.players[1].preferred_actions.insert(0, SitOut)
 
         self.assertEquals(3, len(self.game.players))
         self.game.advance()
         self.assertEquals(2, len(self.game.players))
-        self.assertEquals(3, len(self.players))
+        self.assertEquals(CHIPS - 1, self.players[0].chips)
+        self.assertEquals(True, self.players[1].sittingOut)
+        self.assertEquals(CHIPS - 2, self.players[2].chips)
+        self.assertEquals(CHIPS, self.players[1].chips)
+
+    def test_big_blind_sitout_three_handed(self):
+        # Difficult situation here, when down to heads up the dealer should
+        # be the small blind, which is incorrect according to the normal
+        # means of selecting the small and big blind. If the big blind choses
+        # to sit out, we already have processed the small blind, who should now
+        # be the dealer. To compensate for this situation we'll cancel the hand
+        # and allow the table to start a new one with just the heads up 
+        # players.
+        self.__create_game(3, 0)
+        self.players[2].preferred_actions.insert(0, SitOut)
+
+        self.assertEquals(3, len(self.game.players))
+        self.game.advance()
+        self.assertEquals(True, self.game_over)
+        self.assertEquals(True, self.game.aborted)
+        # Nobody should have lost any money:
+        self.assertEquals(CHIPS, self.players[1].chips)
+        self.assertEquals(CHIPS, self.players[0].chips)
+        self.assertEquals(CHIPS, self.players[2].chips)
+
+    def test_heads_up_blinds(self):
+        # Dealer should be the small blind in a heads up match:
+        self.__create_game(2, 0)
+        self.game.advance()
+        self.assertEquals(CHIPS - 1, self.players[0].chips)
+        self.assertEquals(CHIPS - 2, self.players[1].chips)
+
+    def test_heads_up_small_blind_sitout(self):
+        self.__create_game(2, 0)
+        self.players[0].preferred_actions.insert(0, SitOut)
+        self.game.advance()
+
+        self.assertEquals(True, self.game_over)
+        self.assertEquals(True, self.game.aborted)
+        self.assertEquals(CHIPS, self.players[1].chips)
+        self.assertEquals(CHIPS, self.players[0].chips)
 
     # test_fake_action_response
     # test_invalid_action_response_params

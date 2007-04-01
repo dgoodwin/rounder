@@ -38,6 +38,7 @@ class Player:
         self.name = name
         self.chips = chips
         self.cards = []
+        self.sittingOut = False
         
     def prompt(self, actions):
         """ 
