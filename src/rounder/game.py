@@ -24,7 +24,7 @@ from logging import getLogger
 logger = getLogger("rounder.game")
 
 from rounder.action import PostBlind, SitOut
-from rounder.core import RounderException
+from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 
 GAME_ID_COUNTER = 1
