@@ -186,7 +186,7 @@ class TexasHoldemGame(Game):
         self.prompt_player(self.players[self.small_blind], [post_sb, sit_out])
 
     def prompt_big_blind(self):
-        logger.debug("posting big blind")
+        logger.debug("requesting big blind")
 
         # If heads-up, non-dealer becomes the big blind:
         if len(self.players) == 2:
@@ -262,6 +262,7 @@ class TexasHoldemGame(Game):
                 # cancel the hand to deal with this situation.
                 if len(self.players) == 2:
                     self.__refund_small_blind()
+                    action.player.clear_pending_actions()
                     self.abort()
                     return
 

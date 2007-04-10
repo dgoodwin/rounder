@@ -190,13 +190,20 @@ class TexasHoldemTests(unittest.TestCase):
         # and allow the table to start a new one with just the heads up 
         # players.
         self.__create_game(3, 0)
-        self.players[2].preferred_actions.insert(0, SitOut)
-
-        self.assertEquals(3, len(self.game.players))
         self.game.advance()
+
+        # Player 1 posts small blind:
+        self.game.perform(find_action_in_list(PostBlind, 
+            self.players[1].pending_actions))
+        self.assertEquals(CHIPS - 1, self.players[1].chips)
+
+        # Player 2 refuses the big blind:
+        self.game.perform(find_action_in_list(SitOut, 
+            self.players[2].pending_actions))
+
         self.assertEquals(True, self.game_over)
         self.assertEquals(True, self.game.aborted)
-        # Nobody should have lost any money:
+
         self.assertEquals(CHIPS, self.players[1].chips)
         self.assertEquals(CHIPS, self.players[0].chips)
         self.assertEquals(CHIPS, self.players[2].chips)
@@ -205,13 +212,22 @@ class TexasHoldemTests(unittest.TestCase):
         # Dealer should be the small blind in a heads up match:
         self.__create_game(2, 0)
         self.game.advance()
+
+        self.game.perform(find_action_in_list(PostBlind, 
+            self.players[0].pending_actions))
         self.assertEquals(CHIPS - 1, self.players[0].chips)
+
+        self.game.perform(find_action_in_list(PostBlind, 
+            self.players[1].pending_actions))
         self.assertEquals(CHIPS - 2, self.players[1].chips)
 
     def test_heads_up_small_blind_sitout(self):
         self.__create_game(2, 0)
-        self.players[0].preferred_actions.insert(0, SitOut)
         self.game.advance()
+
+        # Player 0 refuses the small blind:
+        self.game.perform(find_action_in_list(SitOut, 
+            self.players[0].pending_actions))
 
         self.assertEquals(True, self.game_over)
         self.assertEquals(True, self.game.aborted)
