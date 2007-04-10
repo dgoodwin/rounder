@@ -33,6 +33,7 @@ import tabletests
 import playertests
 import gametests
 import limittests
+import servertests
 
 from unittest import TestSuite
 
@@ -47,6 +48,7 @@ def suite():
         playertests.suite(),
         gametests.suite(),
         limittests.suite(),
+        servertests.suite(),
     ))
 
 if __name__ == "__main__":

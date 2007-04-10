@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 #   Rounder - Poker for the GNOME Desktop
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
@@ -20,28 +18,28 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Server Module """
+""" Tests for the rounder.server module. """
 
-from twisted.internet import reactor, protocol
+import unittest
 
-import configureLogging
-from logging import getLogger
-logger = getLogger("rounder.server")
+import settestpath
+import rounder.server
+import rounder.client
 
-SERVER_PORT = 8000
+class RounderServerTests(unittest.TestCase):
 
-class RounderProtocol(protocol.Protocol):
-    def dataReceived(self, data):
-        print "dataReceived: ", data
-        self.transport.write(data)
+    def test_something(self):
+        pass
+        #rounder.server.main()
+        #rounder.client.main()
 
-def main():
-    logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
-    factory = protocol.ServerFactory()
-    factory.protocol = RounderProtocol
-    reactor.listenTCP(SERVER_PORT, factory)
-    reactor.run()
-    logger.info("server started.")
 
-if __name__ == '__main__':
-    main()
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(RounderServerTests))
+    return suite
+
+if __name__ == "__main__":
+    unittest.main(defaultTest="suite")
+
