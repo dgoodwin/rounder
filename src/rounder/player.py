@@ -23,7 +23,7 @@
 from logging import getLogger
 logger = getLogger("rounder.player")
 
-from rounder.core import NotImplementedException
+from rounder.core import NotImplementedException, RounderException
 from rounder.action import PostBlind
 
 class Player:
@@ -69,5 +69,20 @@ class Player:
     def is_sitting_out(self):
         """ Check if player is sitting out. """
         return self.sitting_out
+
+    def add_chips(self, amount):
+        """ Add chips to the players stack. """
+        if amount < 0:
+            raise RounderException("Negative amount, use subtract_chips instead.")
+        logger.debug("Adding chips to " + str(self.name) + ": " + str(amount))
+        self.chips = self.chips + amount
+
+    def subtract_chips(self, amount):
+        """ Remove chips from the players stack. """
+        # NOTE: Separate function to hopefully help prevent errors.
+        if amount < 0:
+            raise RounderException("Negative amount, use add_chips instead.")
+        logger.debug("Subtracting chips from " + str(self.name) + ": " + str(amount))
+        self.chips = self.chips - amount
 
 

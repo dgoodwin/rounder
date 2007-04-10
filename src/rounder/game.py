@@ -26,6 +26,7 @@ logger = getLogger("rounder.game")
 from rounder.action import PostBlind, SitOut
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
+from rounder.currency import Currency
 
 GAME_ID_COUNTER = 1
 
@@ -91,7 +92,7 @@ class Game:
 
     """ Parent class of all poker games. """
 
-    def __init__(self, callback):
+    def __init__(self, players, callback):
         # Every hand played needs a unique ID:
         self.id = ++GAME_ID_COUNTER
 
@@ -100,6 +101,23 @@ class Game:
         self.callback = callback
 
         self.aborted = False
+
+        # List of players passed in should have empty seats and players
+        # sitting out filtered out:
+        self.players = players
+
+        # A map of player to amount contributed to the pot, can be used both
+        # as a definitive list of all players who were present when this game
+        # started (as they're removed from the list when sitting out), as well
+        # as a record of how much to refund to each player in the event this
+        # game is aborted.
+        self.in_pot = {}
+        for p in self.players:
+            self.in_pot[p] = Currency(0.00)
+            
+        self.pot = Currency(0.00)
+
+
 
     def start(self):
         """ Begin the hand. """
@@ -124,9 +142,16 @@ class Game:
         Abort the current hand and return control to the object that 
         created us.
         """
+        logger.warn("Aborting game:")
         self.aborted = True
         for p in self.players:
             p.clear_pending_actions()
+            p.add_chips(self.in_pot[p])
+            self.pot = self.pot - self.in_pot[p]
+            self.in_pot[p] = Currency(0.00)
+        if self.pot > 0:
+            logger.error("Funds left in pot after refuding all players: " + 
+                str(self.pot))
         self.callback()
         
 
@@ -136,13 +161,9 @@ class TexasHoldemGame(Game):
     """ Texas Hold'em, the king of all poker games. """
 
     def __init__(self, limit, players, dealer, callback):
-        Game.__init__(self, callback)
+        Game.__init__(self, players, callback)
         self.limit = limit
         self.dealer = dealer
-
-        # List of players passed in should have empty seats and players
-        # sitting out filtered out:
-        self.players = players
 
         # Pointers to the position in the players list that has accepted the
         # small and big blind, initially nobody:
@@ -170,35 +191,43 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
         self.gsm.add_state(STATE_PREFLOP, self.deal_hole_cards)
 
+    def add_to_pot(self, player, amount):
+        """ Adds the specified amount to the pot. """
+        player.subtract_chips(amount)
+        self.pot = self.pot + amount
+        self.in_pot[player] = self.in_pot[player] + amount
+        logger.debug("Adding " + str(amount) + " from " + str(player) + " to pot: " +
+            str(self.pot))
+
     def prompt_small_blind(self):
         logger.debug("requesting small blind")
 
         # If heads-up, dealer becomes the small blind:
         if len(self.players) == 2:
-            self.small_blind = self.dealer
+            small_blind_seat = self.dealer
         else:
             # Modulus to handle wrapping around the end of the list:
-            self.small_blind = (self.dealer + 1) % len(self.players)
+            small_blind_seat = (self.dealer + 1) % len(self.players)
 
-        post_sb = PostBlind(self, self.players[self.small_blind], 
-            self.limit.small_blind)
-        sit_out = SitOut(self, self.players[self.small_blind])
-        self.prompt_player(self.players[self.small_blind], [post_sb, sit_out])
+        sb = self.players[small_blind_seat]
+        post_sb = PostBlind(self, sb, self.limit.small_blind)
+        sit_out = SitOut(self, sb)
+        self.prompt_player(sb, [post_sb, sit_out])
 
     def prompt_big_blind(self):
         logger.debug("requesting big blind")
 
         # If heads-up, non-dealer becomes the big blind:
         if len(self.players) == 2:
-            self.big_blind = (self.dealer + 1) % len(self.players)
+            bb_seat = (self.dealer + 1) % len(self.players)
         else:
             # Modulus to handle wrapping around the end of the list:
-            self.big_blind = (self.dealer + 2) % len(self.players)
+            bb_seat = (self.dealer + 2) % len(self.players)
 
-        post_bb = PostBlind(self, self.players[self.big_blind], 
-            self.limit.big_blind)
-        sit_out = SitOut(self, self.players[self.big_blind])
-        self.prompt_player(self.players[self.big_blind], [post_bb, sit_out])
+        bb = self.players[bb_seat]
+        post_bb = PostBlind(self, bb, self.limit.big_blind)
+        sit_out = SitOut(self, bb)
+        self.prompt_player(bb, [post_bb, sit_out])
 
     def deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
@@ -219,11 +248,6 @@ class TexasHoldemGame(Game):
 
         player.prompt(actions_list)
 
-    def __refund_small_blind(self):
-        # Refund the small blind:
-        sb = self.players[self.small_blind]
-        sb.chips = sb.chips + self.limit.small_blind
-
     def perform(self, action):
         logger.info("Incoming action: " + str(action))
 
@@ -233,7 +257,14 @@ class TexasHoldemGame(Game):
         
         # TODO: Clean this up:
         if isinstance(action, PostBlind):
-            action.player.chips = action.player.chips - action.amount
+            self.add_to_pot(action.player, action.amount)
+            if self.gsm.get_current_state() == STATE_SMALL_BLIND:
+                # TODO: Might need a safer way to look for the players seat:
+                self.small_blind = self.players.index(action.player)
+            if self.gsm.get_current_state() == STATE_BIG_BLIND:
+                # TODO: Might need a safer way to look for the players seat:
+                self.big_blind = self.players.index(action.player)
+
         if isinstance(action, SitOut):
 
             if len(self.players) == 2:
@@ -261,7 +292,6 @@ class TexasHoldemGame(Game):
                 # the dealer is supposed to be the small blind. For now we will
                 # cancel the hand to deal with this situation.
                 if len(self.players) == 2:
-                    self.__refund_small_blind()
                     action.player.clear_pending_actions()
                     self.abort()
                     return
