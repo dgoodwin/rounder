@@ -125,6 +125,8 @@ class Game:
         created us.
         """
         self.aborted = True
+        for p in self.players:
+            p.clear_pending_actions()
         self.callback()
         
 
@@ -243,14 +245,14 @@ class TexasHoldemGame(Game):
             # SitOut actions should only be received while gathering blinds:
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 logger.info("Sitting player out: " + str(action.player))
-                action.player.sittingOut = True
+                action.player.sit_out()
                 # Remove the player from the game and rerequest the small blind:
                 # TODO: should we check that the player is in the list?
                 self.players.remove(action.player)
                 self.prompt_small_blind()
             if self.gsm.get_current_state() == STATE_BIG_BLIND:
                 logger.info("Sitting player out: " + str(action.player))
-                action.player.sittingOut = True
+                action.player.sit_out()
                 # Remove the player from the game and rerequest the big blind:
                 self.players.remove(action.player)
 
@@ -267,6 +269,7 @@ class TexasHoldemGame(Game):
 
         # Remove this player from the pending actions map:
         self.pending_actions.pop(action.player)
+        action.player.clear_pending_actions()
 
         # Check if any actions are still pending, and if not advance the game:
         self.advance()

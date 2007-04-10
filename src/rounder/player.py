@@ -38,7 +38,8 @@ class Player:
         self.name = name
         self.chips = chips
         self.cards = []
-        self.sittingOut = False
+        self.sitting_out = False
+        self.pending_actions = []
         
     def prompt(self, actions):
         """ 
@@ -47,10 +48,26 @@ class Player:
         (and perhaps parent objects such as the server) will return the
         players selection.
         """
-        raise NotImplementedException()
+        self.pending_actions = actions
 
     def __repr__(self):
         return "Player: " + self.name + " (chips: " + str(self.chips) + ")"
 
+    def clear_pending_actions(self):
+        """ Clear any actions pending for this player. """
+        logger.debug("Clearing pending actions: " + str(self.pending_actions))
+        self.pending_actions = []
+
+    def sit_out(self):
+        """ Sit player out of the game. """
+        self.sitting_out = True
+
+    def sit_in(self):
+        """ Sit player back in the game. """
+        self.sitting_out = False
+
+    def is_sitting_out(self):
+        """ Check if player is sitting out. """
+        return self.sitting_out
 
 

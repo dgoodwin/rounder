@@ -100,26 +100,6 @@ class GameStateMachineTests(unittest.TestCase):
 
 
 
-class DummyPlayer(Player):
-
-    """ 
-    Player implementation that does nothing but record the last actions
-    that were prompted. 
-    """
-
-    def __init__(self, name, chips=0):
-        Player.__init__(self, name, chips)
-        self.prompted_actions = []
-
-    def prompt(self, actions):
-        logger.debug("Prompting player with actions:")
-
-        for a in actions:
-            logger.debug("   " + str(a))
-            self.prompted_actions = actions
-
-
-
 class TexasHoldemTests(unittest.TestCase):
 
     def game_over_callback(self):
@@ -128,7 +108,7 @@ class TexasHoldemTests(unittest.TestCase):
     def __create_game(self, numPlayers, dealerIndex):
         self.players = []
         for i in range(numPlayers):
-            self.players.append(DummyPlayer('player' + str(i), 
+            self.players.append(Player('player' + str(i), 
                 Currency(CHIPS)))
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
 
@@ -146,18 +126,18 @@ class TexasHoldemTests(unittest.TestCase):
         self.game.advance()
         self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
         sb = self.players[1]
-        self.assertEquals(2, len(sb.prompted_actions))
+        self.assertEquals(2, len(sb.pending_actions))
 
         # simulate player posting small blind:
-        post_sb_action = find_action_in_list(PostBlind, sb.prompted_actions)
+        post_sb_action = find_action_in_list(PostBlind, sb.pending_actions)
         self.game.perform(post_sb_action)
         self.assertEquals(CHIPS - 1, self.players[1].chips)
 
         # simulate player posting big blind:
         self.assertEquals(STATE_BIG_BLIND, self.game.gsm.get_current_state())
         bb = self.players[2]
-        self.assertEquals(2, len(bb.prompted_actions))
-        post_bb_action = find_action_in_list(PostBlind, bb.prompted_actions)
+        self.assertEquals(2, len(bb.pending_actions))
+        post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
         self.game.perform(post_bb_action)
         self.assertEquals(CHIPS - 2, self.players[2].chips)
 
@@ -173,17 +153,33 @@ class TexasHoldemTests(unittest.TestCase):
 
     def test_small_blind_sitout_three_handed(self):
         self.__create_game(3, 0)
-        # Configure player 1 to reject the small blind, ensure 0 becomes the
-        # small and 2 the big:
-        self.players[1].preferred_actions.insert(0, SitOut)
-
-        self.assertEquals(3, len(self.game.players))
         self.game.advance()
+
+        # Player 1 rejects the small blind and chooses to sit out:
+        self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
+        self.assertEquals(2, len(self.players[1].pending_actions))
+        self.game.perform(find_action_in_list(SitOut, 
+            self.players[1].pending_actions))
         self.assertEquals(2, len(self.game.players))
-        self.assertEquals(CHIPS - 1, self.players[0].chips)
-        self.assertEquals(True, self.players[1].sittingOut)
-        self.assertEquals(CHIPS - 2, self.players[2].chips)
+        self.assertEquals(0, len(self.players[1].pending_actions))
         self.assertEquals(CHIPS, self.players[1].chips)
+        self.assertEquals(True, self.players[1].is_sitting_out())
+
+        # Player 0 (not 2) becomes the small blind:
+        self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
+        self.assertEquals(2, len(self.players[0].pending_actions))
+        self.game.perform(find_action_in_list(PostBlind, 
+            self.players[0].pending_actions))
+        self.assertEquals(0, len(self.players[0].pending_actions))
+        self.assertEquals(CHIPS - 1, self.players[0].chips)
+
+        # Player 2 should be the big blind:
+        self.assertEquals(STATE_BIG_BLIND, self.game.gsm.get_current_state())
+        self.assertEquals(2, len(self.players[2].pending_actions))
+        self.game.perform(find_action_in_list(PostBlind, 
+            self.players[2].pending_actions))
+        self.assertEquals(0, len(self.players[2].pending_actions))
+        self.assertEquals(CHIPS - 2, self.players[2].chips)
 
     def test_big_blind_sitout_three_handed(self):
         # Difficult situation here, when down to heads up the dealer should
