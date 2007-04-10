@@ -169,7 +169,7 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_PREFLOP, self.deal_hole_cards)
 
     def prompt_small_blind(self):
-        logger.debug("posting small blind")
+        logger.debug("requesting small blind")
 
         # If heads-up, dealer becomes the small blind:
         if len(self.players) == 2:

@@ -20,18 +20,28 @@
 
 """ Tests for the rounder.game module. """
 
+from logging import getLogger
+logger = getLogger("rounder.test.gametests")
+
 import unittest
 
 import settestpath
 
-from rounder.action import SitOut
+from rounder.action import SitOut, PostBlind
 from rounder.core import RounderException
-from rounder.player import CallingStation
 from rounder.limit import FixedLimit
+from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine
+from rounder.game import STATE_SMALL_BLIND, STATE_BIG_BLIND
 from rounder.currency import Currency
 
 CHIPS = 1000
+
+def find_action_in_list(action, action_list):
+    for a in action_list:
+        if isinstance(a, action):
+            return a
+    return None
 
 class GameStateMachineTests(unittest.TestCase):
 
@@ -90,16 +100,35 @@ class GameStateMachineTests(unittest.TestCase):
 
 
 
+class DummyPlayer(Player):
+
+    """ 
+    Player implementation that does nothing but record the last actions
+    that were prompted. 
+    """
+
+    def __init__(self, name, chips=0):
+        Player.__init__(self, name, chips)
+        self.prompted_actions = []
+
+    def prompt(self, actions):
+        logger.debug("Prompting player with actions:")
+
+        for a in actions:
+            logger.debug("   " + str(a))
+            self.prompted_actions = actions
+
+
+
 class TexasHoldemTests(unittest.TestCase):
 
     def game_over_callback(self):
         self.game_over = True
 
-
     def __create_game(self, numPlayers, dealerIndex):
         self.players = []
         for i in range(numPlayers):
-            self.players.append(CallingStation('player' + str(i), 
+            self.players.append(DummyPlayer('player' + str(i), 
                 Currency(CHIPS)))
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
 
@@ -115,13 +144,27 @@ class TexasHoldemTests(unittest.TestCase):
     def test_standard_post_blinds(self):
         self.__create_game(3, 0)
         self.game.advance()
+        self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
+        sb = self.players[1]
+        self.assertEquals(2, len(sb.prompted_actions))
+
+        # simulate player posting small blind:
+        post_sb_action = find_action_in_list(PostBlind, sb.prompted_actions)
+        self.game.perform(post_sb_action)
         self.assertEquals(CHIPS - 1, self.players[1].chips)
+
+        # simulate player posting big blind:
+        self.assertEquals(STATE_BIG_BLIND, self.game.gsm.get_current_state())
+        bb = self.players[2]
+        self.assertEquals(2, len(bb.prompted_actions))
+        post_bb_action = find_action_in_list(PostBlind, bb.prompted_actions)
+        self.game.perform(post_bb_action)
         self.assertEquals(CHIPS - 2, self.players[2].chips)
-        self.assertEquals(CHIPS, self.players[0].chips)
 
         # At this point, players should be dealt their hole cards:
         for player in self.players:
             self.assertEquals(2, len(player.cards))
+        self.assertEquals(CHIPS, self.players[0].chips)
 
     def test_prompt_player_actions_already_pending(self):
         self.__create_game(3, 0)
@@ -147,7 +190,7 @@ class TexasHoldemTests(unittest.TestCase):
         # be the small blind, which is incorrect according to the normal
         # means of selecting the small and big blind. If the big blind choses
         # to sit out, we already have processed the small blind, who should now
-        # be the dealer. To compensate for this situation we'll cancel the hand
+        # be the dealer. To compensate for this situation we'll canel the hand
         # and allow the table to start a new one with just the heads up 
         # players.
         self.__create_game(3, 0)

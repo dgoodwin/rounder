@@ -43,6 +43,9 @@ class Player:
     def prompt(self, actions):
         """ 
         Prompt this player to make a choice among the given actions.
+        Returns nothing, but rather an asynchronous call back into the game
+        (and perhaps parent objects such as the server) will return the
+        players selection.
         """
         raise NotImplementedException()
 
@@ -51,35 +54,3 @@ class Player:
 
 
 
-class CallingStation(Player):
-
-    """ Player who will always continue to showdown if he has the option. """
-
-    def __init__(self, name, chips=0):
-        Player.__init__(self, name, chips)
-
-        # List of preferred actions this player will try to respond to
-        # in order. Sometimes overridden in tests.
-        self.preferred_actions = [PostBlind]
-
-    def prompt(self, actions):
-
-        logger.debug("Prompting player: " + str(self))
-        for a in actions:
-            logger.debug("   " + str(a))
-
-        for search_action in self.preferred_actions:
-            action = self.__find_action(actions, search_action)
-            if action is not None:
-                # TODO: Supposed to be an asynchronous call here...
-                logger.debug("Returning action: " + str(action))
-                action.game.perform(action)
-                return
-        raise Exception("CallingStation couldn't find a suitable action: " +
-            str(actions))
-
-    def __find_action(self, action_list, action):
-        for a in action_list:
-            if isinstance(a, action):
-                return a
-        return None
