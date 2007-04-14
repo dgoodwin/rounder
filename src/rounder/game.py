@@ -121,7 +121,7 @@ class Game:
         """ Begin the hand. """
         raise NotImplementedException()
 
-    def perform(self, action):
+    def process_action(self, action):
         """ 
         Perform a player action.
 
@@ -194,8 +194,8 @@ class TexasHoldemGame(Game):
         player.subtract_chips(amount)
         self.pot = self.pot + amount
         self.in_pot[player] = self.in_pot[player] + amount
-        logger.debug("Adding " + str(amount) + " from " + str(player) + " to pot: " +
-            str(self.pot))
+        logger.debug("Adding " + str(amount) + " from " + str(player) + 
+            " to pot: " + str(self.pot))
 
     def prompt_small_blind(self):
         logger.debug("requesting small blind")
@@ -246,7 +246,7 @@ class TexasHoldemGame(Game):
 
         player.prompt(actions_list)
 
-    def perform(self, action):
+    def process_action(self, action):
         logger.info("Incoming action: " + str(action))
 
         # TODO: verify the action coming back has valid params?

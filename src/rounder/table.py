@@ -29,3 +29,4 @@ class Table:
     def __init__(self, seats=10):
         self.seats = seats
         
+    # TODO: sitout players short on chips

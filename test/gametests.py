@@ -130,7 +130,7 @@ class TexasHoldemTests(unittest.TestCase):
 
         # simulate player posting small blind:
         post_sb_action = find_action_in_list(PostBlind, sb.pending_actions)
-        self.game.perform(post_sb_action)
+        self.game.process_action(post_sb_action)
         self.assertEquals(CHIPS - 1, self.players[1].chips)
 
         # simulate player posting big blind:
@@ -138,7 +138,7 @@ class TexasHoldemTests(unittest.TestCase):
         bb = self.players[2]
         self.assertEquals(2, len(bb.pending_actions))
         post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
-        self.game.perform(post_bb_action)
+        self.game.process_action(post_bb_action)
         self.assertEquals(CHIPS - 2, self.players[2].chips)
 
         # At this point, players should be dealt their hole cards:
@@ -158,7 +158,7 @@ class TexasHoldemTests(unittest.TestCase):
         # Player 1 rejects the small blind and chooses to sit out:
         self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
         self.assertEquals(2, len(self.players[1].pending_actions))
-        self.game.perform(find_action_in_list(SitOut, 
+        self.game.process_action(find_action_in_list(SitOut, 
             self.players[1].pending_actions))
         self.assertEquals(2, len(self.game.players))
         self.assertEquals(0, len(self.players[1].pending_actions))
@@ -168,7 +168,7 @@ class TexasHoldemTests(unittest.TestCase):
         # Player 0 (not 2) becomes the small blind:
         self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
         self.assertEquals(2, len(self.players[0].pending_actions))
-        self.game.perform(find_action_in_list(PostBlind, 
+        self.game.process_action(find_action_in_list(PostBlind, 
             self.players[0].pending_actions))
         self.assertEquals(0, len(self.players[0].pending_actions))
         self.assertEquals(CHIPS - 1, self.players[0].chips)
@@ -176,7 +176,7 @@ class TexasHoldemTests(unittest.TestCase):
         # Player 2 should be the big blind:
         self.assertEquals(STATE_BIG_BLIND, self.game.gsm.get_current_state())
         self.assertEquals(2, len(self.players[2].pending_actions))
-        self.game.perform(find_action_in_list(PostBlind, 
+        self.game.process_action(find_action_in_list(PostBlind, 
             self.players[2].pending_actions))
         self.assertEquals(0, len(self.players[2].pending_actions))
         self.assertEquals(CHIPS - 2, self.players[2].chips)
@@ -193,12 +193,12 @@ class TexasHoldemTests(unittest.TestCase):
         self.game.advance()
 
         # Player 1 posts small blind:
-        self.game.perform(find_action_in_list(PostBlind, 
+        self.game.process_action(find_action_in_list(PostBlind, 
             self.players[1].pending_actions))
         self.assertEquals(CHIPS - 1, self.players[1].chips)
 
         # Player 2 refuses the big blind:
-        self.game.perform(find_action_in_list(SitOut, 
+        self.game.process_action(find_action_in_list(SitOut, 
             self.players[2].pending_actions))
 
         self.assertEquals(True, self.game_over)
@@ -213,11 +213,11 @@ class TexasHoldemTests(unittest.TestCase):
         self.__create_game(2, 0)
         self.game.advance()
 
-        self.game.perform(find_action_in_list(PostBlind, 
+        self.game.process_action(find_action_in_list(PostBlind, 
             self.players[0].pending_actions))
         self.assertEquals(CHIPS - 1, self.players[0].chips)
 
-        self.game.perform(find_action_in_list(PostBlind, 
+        self.game.process_action(find_action_in_list(PostBlind, 
             self.players[1].pending_actions))
         self.assertEquals(CHIPS - 2, self.players[1].chips)
 
@@ -226,21 +226,13 @@ class TexasHoldemTests(unittest.TestCase):
         self.game.advance()
 
         # Player 0 refuses the small blind:
-        self.game.perform(find_action_in_list(SitOut, 
+        self.game.process_action(find_action_in_list(SitOut, 
             self.players[0].pending_actions))
 
         self.assertEquals(True, self.game_over)
         self.assertEquals(True, self.game.aborted)
         self.assertEquals(CHIPS, self.players[1].chips)
         self.assertEquals(CHIPS, self.players[0].chips)
-
-    # test_fake_action_response
-    # test_invalid_action_response_params
-    # test_blinds_heads_up
-    # test_insufficient_funds_for_blinds
-    # test_blinds_wraparound
-    # test_empty_seats
-    # test_seats_sitting_out
 
 
 
