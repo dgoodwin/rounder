@@ -22,38 +22,38 @@
 
 """ The Rounder Client Module """
 
-from twisted.internet import reactor, protocol
+#from twisted.internet import reactor, protocol
 
-from logging import getLogger
-logger = getLogger("rounder.client")
+#from logging import getLogger
+#logger = getLogger("rounder.client")
 
 
-class RounderClient(protocol.Protocol):
-    def connectionMade(self):
-        self.transport.write("hello, world!")
+#class RounderClient(protocol.Protocol):
+#    def connectionMade(self):
+#        self.transport.write("hello, world!")
 
-    def dataReceived(self, data):
-        print "Server said:", data
-        self.transport.loseConnection()
+#    def dataReceived(self, data):
+#        print "Server said:", data
+#        self.transport.loseConnection()
 
-    def connectionLost(self, reason):
-        print "connection lost"
+#    def connectionLost(self, reason):
+#        print "connection lost"
 
-class RounderClientFactory(protocol.ClientFactory):
-    protocol = RounderClient
+#class RounderClientFactory(protocol.ClientFactory):
+#    protocol = RounderClient
 
-    def clientConnectionFailed(self, connector, reason):
-        print "Connection failed, goodbye!"
-        reactor.stop()
+#    def clientConnectionFailed(self, connector, reason):
+#        print "Connection failed, goodbye!"
+#        reactor.stop()
 
-    def clientConnectionLost(self, connector, reason):
-        print "Connection failed, goodbye!"
-        reactor.stop()
+#    def clientConnectionLost(self, connector, reason):
+#        print "Connection failed, goodbye!"
+#        reactor.stop()
 
-def main():
-    f = RounderClientFactory()
-    reactor.connectTCP("localhost", 8000, f)
-    reactor.run()
+#def main():
+#    f = RounderClientFactory()
+#    reactor.connectTCP("localhost", 8000, f)
+#    reactor.run()
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()

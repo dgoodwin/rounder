@@ -22,26 +22,26 @@
 
 """ The Rounder Server Module """
 
-from twisted.internet import reactor, protocol
+#from twisted.internet import reactor, protocol
 
-import configureLogging
-from logging import getLogger
-logger = getLogger("rounder.server")
+#import configureLogging
+#from logging import getLogger
+#logger = getLogger("rounder.server")
 
-SERVER_PORT = 8000
+#SERVER_PORT = 8000
 
-class RounderProtocol(protocol.Protocol):
-    def dataReceived(self, data):
-        print "dataReceived: ", data
-        self.transport.write(data)
+#class RounderProtocol(protocol.Protocol):
+#    def dataReceived(self, data):
+#        print "dataReceived: ", data
+#        self.transport.write(data)
 
-def main():
-    logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
-    factory = protocol.ServerFactory()
-    factory.protocol = RounderProtocol
-    reactor.listenTCP(SERVER_PORT, factory)
-    reactor.run()
-    logger.info("server started.")
+#def main():
+#    logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
+#    factory = protocol.ServerFactory()
+#    factory.protocol = RounderProtocol
+#    reactor.listenTCP(SERVER_PORT, factory)
+#    reactor.run()
+#    logger.info("server started.")
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()

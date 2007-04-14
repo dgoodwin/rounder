@@ -117,8 +117,6 @@ class Game:
             
         self.pot = Currency(0.00)
 
-
-
     def start(self):
         """ Begin the hand. """
         raise NotImplementedException()
@@ -302,7 +300,6 @@ class TexasHoldemGame(Game):
         self.pending_actions.pop(action.player)
         action.player.clear_pending_actions()
 
-        # Check if any actions are still pending, and if not advance the game:
         self.advance()
 
     def advance(self):

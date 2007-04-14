@@ -48,7 +48,7 @@ def suite():
         playertests.suite(),
         gametests.suite(),
         limittests.suite(),
-        servertests.suite(),
+#        servertests.suite(),
     ))
 
 if __name__ == "__main__":
