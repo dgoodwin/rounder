@@ -6,16 +6,16 @@
 If someone says the bot's name in the channel followed by a ':',
 e.g.
 
-  <foo> logbot: hello!
+  <foo> RounderBot: hello!
 
 the bot will reply:
 
-  <logbot> foo: I am a log bot
+  <RounderBot> foo: I am a log bot
 
 Run this script with two arguments, the channel name the bot should
 connect to, and file to log to, e.g.:
 
-  $ python ircLogBot.py test test.log
+  $ python ircRounderBot.py test test.log
 
 will log channel #test to the file 'test.log'.
 """
@@ -48,7 +48,7 @@ class MessageLogger:
         self.file.close()
 
 
-class LogBot(irc.IRCClient):
+class RounderBot(irc.IRCClient):
     """A logging IRC bot."""
     
     nickname = "rounder"
@@ -96,7 +96,7 @@ class LogBot(irc.IRCClient):
             cmd = msg[len(self.nickname) + 2:].lower()
             if cmd == "new game" and not self.starting_game \
                     and not self.playing_game:
-                msg = "Ok %s, I'm starting new poker game. Who else is playing?" % user
+                msg = "Ok %s, I'm starting a new poker game. Who else is playing?" % user
                 self.players = []
                 self.players.append(user)
                 self.starting_game = True
@@ -108,6 +108,8 @@ class LogBot(irc.IRCClient):
                     msg = "%s: I already know you're playing" % user
             elif cmd == "nobody else" and self.starting_game:
                 msg = "Let's play."
+                self.starting_game = False
+                self.playing_game = True
             else:
                 msg = "%s: I am rounder. phear" % user
             self.msg(channel, msg)
@@ -127,14 +129,14 @@ class LogBot(irc.IRCClient):
         self.logger.log("%s is now known as %s" % (old_nick, new_nick))
 
 
-class LogBotFactory(protocol.ClientFactory):
-    """A factory for LogBots.
+class RounderBotFactory(protocol.ClientFactory):
+    """A factory for RounderBots.
 
     A new protocol instance will be created each time we connect to the server.
     """
 
     # the class of the protocol to build when new connection is made
-    protocol = LogBot
+    protocol = RounderBot
 
     def __init__(self, channel, filename):
         self.channel = channel
@@ -154,7 +156,7 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
     
     # create factory protocol and application
-    f = LogBotFactory(sys.argv[1], sys.argv[2])
+    f = RounderBotFactory(sys.argv[1], sys.argv[2])
 
     # connect factory to this host and port
     reactor.connectTCP("irc.efnet.net", 6667, f)
