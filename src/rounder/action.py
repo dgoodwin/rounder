@@ -27,8 +27,7 @@ class Action:
     sitting at a table can be faced with.
     """
 
-    def __init__(self, game, player):
-        self.game = game
+    def __init__(self, player):
         self.player = player
 
     def validate(self, params):
@@ -50,12 +49,13 @@ class PostBlind(Action):
     """
     # Can double as an Ante?
 
-    def __init__(self, game, player, amount):
-        Action.__init__(self, game, player)
+    def __init__(self, table, player, amount):
+        Action.__init__(self, player)
+        self.table = table
         self.amount = amount
 
     def __repr__(self):
-        return "PostBlind: " + str(self.game.id) + " " + self.player.name + \
+        return "PostBlind: " + str(self.table.name) + " " + self.player.name + \
             " $" + str(self.amount)
 
 
@@ -65,7 +65,8 @@ class SitOut(Action):
     """ Action a player can take to sit out of the next hand. """
 
     def __init__(self, game, player):
-        Action.__init__(self, game, player)
+        Action.__init__(self, player)
+        self.game = game
 
     def __repr__(self):
         return "SitOut: " + str(self.game.id) + " " + self.player.name

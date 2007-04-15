@@ -34,9 +34,10 @@ class Player:
     created for each.
     """
 
-    def __init__(self, name, chips=0):
+    def __init__(self, name, seat=None, chips=0):
         self.name = name
         self.chips = chips
+        self.seat = seat
         self.cards = []
         self.sitting_out = False
         self.pending_actions = []
@@ -51,7 +52,7 @@ class Player:
         self.pending_actions = actions
 
     def __repr__(self):
-        return "Player: " + self.name + " (chips: " + str(self.chips) + ")"
+        return "Player: %s (seat: %s, chips: %s)" % (self.name, self.seat, self.chips)
 
     def clear_pending_actions(self):
         """ Clear any actions pending for this player. """

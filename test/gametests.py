@@ -32,16 +32,10 @@ from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine
-from rounder.game import STATE_SMALL_BLIND, STATE_BIG_BLIND
 from rounder.currency import Currency
+from utils import find_action_in_list
 
 CHIPS = 1000
-
-def find_action_in_list(action, action_list):
-    for a in action_list:
-        if isinstance(a, action):
-            return a
-    return None
 
 class GameStateMachineTests(unittest.TestCase):
 
@@ -120,31 +114,6 @@ class TexasHoldemTests(unittest.TestCase):
         self.game = TexasHoldemGame(limit=limit, players=players_copy, 
             dealer=dealerIndex, callback=self.game_over_callback)
         self.game_over = False
-
-    def test_standard_post_blinds(self):
-        self.__create_game(3, 0)
-        self.game.advance()
-        self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
-        sb = self.players[1]
-        self.assertEquals(2, len(sb.pending_actions))
-
-        # simulate player posting small blind:
-        post_sb_action = find_action_in_list(PostBlind, sb.pending_actions)
-        self.game.process_action(post_sb_action)
-        self.assertEquals(CHIPS - 1, self.players[1].chips)
-
-        # simulate player posting big blind:
-        self.assertEquals(STATE_BIG_BLIND, self.game.gsm.get_current_state())
-        bb = self.players[2]
-        self.assertEquals(2, len(bb.pending_actions))
-        post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
-        self.game.process_action(post_bb_action)
-        self.assertEquals(CHIPS - 2, self.players[2].chips)
-
-        # At this point, players should be dealt their hole cards:
-        for player in self.players:
-            self.assertEquals(2, len(player.cards))
-        self.assertEquals(CHIPS, self.players[0].chips)
 
     def test_prompt_player_actions_already_pending(self):
         self.__create_game(3, 0)

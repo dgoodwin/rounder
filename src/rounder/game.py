@@ -23,15 +23,13 @@
 from logging import getLogger
 logger = getLogger("rounder.game")
 
-from rounder.action import PostBlind, SitOut
+from rounder.action import SitOut
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 from rounder.currency import Currency
 
 GAME_ID_COUNTER = 1
 
-STATE_SMALL_BLIND = "small_blind"
-STATE_BIG_BLIND = "big_blind"
 STATE_PREFLOP = "preflop"
 
 class GameStateMachine:
@@ -123,7 +121,7 @@ class Game:
 
     def process_action(self, action):
         """ 
-        Perform a player action.
+        Process a player action.
 
         Assume that any parameters required for the action have already
         been received from the player, parsed, and applied to the action.
@@ -196,36 +194,6 @@ class TexasHoldemGame(Game):
         self.in_pot[player] = self.in_pot[player] + amount
         logger.debug("Adding " + str(amount) + " from " + str(player) + 
             " to pot: " + str(self.pot))
-
-    def prompt_small_blind(self):
-        logger.debug("requesting small blind")
-
-        # If heads-up, dealer becomes the small blind:
-        if len(self.players) == 2:
-            small_blind_seat = self.dealer
-        else:
-            # Modulus to handle wrapping around the end of the list:
-            small_blind_seat = (self.dealer + 1) % len(self.players)
-
-        sb = self.players[small_blind_seat]
-        post_sb = PostBlind(self, sb, self.limit.small_blind)
-        sit_out = SitOut(self, sb)
-        self.prompt_player(sb, [post_sb, sit_out])
-
-    def prompt_big_blind(self):
-        logger.debug("requesting big blind")
-
-        # If heads-up, non-dealer becomes the big blind:
-        if len(self.players) == 2:
-            bb_seat = (self.dealer + 1) % len(self.players)
-        else:
-            # Modulus to handle wrapping around the end of the list:
-            bb_seat = (self.dealer + 2) % len(self.players)
-
-        bb = self.players[bb_seat]
-        post_bb = PostBlind(self, bb, self.limit.big_blind)
-        sit_out = SitOut(self, bb)
-        self.prompt_player(bb, [post_bb, sit_out])
 
     def deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
