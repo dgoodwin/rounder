@@ -171,6 +171,19 @@ class TableTests(unittest.TestCase):
             self.players[1].pending_actions))
         self.assertEquals(self.players[1], self.table.big_blind)
 
+    def test_heads_up_small_blind_sitout(self):
+        self.__create_game(2, 0)
+        self.table.start_hand()
+
+        # Player 0 refuses the small blind:
+        self.table.process_action(find_action_in_list(SitOut, 
+            self.players[0].pending_actions))
+        self.assertEquals(None, self.table.gsm.current)
+        self.assertEquals(self.players[0], self.table.dealer)
+        self.assertEquals(None, self.table.small_blind)
+        self.assertEquals(None, self.table.big_blind)
+
+    # def test_dealer_maintained_when_table_dies
 
 
 

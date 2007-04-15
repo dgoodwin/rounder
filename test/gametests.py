@@ -126,59 +126,6 @@ class TexasHoldemTests(unittest.TestCase):
         self.game.prompt_small_blind()
         self.assertRaises(RounderException, self.game.prompt_small_blind)
 
-    def test_big_blind_sitout_three_handed(self):
-        # Difficult situation here, when down to heads up the dealer should
-        # be the small blind, which is incorrect according to the normal
-        # means of selecting the small and big blind. If the big blind choses
-        # to sit out, we already have processed the small blind, who should now
-        # be the dealer. To compensate for this situation we'll canel the hand
-        # and allow the table to start a new one with just the heads up 
-        # players.
-        self.__create_game(3, 0)
-        self.game.advance()
-
-        # Player 1 posts small blind:
-        self.game.process_action(find_action_in_list(PostBlind, 
-            self.players[1].pending_actions))
-        self.assertEquals(CHIPS - 1, self.players[1].chips)
-
-        # Player 2 refuses the big blind:
-        self.game.process_action(find_action_in_list(SitOut, 
-            self.players[2].pending_actions))
-
-        self.assertEquals(True, self.game_over)
-        self.assertEquals(True, self.game.aborted)
-
-        self.assertEquals(CHIPS, self.players[1].chips)
-        self.assertEquals(CHIPS, self.players[0].chips)
-        self.assertEquals(CHIPS, self.players[2].chips)
-
-    def test_heads_up_blinds(self):
-        # Dealer should be the small blind in a heads up match:
-        self.__create_game(2, 0)
-        self.game.advance()
-
-        self.game.process_action(find_action_in_list(PostBlind, 
-            self.players[0].pending_actions))
-        self.assertEquals(CHIPS - 1, self.players[0].chips)
-
-        self.game.process_action(find_action_in_list(PostBlind, 
-            self.players[1].pending_actions))
-        self.assertEquals(CHIPS - 2, self.players[1].chips)
-
-    def test_heads_up_small_blind_sitout(self):
-        self.__create_game(2, 0)
-        self.game.advance()
-
-        # Player 0 refuses the small blind:
-        self.game.process_action(find_action_in_list(SitOut, 
-            self.players[0].pending_actions))
-
-        self.assertEquals(True, self.game_over)
-        self.assertEquals(True, self.game.aborted)
-        self.assertEquals(CHIPS, self.players[1].chips)
-        self.assertEquals(CHIPS, self.players[0].chips)
-
 
 
 def suite():

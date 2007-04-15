@@ -152,6 +152,11 @@ class Table:
         self.gsm.reset()
         self.gsm.advance()
 
+    def wait(self):
+        self.gsm.reset()
+        self.small_blind = None
+        self.big_blind = None
+
     def __begin_hand(self):
         pass
 
@@ -220,12 +225,12 @@ class Table:
 
         elif isinstance(action, SitOut):
 
-            if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
-                logger.debug("Not enough players for a new hand.")
-                return
-
             logger.info("Sitting player out: " + str(p))
             p.sit_out()
+
+            if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
+                logger.debug("Not enough players for a new hand.")
+                self.wait()
 
             if find_action_in_list(PostBlind, pending_actions_copy) != None and \
                 self.gsm.get_current_state() == STATE_SMALL_BLIND:

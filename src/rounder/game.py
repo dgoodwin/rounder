@@ -86,6 +86,8 @@ class GameStateMachine:
         self.actions[self.states[self.current]]()
 
     def get_current_state(self):
+        if self.current == None:
+            return None
         return self.states[self.current]
 
 
