@@ -29,6 +29,7 @@ from rounder.game import GameStateMachine
 
 STATE_SMALL_BLIND = "small_blind"
 STATE_BIG_BLIND = "big_blind"
+HAND_UNDERWAY = "hand_underway"
 
 class Seats:
     """ Players seated at the table. """
@@ -124,6 +125,7 @@ class Table:
         self.gsm = GameStateMachine()
         self.gsm.add_state(STATE_SMALL_BLIND, self.prompt_small_blind)
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
+        self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
 
         self.small_blind = None
         self.big_blind = None
@@ -132,6 +134,11 @@ class Table:
         self.seats.new_dealer()
         if self.gsm.current == None:
             self.gsm.advance()
+
+    def __begin_hand(self):
+        pass
+    # TODO: sitout players short on chips
+
 
     def seat_player(self, player, seat_num):
         self.seats.seat_player(player, seat_num)
@@ -157,14 +164,19 @@ class Table:
         sit_out = SitOut(self, bb)
         self.prompt_player(bb, [post_bb, sit_out])
 
-    # TODO: sitout players short on chips
-
     def __get_small_blind(self):
         return self.seats.small_blind 
 
     def __set_small_blind(self, small_blind):
         self.seats.small_blind = small_blind
     small_blind = property(__get_small_blind, __set_small_blind)
+
+    def __get_big_blind(self):
+        return self.seats.big_blind 
+
+    def __set_big_blind(self, big_blind):
+        self.seats.big_blind = big_blind
+    big_blind = property(__get_big_blind, __set_big_blind)
 
     def process_action(self, action):
         logger.info("Incoming action: " + str(action))
@@ -178,8 +190,9 @@ class Table:
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 self.small_blind = action.player
                 self.gsm.advance()
-            if self.gsm.get_current_state() == STATE_BIG_BLIND:
+            elif self.gsm.get_current_state() == STATE_BIG_BLIND:
                 self.big_blind = action.player
+                self.gsm.advance()
 
         #if isinstance(action, SitOut):
 
