@@ -64,9 +64,9 @@ class SitOut(Action):
 
     """ Action a player can take to sit out of the next hand. """
 
-    def __init__(self, game, player):
+    def __init__(self, table, player):
         Action.__init__(self, player)
-        self.game = game
+        self.table = table
 
     def __repr__(self):
-        return "SitOut: " + str(self.game.id) + " " + self.player.name
+        return "SitOut: " + str(self.table.name) + " " + self.player.name

@@ -26,10 +26,13 @@ logger = getLogger("rounder.table")
 from rounder.action import PostBlind, SitOut
 from rounder.core import RounderException
 from rounder.game import GameStateMachine
+from rounder.utils import find_action_in_list
 
 STATE_SMALL_BLIND = "small_blind"
 STATE_BIG_BLIND = "big_blind"
 HAND_UNDERWAY = "hand_underway"
+
+MIN_PLAYERS_FOR_HAND = 2
 
 class Seats:
     """ Players seated at the table. """
@@ -95,6 +98,10 @@ class Seats:
         if self.dealer== None:
             raise RounderException("Need a dealer before small blind.")
 
+        if len(self.active_players) == 2:
+            # Dealer is the small blind heads up:
+            return self.dealer
+
         start_at = (self.dealer.seat + 1) % len(self.__seats)
         return self.__seats[self.__get_first_active_seat(start_at)]
 
@@ -137,8 +144,6 @@ class Table:
 
     def __begin_hand(self):
         pass
-    # TODO: sitout players short on chips
-
 
     def seat_player(self, player, seat_num):
         self.seats.seat_player(player, seat_num)
@@ -180,49 +185,41 @@ class Table:
 
     def process_action(self, action):
         logger.info("Incoming action: " + str(action))
+        p = action.player
 
         # TODO: verify the action coming back has valid params?
         # TODO: asserting the player responding to the action actually was
         #   given the option, perhaps at another layer (server?)
         
+        pending_actions_copy = []
+        pending_actions_copy.extend(p.pending_actions)
+        p.clear_pending_actions()
+
         # TODO: Clean this up:
         if isinstance(action, PostBlind):
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
-                self.small_blind = action.player
+                self.small_blind = p
                 self.gsm.advance()
             elif self.gsm.get_current_state() == STATE_BIG_BLIND:
-                self.big_blind = action.player
+                self.big_blind = p
                 self.gsm.advance()
 
-        #if isinstance(action, SitOut):
 
-        #    if len(self.players) == 2:
-        #        if self.gsm.get_current_state() == STATE_BIG_BLIND:
-        #            self.__refund_small_blind()
-        #        self.abort()
-        #        return
+        elif isinstance(action, SitOut):
 
-        #    # SitOut actions should only be received while gathering blinds:
-        #    if self.gsm.get_current_state() == STATE_SMALL_BLIND:
-        #        logger.info("Sitting player out: " + str(action.player))
-        #        action.player.sit_out()
-        #        # Remove the player from the game and rerequest the small blind:
-        #        # TODO: should we check that the player is in the list?
-        #        self.players.remove(action.player)
-        #        self.prompt_small_blind()
-        #    if self.gsm.get_current_state() == STATE_BIG_BLIND:
-        #        logger.info("Sitting player out: " + str(action.player))
-        #        action.player.sit_out()
-        #        # Remove the player from the game and rerequest the big blind:
-        #        self.players.remove(action.player)
+            if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
+                logger.debug("Not enough players for a new hand.")
+                return
 
-        #        # If the big blind just sat out in a three handed game, we've
-        #        # already collected the small blind, but in a heads up hand
-        #        # the dealer is supposed to be the small blind. For now we will
-        #        # cancel the hand to deal with this situation.
-        #        if len(self.players) == 2:
-        #            action.player.clear_pending_actions()
-        #            self.abort()
-        #            return
+            logger.info("Sitting player out: " + str(p))
+            p.sit_out()
 
-        #        self.prompt_big_blind()
+            if find_action_in_list(PostBlind, pending_actions_copy) != None and \
+                self.gsm.get_current_state() == STATE_SMALL_BLIND:
+                p.sit_out()
+                self.prompt_small_blind()
+
+            if self.gsm.get_current_state() == STATE_BIG_BLIND:
+                p.sit_out()
+                self.prompt_big_blind()
+

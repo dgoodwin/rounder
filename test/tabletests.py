@@ -32,7 +32,7 @@ from rounder.table import STATE_SMALL_BLIND, STATE_BIG_BLIND
 from rounder.limit import FixedLimit
 from rounder.action import SitOut, PostBlind
 
-from utils import find_action_in_list
+from rounder.utils import find_action_in_list
 
 CHIPS = 1000
 
@@ -102,6 +102,36 @@ class TableTests(unittest.TestCase):
         self.assertEquals(None, self.table.big_blind)
         self.table.process_action(post_bb_action)
         self.assertEquals(bb, self.table.big_blind)
+
+    def test_small_blind_sitout_three_handed(self):
+        self.__create_game(3, 0)
+        self.table.start_hand()
+
+        # Player 1 rejects the small blind and chooses to sit out:
+        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(2, len(self.players[1].pending_actions))
+        self.table.process_action(find_action_in_list(SitOut, 
+            self.players[1].pending_actions))
+        self.assertEquals(0, len(self.players[1].pending_actions))
+        self.assertEquals(True, self.players[1].sitting_out)
+        self.assertEquals(None, self.table.small_blind)
+
+        # Player 0 (not 2) becomes the small blind:
+        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(2, len(self.players[0].pending_actions))
+        self.table.process_action(find_action_in_list(PostBlind, 
+            self.players[0].pending_actions))
+        self.assertEquals(0, len(self.players[0].pending_actions))
+        self.assertEquals(self.players[0], self.table.small_blind)
+
+        # Player 2 should be the big blind:
+        self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(None, self.table.big_blind)
+        self.assertEquals(2, len(self.players[2].pending_actions))
+        self.table.process_action(find_action_in_list(PostBlind, 
+            self.players[2].pending_actions))
+        self.assertEquals(0, len(self.players[2].pending_actions))
+        self.assertEquals(self.players[2], self.table.big_blind)
 
 
 

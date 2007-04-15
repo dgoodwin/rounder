@@ -33,7 +33,7 @@ from rounder.limit import FixedLimit
 from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine
 from rounder.currency import Currency
-from utils import find_action_in_list
+from rounder.utils import find_action_in_list
 
 CHIPS = 1000
 
@@ -125,36 +125,6 @@ class TexasHoldemTests(unittest.TestCase):
         self.__create_game(3, 0)
         self.game.prompt_small_blind()
         self.assertRaises(RounderException, self.game.prompt_small_blind)
-
-    def test_small_blind_sitout_three_handed(self):
-        self.__create_game(3, 0)
-        self.game.advance()
-
-        # Player 1 rejects the small blind and chooses to sit out:
-        self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
-        self.assertEquals(2, len(self.players[1].pending_actions))
-        self.game.process_action(find_action_in_list(SitOut, 
-            self.players[1].pending_actions))
-        self.assertEquals(2, len(self.game.players))
-        self.assertEquals(0, len(self.players[1].pending_actions))
-        self.assertEquals(CHIPS, self.players[1].chips)
-        self.assertEquals(True, self.players[1].is_sitting_out())
-
-        # Player 0 (not 2) becomes the small blind:
-        self.assertEquals(STATE_SMALL_BLIND, self.game.gsm.get_current_state())
-        self.assertEquals(2, len(self.players[0].pending_actions))
-        self.game.process_action(find_action_in_list(PostBlind, 
-            self.players[0].pending_actions))
-        self.assertEquals(0, len(self.players[0].pending_actions))
-        self.assertEquals(CHIPS - 1, self.players[0].chips)
-
-        # Player 2 should be the big blind:
-        self.assertEquals(STATE_BIG_BLIND, self.game.gsm.get_current_state())
-        self.assertEquals(2, len(self.players[2].pending_actions))
-        self.game.process_action(find_action_in_list(PostBlind, 
-            self.players[2].pending_actions))
-        self.assertEquals(0, len(self.players[2].pending_actions))
-        self.assertEquals(CHIPS - 2, self.players[2].chips)
 
     def test_big_blind_sitout_three_handed(self):
         # Difficult situation here, when down to heads up the dealer should

@@ -18,7 +18,7 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" Rounder test utilities. """
+""" Rounder Utilities """
 
 def find_action_in_list(action, action_list):
     for a in action_list:

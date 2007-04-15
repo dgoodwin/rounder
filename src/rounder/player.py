@@ -67,10 +67,6 @@ class Player:
         """ Sit player back in the game. """
         self.sitting_out = False
 
-    def is_sitting_out(self):
-        """ Check if player is sitting out. """
-        return self.sitting_out
-
     def add_chips(self, amount):
         """ Add chips to the players stack. """
         if amount < 0:
