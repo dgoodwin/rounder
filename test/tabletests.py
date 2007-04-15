@@ -156,6 +156,21 @@ class TableTests(unittest.TestCase):
             self.players[2].pending_actions))
         self.assertEquals(None, self.table.small_blind)
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(2, len(self.players[0].pending_actions))
+
+    def test_heads_up_blinds(self):
+        # Dealer should be the small blind in a heads up match:
+        self.__create_game(2, 0)
+        self.table.start_hand()
+
+        self.table.process_action(find_action_in_list(PostBlind, 
+            self.players[0].pending_actions))
+        self.assertEquals(self.players[0], self.table.small_blind)
+
+        self.table.process_action(find_action_in_list(PostBlind, 
+            self.players[1].pending_actions))
+        self.assertEquals(self.players[1], self.table.big_blind)
+
 
 
 

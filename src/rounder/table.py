@@ -58,6 +58,7 @@ class Seats:
             raise RounderException("Seat already occupied: " + str(seat_number))
 
         self.__seats[seat_number] = player
+        player.seat = seat_number
 
     def get_player(self, seat_number):
         return self.__seats[seat_number]
@@ -113,7 +114,11 @@ class Seats:
         if self.dealer== None:
             raise RounderException("Need a dealer before big blind.")
 
-        start_at = (self.dealer.seat + 2) % len(self.__seats)
+        if len(self.active_players) == 2:
+            start_at = (self.dealer.seat + 1) % len(self.__seats)
+        else:
+            start_at = (self.dealer.seat + 2) % len(self.__seats)
+
         return self.__seats[self.__get_first_active_seat(start_at)]
 
 
@@ -212,7 +217,6 @@ class Table:
             elif self.gsm.get_current_state() == STATE_BIG_BLIND:
                 self.big_blind = p
                 self.gsm.advance()
-
 
         elif isinstance(action, SitOut):
 
