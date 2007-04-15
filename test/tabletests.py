@@ -65,6 +65,51 @@ class SeatsTests(unittest.TestCase):
         seats.seat_player(p, 0)
         self.assertRaises(RounderException, seats.seat_player, p2, 0)
 
+    def __create_mixed_seats(self):
+        """
+        Create the following seat structure:
+
+        Seat 0: Player 0, sitting out
+        Seat 1: Player 1, sitting in
+        Seat 2: Empty
+        Seat 3: Player 3, sitting in
+        Seat 4: Empty
+        Seat 5: Empty
+        Seat 6: Player 6, sitting out
+        Seat 7: Player 7, sitting in
+        Seat 8: Empty
+        Seat 9: Empty
+        """
+
+        self.seats = Seats(10)
+        self.player0 = Player("Player 0")
+        self.player1 = Player("Player 1")
+        self.player3 = Player("Player 3")
+        self.player6 = Player("Player 6")
+        self.player7 = Player("Player 7")
+
+        self.player0.sit_out()
+        self.player6.sit_out()
+
+        self.seats.seat_player(self.player0, 0)
+        self.seats.seat_player(self.player1, 1)
+        self.seats.seat_player(self.player3, 3)
+        self.seats.seat_player(self.player6, 6)
+        self.seats.seat_player(self.player7, 7)
+
+    def test_new_dealer(self):
+        self.__create_mixed_seats()
+        self.seats.new_dealer()
+        self.assertEquals(self.player1, self.seats.dealer)
+
+        self.seats.dealer = self.player3
+        self.seats.new_dealer()
+        self.assertEquals(self.player7, self.seats.dealer)
+
+        self.seats.dealer = self.player7
+        self.seats.new_dealer()
+        self.assertEquals(self.player1, self.seats.dealer)
+
 
 
 class TableTests(unittest.TestCase):
