@@ -134,13 +134,18 @@ class Table:
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
         self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
 
-        self.small_blind = None
-        self.big_blind = None
-
     def start_hand(self):
         self.seats.new_dealer()
         if self.gsm.current == None:
             self.gsm.advance()
+
+    def restart_hand(self):
+        logger.debug("restarting hand")
+        # TODO: exception if game is already underway
+        self.small_blind = None
+        self.big_blind = None
+        self.gsm.reset()
+        self.gsm.advance()
 
     def __begin_hand(self):
         pass
@@ -183,6 +188,10 @@ class Table:
         self.seats.big_blind = big_blind
     big_blind = property(__get_big_blind, __set_big_blind)
 
+    def __get_dealer(self):
+        return self.seats.dealer
+    dealer = property(__get_dealer, None)
+
     def process_action(self, action):
         logger.info("Incoming action: " + str(action))
         p = action.player
@@ -219,7 +228,11 @@ class Table:
                 p.sit_out()
                 self.prompt_small_blind()
 
-            if self.gsm.get_current_state() == STATE_BIG_BLIND:
+            if find_action_in_list(PostBlind, pending_actions_copy) != None and \
+                self.gsm.get_current_state() == STATE_BIG_BLIND:
                 p.sit_out()
+                if len(self.seats.active_players) == 2:
+                    # if down to heads up, we need a different small blind:
+                    self.restart_hand()
                 self.prompt_big_blind()
 

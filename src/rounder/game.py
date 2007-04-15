@@ -51,6 +51,10 @@ class GameStateMachine:
         # Map of state name to callback method:
         self.actions = {}
 
+    def reset(self):
+        logger.debug("Resetting game state machine.")
+        self.current = None
+
     def add_state(self, state_name, action):
         """
         Add the given state and method to call when transitioning into it.

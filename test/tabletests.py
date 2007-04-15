@@ -133,6 +133,30 @@ class TableTests(unittest.TestCase):
         self.assertEquals(0, len(self.players[2].pending_actions))
         self.assertEquals(self.players[2], self.table.big_blind)
 
+    def test_big_blind_sitout_three_handed(self):
+        # Difficult situation here, when down to heads up the dealer should
+        # be the small blind, which is incorrect according to the normal
+        # means of selecting the small and big blind. If the big blind choses
+        # to sit out, we already have processed the small blind, who should now
+        # be the dealer. To compensate for this situation we'll canel the hand
+        # and allow the table to start a new one with just the heads up 
+        # players.
+        self.__create_game(3, 0)
+        self.table.start_hand()
+        self.assertEquals(self.players[0], self.table.dealer)
+
+        # Player 1 posts small blind:
+        self.table.process_action(find_action_in_list(PostBlind, 
+            self.players[1].pending_actions))
+        self.assertEquals(self.players[1], self.table.small_blind)
+
+        # Player 2 refuses the big blind:
+        self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
+        self.table.process_action(find_action_in_list(SitOut, 
+            self.players[2].pending_actions))
+        self.assertEquals(None, self.table.small_blind)
+        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+
 
 
 def suite():
