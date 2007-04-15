@@ -93,19 +93,15 @@ class TableTests(unittest.TestCase):
         post_sb_action = find_action_in_list(PostBlind, sb.pending_actions)
         self.table.process_action(post_sb_action)
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(sb, self.table.small_blind)
+        bb = self.players[2]
+        self.assertEquals(2, len(bb.pending_actions))
 
-        ## simulate player posting big blind:
-        #self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
-        #bb = self.players[2]
-        #self.assertEquals(2, len(bb.pending_actions))
-        #post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
-        #self.table.process_action(post_bb_action)
-        #self.assertEquals(CHIPS - 2, self.players[2].chips)
-
-        ## At this point, players should be dealt their hole cards:
-        #for player in self.players:
-        #    self.assertEquals(2, len(player.cards))
-        #self.assertEquals(CHIPS, self.players[0].chips)
+        # simulate player posting big blind:
+        post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
+        self.assertEquals(None, self.table.big_blind)
+        self.table.process_action(post_bb_action)
+        self.assertEquals(bb, self.table.big_blind)
 
 
 

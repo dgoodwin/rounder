@@ -115,6 +115,12 @@ class TexasHoldemTests(unittest.TestCase):
             dealer=dealerIndex, callback=self.game_over_callback)
         self.game_over = False
 
+    def test_something(self):
+        # At this point, players should be dealt their hole cards:
+        for player in self.players:
+            self.assertEquals(2, len(player.cards))
+        self.assertEquals(CHIPS, self.players[0].chips)
+
     def test_prompt_player_actions_already_pending(self):
         self.__create_game(3, 0)
         self.game.prompt_small_blind()
