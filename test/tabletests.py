@@ -114,7 +114,7 @@ class SeatsTests(unittest.TestCase):
 
 class TableTests(unittest.TestCase):
 
-    def __create_game(self, num_players, dealer_index):
+    def __create_table(self, num_players, dealer_index):
         self.limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
         self.table = Table(name="Test Table", limit=self.limit, seats=10)
 
@@ -127,7 +127,7 @@ class TableTests(unittest.TestCase):
     # def test_not_enough_players_to_start_game
 
     def test_standard_post_blinds(self):
-        self.__create_game(3, 0)
+        self.__create_table(3, 0)
         self.table.start_hand()
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
         sb = self.players[1]
@@ -149,7 +149,7 @@ class TableTests(unittest.TestCase):
         self.assertEquals(bb, self.table.big_blind)
 
     def test_small_blind_sitout_three_handed(self):
-        self.__create_game(3, 0)
+        self.__create_table(3, 0)
         self.table.start_hand()
 
         # Player 1 rejects the small blind and chooses to sit out:
@@ -179,14 +179,7 @@ class TableTests(unittest.TestCase):
         self.assertEquals(self.players[2], self.table.big_blind)
 
     def test_big_blind_sitout_three_handed(self):
-        # Difficult situation here, when down to heads up the dealer should
-        # be the small blind, which is incorrect according to the normal
-        # means of selecting the small and big blind. If the big blind choses
-        # to sit out, we already have processed the small blind, who should now
-        # be the dealer. To compensate for this situation we'll canel the hand
-        # and allow the table to start a new one with just the heads up 
-        # players.
-        self.__create_game(3, 0)
+        self.__create_table(3, 0)
         self.table.start_hand()
         self.assertEquals(self.players[0], self.table.dealer)
 
@@ -205,7 +198,7 @@ class TableTests(unittest.TestCase):
 
     def test_heads_up_blinds(self):
         # Dealer should be the small blind in a heads up match:
-        self.__create_game(2, 0)
+        self.__create_table(2, 0)
         self.table.start_hand()
 
         self.table.process_action(find_action_in_list(PostBlind, 
@@ -217,7 +210,7 @@ class TableTests(unittest.TestCase):
         self.assertEquals(self.players[1], self.table.big_blind)
 
     def test_heads_up_small_blind_sitout(self):
-        self.__create_game(2, 0)
+        self.__create_table(2, 0)
         self.table.start_hand()
 
         # Player 0 refuses the small blind:
