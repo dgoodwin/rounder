@@ -46,7 +46,7 @@ def suite():
         pokerroomtests.suite(),
         tabletests.suite(),
         playertests.suite(),
-#        gametests.suite(),
+        gametests.suite(),
         limittests.suite(),
 #        servertests.suite(),
     ))
