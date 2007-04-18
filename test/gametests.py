@@ -99,11 +99,11 @@ class TexasHoldemTests(unittest.TestCase):
     def game_over_callback(self):
         self.game_over = True
 
-    def __create_game(self, numPlayers, dealerIndex):
+    def __create_game(self, numPlayers, dealer_index, sb_index, bb_index):
         self.players = []
         for i in range(numPlayers):
-            self.players.append(Player('player' + str(i), 
-                Currency(CHIPS)))
+            self.players.append(Player(name='player' + str(i), 
+                seat=i, chips=Currency(CHIPS)))
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
 
         # Copy the players list, the game can modify it's own list and we
@@ -112,19 +112,26 @@ class TexasHoldemTests(unittest.TestCase):
         players_copy.extend(self.players)
 
         self.game = TexasHoldemGame(limit=limit, players=players_copy, 
-            dealer=dealerIndex, callback=self.game_over_callback)
+            dealer_index=dealer_index, sb_index=sb_index, bb_index=bb_index,
+            callback=self.game_over_callback)
         self.game_over = False
 
-    def test_something(self):
-        # At this point, players should be dealt their hole cards:
-        for player in self.players:
-            self.assertEquals(2, len(player.cards))
-        self.assertEquals(CHIPS, self.players[0].chips)
+    def test_collect_blinds(self):
+        self.__create_game(10, 0, 1, 2)
+        self.assertEquals(10, len(self.game.players))
+        self.assertEquals(3, self.game.pot)
+        self.assertEquals(CHIPS - 1, self.players[1].chips)
+        self.assertEquals(CHIPS - 2, self.players[2].chips)
 
-    def test_prompt_player_actions_already_pending(self):
-        self.__create_game(3, 0)
-        self.game.prompt_small_blind()
-        self.assertRaises(RounderException, self.game.prompt_small_blind)
+        # At this point, players should be dealt their hole cards:
+        #for player in self.players:
+        #    self.assertEquals(2, len(player.cards))
+        #self.assertEquals(CHIPS, self.players[0].chips)
+
+    #def test_prompt_player_actions_already_pending(self):
+    #    self.__create_game(3, 0, 1, 2)
+    #    self.game.prompt_small_blind()
+    #    self.assertRaises(RounderException, self.game.prompt_small_blind)
 
 
 

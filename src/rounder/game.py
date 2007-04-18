@@ -97,6 +97,10 @@ class Game:
     """ Parent class of all poker games. """
 
     def __init__(self, players, callback):
+        """
+        Constructor expects the list of players to all be active, no one
+        sitting out.
+        """
         # Every hand played needs a unique ID:
         self.id = ++GAME_ID_COUNTER
 
@@ -162,21 +166,32 @@ class TexasHoldemGame(Game):
 
     """ Texas Hold'em, the king of all poker games. """
 
-    def __init__(self, limit, players, dealer, callback):
-        Game.__init__(self, players, callback)
-        self.limit = limit
-        self.dealer = dealer
+    def __init__(self, limit, players, dealer_index, sb_index, bb_index, 
+        callback):
+        """
+        Blind indicies indicate players who have agreed to post the blinds for
+        this hand, thus we can immediately retrieve them and get underway.
+        """
 
-        # Pointers to the position in the players list that has accepted the
-        # small and big blind, initially nobody:
-        self.small_blind = None
-        self.big_blind = None
+        Game.__init__(self, players, callback)
+
+        self.limit = limit
+        self.dealer = self.players[dealer_index]
+        self.small_blind = self.players[sb_index]
+        self.big_blind = self.players[bb_index]
 
         logger.info("Starting new TexasHoldemGame: " + str(self.id))
         logger.info("   Limit: " + str(limit))
         logger.info("   Players:")
         for p in self.players:
-            logger.info("      " + p.name)
+            code = ''
+            if p == self.dealer:
+                code += 'dealer '
+            if p == self.small_blind:
+                code += 'sb '
+            if p == self.big_blind:
+                code += 'bb '
+            logger.info("      %s %s", p, code)
 
         # Map player to their pending actions. Players are popped as they act
         # so an empty map means no pending actions and we're clear to advance
@@ -189,17 +204,26 @@ class TexasHoldemGame(Game):
         self.__deck.shuffle()
 
         self.gsm = GameStateMachine()
-        self.gsm.add_state(STATE_SMALL_BLIND, self.prompt_small_blind)
-        self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
-        self.gsm.add_state(STATE_PREFLOP, self.deal_hole_cards)
+        self.gsm.add_state(STATE_PREFLOP, self.preflop)
+        self.advance()
+
+    def preflop(self):
+        self.__collect_blinds()
+
+    def __collect_blinds(self):
+        logger.info("Collecting small blind of %s from %s", 
+            self.limit.small_blind, self.small_blind.name)
+        self.add_to_pot(self.small_blind, self.limit.small_blind)
+        logger.info("Collecting big blind of %s from %s", 
+            self.limit.big_blind, self.big_blind.name)
+        self.add_to_pot(self.big_blind, self.limit.big_blind)
+        logger.info("Pot is now: %s", self.pot)
 
     def add_to_pot(self, player, amount):
         """ Adds the specified amount to the pot. """
         player.subtract_chips(amount)
         self.pot = self.pot + amount
         self.in_pot[player] = self.in_pot[player] + amount
-        logger.debug("Adding " + str(amount) + " from " + str(player) + 
-            " to pot: " + str(self.pot))
 
     def deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
