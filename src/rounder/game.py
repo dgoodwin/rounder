@@ -32,6 +32,34 @@ GAME_ID_COUNTER = 1
 
 STATE_PREFLOP = "preflop"
 
+def find_next_to_act(players, last_actor_position, bets_this_round, 
+    bet_to_match):
+    """
+    Return the next player to act, or None if this round of betting
+    is over.
+
+    players = List of players.
+    last_actor_position = List index of last player to act.
+    bets_this_round = map of player to amount contributed in this round of
+        betting
+    bet_to_match = Pretty self explanitory.
+    """
+    next_to_act = None
+    logger.debug("find_next_to_act")
+    for i in range(len(players)):
+        p = players[(last_actor_position + 1 + i) % len(players)]
+        logger.debug("   checking: %s" % str(p))
+        logger.debug("      folded = %s" % p.folded)
+        logger.debug("      bet so far = %s" % bets_this_round[p])
+        logger.debug("      to match = %s" % bet_to_match)
+        if not p.folded and bets_this_round[p] < bet_to_match:
+            next_to_act = p
+            break
+
+    logger.debug("next to act: %s" % str(p))
+
+    return p
+
 class GameStateMachine:
 
     """ 
@@ -164,7 +192,7 @@ class Game:
 
 class TexasHoldemGame(Game):
 
-    """ Texas Hold'em, the king of all poker games. """
+    """ Texas Hold'em, the Cadillac of poker. """
 
     def __init__(self, limit, players, dealer_index, sb_index, bb_index, 
         callback):
@@ -180,9 +208,18 @@ class TexasHoldemGame(Game):
         self.small_blind = self.players[sb_index]
         self.big_blind = self.players[bb_index]
 
+        # Members for tracking the current round of betting:
+        self.__last_actor = None
+        self.__bet_to_match = None
+        self.__in_pot_this_betting_round = {}
+        for p in self.players:
+            self.__in_pot_this_betting_round[p] = Currency(0.00)
+
         logger.info("Starting new TexasHoldemGame: " + str(self.id))
         logger.info("   Limit: " + str(limit))
         logger.info("   Players:")
+        self.__positions = {} # TODO: Might need a better way to track seats
+        i = 0
         for p in self.players:
             code = ''
             if p == self.dealer:
@@ -192,6 +229,8 @@ class TexasHoldemGame(Game):
             if p == self.big_blind:
                 code += 'bb '
             logger.info("      %s %s", p, code)
+            self.__positions[p] = i
+            i += 1
 
         # Map player to their pending actions. Players are popped as they act
         # so an empty map means no pending actions and we're clear to advance
@@ -219,13 +258,38 @@ class TexasHoldemGame(Game):
         self.add_to_pot(self.big_blind, self.limit.big_blind)
         logger.info("Pot is now: %s", self.pot)
 
+        self.__last_actor = self.big_blind
+        self.__bet_to_match = self.limit.big_blind
+
+        self.__deal_hole_cards()
+
+    def __continue_betting_round(self):
+        """
+        Check if all players have either folded or contributed their share to
+        the pot. If not, find the next to act and prompt them. If so, advance
+        the game state.
+        """
+        # TODO: handle all-ins
+        last_actor_position = self.__positions[self.__last_actor]
+        next_to_act = find_next_to_act(self.players, last_actor_position,
+            self.__in_pot_this_betting_round, self.__bet_to_match)
+        if next_to_act is not None:
+            pass
+
+        logger.debug("Betting round complete.")
+        self.advance()
+
     def add_to_pot(self, player, amount):
         """ Adds the specified amount to the pot. """
         player.subtract_chips(amount)
         self.pot = self.pot + amount
         self.in_pot[player] = self.in_pot[player] + amount
+        self.__in_pot_this_betting_round[player] = \
+            self.__in_pot_this_betting_round[player] + amount
+        logger.debug("Adding " + str(amount) + " from " + str(player) + 
+            " to pot: " + str(self.pot))
 
-    def deal_hole_cards(self):
+    def __deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
         for p in self.players:
             p.cards.append(self.__deck.draw_card())
@@ -253,52 +317,17 @@ class TexasHoldemGame(Game):
         
         # TODO: Clean this up:
         if isinstance(action, PostBlind):
-            self.add_to_pot(action.player, action.amount)
-            if self.gsm.get_current_state() == STATE_SMALL_BLIND:
-                # TODO: Might need a safer way to look for the players seat:
-                self.small_blind = self.players.index(action.player)
-            if self.gsm.get_current_state() == STATE_BIG_BLIND:
-                # TODO: Might need a safer way to look for the players seat:
-                self.big_blind = self.players.index(action.player)
+            raise RounderException("PostBlind action received while game underway.")
 
         if isinstance(action, SitOut):
-
-            if len(self.players) == 2:
-                if self.gsm.get_current_state() == STATE_BIG_BLIND:
-                    self.__refund_small_blind()
-                self.abort()
-                return
-
-            # SitOut actions should only be received while gathering blinds:
-            if self.gsm.get_current_state() == STATE_SMALL_BLIND:
-                logger.info("Sitting player out: " + str(action.player))
-                action.player.sit_out()
-                # Remove the player from the game and rerequest the small blind:
-                # TODO: should we check that the player is in the list?
-                self.players.remove(action.player)
-                self.prompt_small_blind()
-            if self.gsm.get_current_state() == STATE_BIG_BLIND:
-                logger.info("Sitting player out: " + str(action.player))
-                action.player.sit_out()
-                # Remove the player from the game and rerequest the big blind:
-                self.players.remove(action.player)
-
-                # If the big blind just sat out in a three handed game, we've
-                # already collected the small blind, but in a heads up hand
-                # the dealer is supposed to be the small blind. For now we will
-                # cancel the hand to deal with this situation.
-                if len(self.players) == 2:
-                    action.player.clear_pending_actions()
-                    self.abort()
-                    return
-
-                self.prompt_big_blind()
+            pass
 
         # Remove this player from the pending actions map:
         self.pending_actions.pop(action.player)
         action.player.clear_pending_actions()
 
-        self.advance()
+        # TODO: continue betting round
+        #self.advance()
 
     def advance(self):
         """ 

@@ -40,6 +40,7 @@ class Player:
         self.seat = seat
         self.cards = []
         self.sitting_out = False
+        self.folded = False
         self.pending_actions = []
         
     def prompt(self, actions):
@@ -52,7 +53,8 @@ class Player:
         self.pending_actions = actions
 
     def __repr__(self):
-        return "Player: %s (seat: %s, chips: %s)" % (self.name, self.seat, self.chips)
+        return "Player: %s (seat: %s, chips: %s)" % \
+            (self.name, self.seat, self.chips)
 
     def clear_pending_actions(self):
         """ Clear any actions pending for this player. """

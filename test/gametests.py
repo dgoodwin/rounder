@@ -31,11 +31,53 @@ from rounder.action import SitOut, PostBlind
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
-from rounder.game import TexasHoldemGame, GameStateMachine
+from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 
+from utils import create_players_list
+
 CHIPS = 1000
+
+class NextToActTests(unittest.TestCase):
+
+    def setUp(self):
+        self.players = create_players_list(10, CHIPS)
+        self.bets = {}
+        for p in self.players:
+            self.bets[p] = Currency(0.00)
+
+    def __set_bet(self, player, amount):
+        """
+        Adds the specified amount to the pot and subtracts from the players
+        stack. 
+        """
+        self.bets[player] += Currency(amount)
+        player.chips -= Currency(amount)
+
+    def test_after_blinds(self):
+        self.__set_bet(self.players[1], 1)
+        self.__set_bet(self.players[2], 2)
+
+        self.assertEquals(self.players[3], find_next_to_act(self.players, 2, 
+            self.bets, 2))
+
+    def test_middle_table(self):
+        self.__set_bet(self.players[1], 2)
+        self.__set_bet(self.players[2], 2)
+        self.__set_bet(self.players[3], 2)
+        self.__set_bet(self.players[4], 2)
+
+        self.assertEquals(self.players[5], find_next_to_act(self.players, 4, 
+            self.bets, 2))
+
+    def test_wraparound(self):
+        self.__set_bet(self.players[9], 2)
+
+        self.assertEquals(self.players[0], find_next_to_act(self.players, 9, 
+            self.bets, 2))
+            
+
 
 class GameStateMachineTests(unittest.TestCase):
 
@@ -100,10 +142,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.game_over = True
 
     def __create_game(self, numPlayers, dealer_index, sb_index, bb_index):
-        self.players = []
-        for i in range(numPlayers):
-            self.players.append(Player(name='player' + str(i), 
-                seat=i, chips=Currency(CHIPS)))
+        self.players = create_players_list(numPlayers, CHIPS)
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
 
         # Copy the players list, the game can modify it's own list and we
@@ -114,6 +153,9 @@ class TexasHoldemTests(unittest.TestCase):
         self.game = TexasHoldemGame(limit=limit, players=players_copy, 
             dealer_index=dealer_index, sb_index=sb_index, bb_index=bb_index,
             callback=self.game_over_callback)
+
+        # Referenced in game over callback for determining that a game ended
+        # as expected.
         self.game_over = False
 
     def test_collect_blinds(self):
@@ -124,9 +166,13 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(CHIPS - 2, self.players[2].chips)
 
         # At this point, players should be dealt their hole cards:
-        #for player in self.players:
-        #    self.assertEquals(2, len(player.cards))
-        #self.assertEquals(CHIPS, self.players[0].chips)
+        for player in self.players:
+            self.assertEquals(2, len(player.cards))
+
+    def test_flop_everybody_limits(self):
+        self.__create_game(4, 0, 1, 2)
+        # TODO
+        #self.assertEquals(2, len(self.players[3].pending_actions))
 
     #def test_prompt_player_actions_already_pending(self):
     #    self.__create_game(3, 0, 1, 2)
@@ -137,8 +183,9 @@ class TexasHoldemTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(TexasHoldemTests))
+    suite.addTest(unittest.makeSuite(NextToActTests))
     suite.addTest(unittest.makeSuite(GameStateMachineTests))
+    suite.addTest(unittest.makeSuite(TexasHoldemTests))
     return suite
 
 if __name__ == "__main__":
