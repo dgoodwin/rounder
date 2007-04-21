@@ -78,10 +78,26 @@ class NextToActTests(unittest.TestCase):
             self.bets, 2))
 
     def test_everybody_in(self):
-        pass
+        for p in self.players:
+            self.__set_bet(p, 2)
+        self.assertEquals(None, find_next_to_act(self.players, 9, self.bets, 2))
 
     def test_everybody_in_or_folded(self):
-        pass
+        for p in self.players:
+            if p.seat < 5:
+                self.__set_bet(p, 2)
+            else:
+                p.folded = True
+        self.assertEquals(None, find_next_to_act(self.players, 4, self.bets, 2))
+
+    def test_late_raiser(self):
+        for p in self.players:
+            if p.seat < 9:
+                self.__set_bet(p, 2)
+            # seat 9 raises:
+            self.__set_bet(self.players[9], 4)
+        self.assertEquals(self.players[0], find_next_to_act(self.players, 9,
+            self.bets, 4))
             
 
 

@@ -58,7 +58,7 @@ def find_next_to_act(players, last_actor_position, bets_this_round,
 
     logger.debug("next to act: %s" % str(p))
 
-    return p
+    return next_to_act
 
 class GameStateMachine:
 
