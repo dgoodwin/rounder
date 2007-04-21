@@ -23,7 +23,7 @@
 from logging import getLogger
 logger = getLogger("rounder.game")
 
-from rounder.action import PostBlind, SitOut, Call, Raise, Fold
+from rounder.action import SitOut, Call, Raise, Fold
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 from rounder.currency import Currency
@@ -295,6 +295,7 @@ class TexasHoldemGame(Game):
                 bet_level = 2
 
             options = self.limit.create_actions(next_to_act, 
+                self.__in_pot_this_betting_round[next_to_act], 
                 self.__bet_to_match, bet_level)
             self.prompt_player(next_to_act, options)
             return
@@ -342,9 +343,6 @@ class TexasHoldemGame(Game):
         #   given the option, perhaps at another layer (server?)
         
         # TODO: Clean this up:
-        if isinstance(action, PostBlind):
-            logger.warn("PostBlind action received while game underway.")
-
         if isinstance(action, SitOut):
             pass
 

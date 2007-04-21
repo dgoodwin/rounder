@@ -29,12 +29,15 @@ class Limit:
     def __init__(self):
         pass
 
-    def create_actions(self, table, player, current_bet, bet_level):
+    def create_actions(self, table, player, in_pot, current_bet, bet_level):
         """ 
         Create the appropriate actions for this limit, the given player,
         and the current bet.
 
-        Bet level is an integer representing a scale the limit can use when
+        in_pot is a Currency representing the amount the player has already
+        contributed to the pot on this round of betting.
+
+        bet_level is an integer representing a scale the limit can use when
         the structured bet changes throughout the hand.
 
         i.e. in limit holdem, a bet_level = 1 indicates the small bet is in
@@ -67,8 +70,8 @@ class FixedLimit(Limit):
     def __repr__(self):
         return "$" + str(self.small_bet) + "/" + str(self.big_bet) + " limit"
 
-    def create_actions(self, player, current_bet, bet_level):
-        call_action = Call(player, current_bet)
+    def create_actions(self, player, in_pot, current_bet, bet_level):
+        call_action = Call(player, current_bet - in_pot)
         if bet_level == 1:
             raise_action = Raise(player, self.small_bet, self.small_bet)
         else:

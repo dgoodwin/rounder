@@ -196,18 +196,22 @@ class TexasHoldemTests(unittest.TestCase):
         self.__create_game(4, 0, 1, 2)
 
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
-        next = self.players[3]
-        self.assertEquals(3, len(next.pending_actions))
-        call = find_action_in_list(Call, next.pending_actions)
-        self.assertEquals(2, call.amount)
-        self.game.process_action(call)
-        self.assertEquals(CHIPS - 2, next.chips)
+        self.__call(3, 2, CHIPS - 2)
 
-        next = self.players[0]
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
+        self.__call(0, 2, CHIPS - 2)
+
+        self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
+        self.__call(1, 1, CHIPS - 2)
+        
+        # Onward to the flop!
+        self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+
+    def __call(self, player_index, expected_amount, expected_chips):
+        next = self.players[player_index]
         self.assertEquals(3, len(next.pending_actions))
         call = find_action_in_list(Call, next.pending_actions)
-        self.assertEquals(2, call.amount)
+        self.assertEquals(expected_amount, call.amount)
         self.game.process_action(call)
         self.assertEquals(CHIPS - 2, next.chips)
 
