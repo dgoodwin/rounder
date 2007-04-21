@@ -196,25 +196,37 @@ class TexasHoldemTests(unittest.TestCase):
         self.__create_game(4, 0, 1, 2)
 
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
-        self.__call(3, 2, CHIPS - 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
 
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
-        self.__call(0, 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
 
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
-        self.__call(1, 1, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
         
         # Onward to the flop!
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
 
-    def __call(self, player_index, expected_amount, expected_chips):
-        next = self.players[player_index]
-        self.assertEquals(3, len(next.pending_actions))
-        call = find_action_in_list(Call, next.pending_actions)
+    def __call(self, player, expected_amount, expected_chips):
+        self.assertEquals(3, len(player.pending_actions))
+        call = find_action_in_list(Call, player.pending_actions)
         self.assertEquals(expected_amount, call.amount)
         self.game.process_action(call)
-        self.assertEquals(CHIPS - 2, next.chips)
+        self.assertEquals(expected_chips, player.chips)
 
+    def __fold(self, player, expected_chips):
+        self.assertEquals(3, len(player.pending_actions))
+        fold = find_action_in_list(Fold, player.pending_actions)
+        self.game.process_action(fold)
+        self.assertEquals(expected_chips, player.chips)
+
+    def test_preflop_fold_to_big_blind(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__fold(self.players[3], CHIPS)
+        self.__fold(self.players[0], CHIPS)
+        self.__fold(self.players[1], CHIPS - 1)
+        self.assertTrue(self.game.finished)
+        self.assertTrue(self.game_over)
 
     #def test_prompt_player_actions_already_pending(self):
     #    self.__create_game(3, 0, 1, 2)

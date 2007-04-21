@@ -46,13 +46,8 @@ def find_next_to_act(players, last_actor_position, bets_this_round,
     bet_to_match = Pretty self explanitory.
     """
     next_to_act = None
-    logger.debug("find_next_to_act")
     for i in range(len(players)):
         p = players[(last_actor_position + 1 + i) % len(players)]
-        logger.debug("   checking: %s" % str(p))
-        logger.debug("      folded = %s" % p.folded)
-        logger.debug("      bet so far = %s" % bets_this_round[p])
-        logger.debug("      to match = %s" % bet_to_match)
         if not p.folded and bets_this_round[p] < bet_to_match:
             next_to_act = p
             break
@@ -139,6 +134,8 @@ class Game:
 
         self.aborted = False
 
+        self.finished = False
+
         # List of players passed in should have empty seats and players
         # sitting out filtered out:
         self.players = players
@@ -189,6 +186,34 @@ class Game:
             logger.error("Funds left in pot after refuding all players: " + 
                 str(self.pot))
         self.callback()
+
+    def game_over(self):
+        """
+        Finalize this game and return control to our parent object.
+        (usually a table)
+        """
+        self._check_if_finished()
+        self.finished = True
+
+        # TODO: safe way to return without building a neverending callstack?
+        self.callback()
+
+    def _check_if_finished(self):
+        """
+        Check if we're trying to do anything but the game has already been
+        marked as finished.
+        """
+        if self.finished:
+            raise RounderException("Game is finished.")
+
+    def __get_active_players(self):    
+        active_players = []
+        for p in self.players:
+            if not p.folded:
+                active_players.append(p)
+        return active_players
+    active_players = property(__get_active_players, None)
+
         
 
 
@@ -251,11 +276,13 @@ class TexasHoldemGame(Game):
 
     def preflop(self):
         """ Initiate preflop game state. """
+        self._check_if_finished()
         self.__collect_blinds()
         self.__deal_hole_cards()
         self.__continue_betting_round()
 
     def __collect_blinds(self):
+        self._check_if_finished()
         logger.info("Collecting small blind of %s from %s", 
             self.limit.small_blind, self.small_blind.name)
         self.add_to_pot(self.small_blind, self.limit.small_blind)
@@ -269,6 +296,7 @@ class TexasHoldemGame(Game):
 
     def __deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
+        self._check_if_finished()
         for p in self.players:
             p.cards.append(self.__deck.draw_card())
         for p in self.players:
@@ -281,6 +309,7 @@ class TexasHoldemGame(Game):
         the game state.
         """
         # TODO: handle all-ins
+        self._check_if_finished()
         last_actor_position = self.__positions[self.__last_actor]
         next_to_act = find_next_to_act(self.players, last_actor_position,
             self.__in_pot_this_betting_round, self.__bet_to_match)
@@ -307,6 +336,7 @@ class TexasHoldemGame(Game):
         """
         Deal the flop and initiate the betting.
         """
+        self._check_if_finished()
         pass
 
     def add_to_pot(self, player, amount):
@@ -314,6 +344,7 @@ class TexasHoldemGame(Game):
         Adds the specified amount to the pot. Handles adjustment of players
         stack as well as internal tracking of who has contributed what.
         """
+        self._check_if_finished()
         player.subtract_chips(amount)
         self.pot = self.pot + amount
         self.in_pot[player] = self.in_pot[player] + amount
@@ -324,6 +355,7 @@ class TexasHoldemGame(Game):
 
     def prompt_player(self, player, actions_list):
         """ Prompt the given player with the given list of actions. """
+        self._check_if_finished()
         if (self.pending_actions.has_key(player)):
             # Shouldn't happen, but just in case:
             logger.error("Error adding pending actions for player: " +
@@ -337,6 +369,7 @@ class TexasHoldemGame(Game):
 
     def process_action(self, action):
         logger.info("Incoming action: " + str(action))
+        self._check_if_finished()
 
         # TODO: verify the action coming back has valid params?
         # TODO: asserting the player responding to the action actually was
@@ -349,6 +382,9 @@ class TexasHoldemGame(Game):
         if isinstance(action, Call):
             self.add_to_pot(action.player, action.amount)
 
+        if isinstance(action, Fold):
+            action.player.folded = True
+
         # Remove this player from the pending actions map:
         self.pending_actions.pop(action.player)
         action.player.clear_pending_actions()
@@ -359,7 +395,13 @@ class TexasHoldemGame(Game):
         Check if we no longer have any actions pending and advance the
         game state if possible.
         """
-        if len(self.pending_actions.keys()) == 0:
+        self._check_if_finished()
+
+        # Check if everyone has folded:
+        if len(self.active_players) == 1:
+            self.game_over() 
+
+        elif len(self.pending_actions.keys()) == 0:
             logger.debug("No actions pending, advancing game.")
             self.gsm.advance()
 
