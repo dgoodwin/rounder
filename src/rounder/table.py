@@ -154,6 +154,9 @@ class Table:
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
         self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
 
+    def __repr__(self):
+        return self.name
+
     def begin(self):
         """ 
         Select a new dealer and prompt for players to agree to post
@@ -188,6 +191,7 @@ class Table:
 
     def seat_player(self, player, seat_num):
         self.seats.seat_player(player, seat_num)
+        player.table = self
 
     def prompt_small_blind(self):
         """
@@ -198,8 +202,8 @@ class Table:
         """
         sb = self.seats.small_blind_to_prompt()
         logger.debug("requesting small blind from: " + sb.name)
-        post_sb = PostBlind(self, sb, self.limit.small_blind)
-        sit_out = SitOut(self, sb)
+        post_sb = PostBlind(sb, self.limit.small_blind)
+        sit_out = SitOut(sb)
         self.prompt_player(sb, [post_sb, sit_out])
 
     def prompt_player(self, player, actions_list):
@@ -217,8 +221,8 @@ class Table:
         # If heads-up, non-dealer becomes the big blind:
         bb = self.seats.big_blind_to_prompt()
         logger.debug("requesting big blind from: %s" % bb.name)
-        post_bb = PostBlind(self, bb, self.limit.big_blind)
-        sit_out = SitOut(self, bb)
+        post_bb = PostBlind(bb, self.limit.big_blind)
+        sit_out = SitOut(bb)
         self.prompt_player(bb, [post_bb, sit_out])
 
 

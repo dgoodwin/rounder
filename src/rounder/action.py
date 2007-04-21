@@ -20,6 +20,21 @@
 
 """ The Rounder Action Module """
 
+from rounder.core import RounderException
+from rounder.currency import Currency
+
+class ActionValidationException(RounderException):
+
+    """ Exception thrown when invalid action parameters are received. """
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+
 class Action:
 
     """ 
@@ -36,8 +51,22 @@ class Action:
         it contains are valid. This is done to ensure nobody can
         modify the source for their client and submit invalid
         responses.
+
+        Parameters are expected to arrive as a list of strings. Actions
+        can expect order and manipulate to other data types as they see
+        fit.
         """
         pass
+
+    def _check_params_length(self, params, expected_length):
+        """ 
+        Raise an ActionValidationException if the params list is not of the
+        expected length.
+        """
+        if len(params) != expected_length:
+            raise ActionValidationException(
+                "Expected %s params but got %s" % (expected_length, 
+                    len(params)))
 
 
 
@@ -49,14 +78,14 @@ class PostBlind(Action):
     """
     # Can double as an Ante?
 
-    def __init__(self, table, player, amount):
+    def __init__(self, player, amount):
         Action.__init__(self, player)
-        self.table = table
         self.amount = amount
 
     def __repr__(self):
-        return "PostBlind: " + str(self.table.name) + " " + self.player.name + \
-            " $" + str(self.amount)
+        print self.player
+        return "PostBlind: " + str(self.player.table) + " " + \
+            self.player.name + " $" + str(self.amount)
 
 
 
@@ -64,9 +93,67 @@ class SitOut(Action):
 
     """ Action a player can take to sit out of the next hand. """
 
-    def __init__(self, table, player):
+    def __init__(self, player):
         Action.__init__(self, player)
-        self.table = table
 
     def __repr__(self):
-        return "SitOut: " + str(self.table.name) + " " + self.player.name
+        return "SitOut: " + str(self.player.table) + " " + self.player.name
+
+
+
+class Call(Action):
+
+    """ 
+    Action a player can take to call the current bet.
+    next hand.
+    """
+
+    def __init__(self, player, amount):
+        Action.__init__(self, player)
+        self.amount = amount
+
+    def __repr__(self):
+        return "Call: " + str(self.player.table) + " " + \
+            self.player.name + " $" + str(self.amount)
+
+
+
+class Raise(Action):
+
+    """ 
+    Action a player can take to raise the current bet.
+    """
+
+    def __init__(self, player, max_bet, min_bet):
+        Action.__init__(self, player)
+        self.max_bet = max_bet
+        self.min_bet = min_bet
+        self.amount = None # unknown until we receive a response from the player
+
+    def __repr__(self):
+        return "Raise: " + str(self.player.table) + " " + \
+            self.player.name + " $" + str(self.amount)
+
+    def validate(self, params):
+        Action.validate(self)
+        self._check_params_length(params, 1)
+        amount = Currency(params[0])
+        if amount < self.min_bet or amount > self.max_bet:
+            raise ActionValidationException("Invalid raise amount: %s" 
+                % (amount))
+        self.amount = amount
+
+class Fold(Action):
+
+    """ 
+    Action a player can take to fold the current hand.
+    """
+
+    def __init__(self, player):
+        Action.__init__(self, player)
+
+    def __repr__(self):
+        return "Fold: " + str(self.player.table) + " " + self.player.name
+
+
+

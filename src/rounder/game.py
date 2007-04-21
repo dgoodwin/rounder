@@ -23,7 +23,7 @@
 from logging import getLogger
 logger = getLogger("rounder.game")
 
-from rounder.action import SitOut
+from rounder.action import SitOut, Call, Raise, Fold
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 from rounder.currency import Currency
@@ -31,6 +31,7 @@ from rounder.currency import Currency
 GAME_ID_COUNTER = 1
 
 STATE_PREFLOP = "preflop"
+STATE_FLOP = "flop"
 
 def find_next_to_act(players, last_actor_position, bets_this_round, 
     bet_to_match):
@@ -245,12 +246,14 @@ class TexasHoldemGame(Game):
 
         self.gsm = GameStateMachine()
         self.gsm.add_state(STATE_PREFLOP, self.preflop)
+        self.gsm.add_state(STATE_FLOP, self.flop)
         self.advance()
 
     def preflop(self):
         """ Initiate preflop game state. """
         self.__collect_blinds()
         self.__deal_hole_cards()
+        self.__continue_betting_round()
 
     def __collect_blinds(self):
         logger.info("Collecting small blind of %s from %s", 
@@ -264,6 +267,13 @@ class TexasHoldemGame(Game):
         self.__last_actor = self.big_blind
         self.__bet_to_match = self.limit.big_blind
 
+    def __deal_hole_cards(self):
+        """ Deal 2 cards face down to each player. """
+        for p in self.players:
+            p.cards.append(self.__deck.draw_card())
+        for p in self.players:
+            p.cards.append(self.__deck.draw_card())
+
     def __continue_betting_round(self):
         """
         Check if all players have either folded or contributed their share to
@@ -275,10 +285,28 @@ class TexasHoldemGame(Game):
         next_to_act = find_next_to_act(self.players, last_actor_position,
             self.__in_pot_this_betting_round, self.__bet_to_match)
         if next_to_act is not None:
-            pass
+            # Build the actions we'll present to the player:
+
+            # Set the bet level to 1 on preflop and on the flop, 2 otherwise:
+            if self.gsm.get_current_state() == STATE_PREFLOP or \
+                self.gsm.get_current_state() == STATE_FLOP:
+                bet_level = 1
+            else:
+                bet_level = 2
+
+            options = self.limit.create_actions(next_to_act, 
+                self.__bet_to_match, bet_level)
+            self.prompt_player(next_to_act, options)
+            return
 
         logger.debug("Betting round complete.")
         self.advance()
+
+    def flop(self):
+        """
+        Deal the flop and initiate the betting.
+        """
+        pass
 
     def add_to_pot(self, player, amount):
         """ 
@@ -292,13 +320,6 @@ class TexasHoldemGame(Game):
             self.__in_pot_this_betting_round[player] + amount
         logger.debug("Adding " + str(amount) + " from " + str(player) + 
             " to pot: " + str(self.pot))
-
-    def __deal_hole_cards(self):
-        """ Deal 2 cards face down to each player. """
-        for p in self.players:
-            p.cards.append(self.__deck.draw_card())
-        for p in self.players:
-            p.cards.append(self.__deck.draw_card())
 
     def prompt_player(self, player, actions_list):
         """ Prompt the given player with the given list of actions. """

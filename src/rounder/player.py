@@ -34,9 +34,10 @@ class Player:
     created for each.
     """
 
-    def __init__(self, name, seat=None, chips=0):
+    def __init__(self, name, table=None, seat=None, chips=0):
         self.name = name
         self.chips = chips
+        self.table = table
         self.seat = seat
         self.cards = []
         self.sitting_out = False

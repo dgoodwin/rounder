@@ -32,6 +32,7 @@ from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
+from rounder.game import STATE_PREFLOP, STATE_FLOP
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 
@@ -163,8 +164,8 @@ class TexasHoldemTests(unittest.TestCase):
     def game_over_callback(self):
         self.game_over = True
 
-    def __create_game(self, numPlayers, dealer_index, sb_index, bb_index):
-        self.players = create_players_list(numPlayers, CHIPS)
+    def __create_game(self, num_players, dealer_index, sb_index, bb_index):
+        self.players = create_players_list(num_players, CHIPS)
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
 
         # Copy the players list, the game can modify it's own list and we
@@ -191,10 +192,10 @@ class TexasHoldemTests(unittest.TestCase):
         for player in self.players:
             self.assertEquals(2, len(player.cards))
 
-    def test_flop_everybody_limits(self):
+    def test_flop_everybody_in(self):
         self.__create_game(4, 0, 1, 2)
-        # TODO
-        #self.assertEquals(2, len(self.players[3].pending_actions))
+        self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
+        self.assertEquals(3, len(self.players[3].pending_actions))
 
     #def test_prompt_player_actions_already_pending(self):
     #    self.__create_game(3, 0, 1, 2)

@@ -20,11 +20,27 @@
 
 """ The Rounder Limit Module """
 
+from rounder.action import Call, Raise, Fold
+
 class Limit:
 
     """ Parent class of all poker limits. """
 
     def __init__(self):
+        pass
+
+    def create_actions(self, table, player, current_bet, bet_level):
+        """ 
+        Create the appropriate actions for this limit, the given player,
+        and the current bet.
+
+        Bet level is an integer representing a scale the limit can use when
+        the structured bet changes throughout the hand.
+
+        i.e. in limit holdem, a bet_level = 1 indicates the small bet is in
+        effect (preflop, flop), and 2 indicates the big bet (turn, river)
+        Other games may make use of this value.
+        """
         pass
 
 
@@ -50,4 +66,13 @@ class FixedLimit(Limit):
 
     def __repr__(self):
         return "$" + str(self.small_bet) + "/" + str(self.big_bet) + " limit"
+
+    def create_actions(self, player, current_bet, bet_level):
+        call_action = Call(player, current_bet)
+        if bet_level == 1:
+            raise_action = Raise(player, self.small_bet, self.small_bet)
+        else:
+            raise_action = Raise(player, self.big_bet, self.big_bet)
+        fold_action = Fold(player)
+        return [call_action, raise_action, fold_action]
 
