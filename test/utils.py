@@ -25,8 +25,7 @@ from rounder.player import Player
 
 def create_players_list(size, chips):
     """
-    Create a list of players of the given size. Names are assigned in the
-    form of playerX.
+    Create a list of players of the given size.
     """
     l = []
     for i in range(size):

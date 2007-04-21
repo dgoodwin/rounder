@@ -76,6 +76,12 @@ class NextToActTests(unittest.TestCase):
 
         self.assertEquals(self.players[0], find_next_to_act(self.players, 9, 
             self.bets, 2))
+
+    def test_everybody_in(self):
+        pass
+
+    def test_everybody_in_or_folded(self):
+        pass
             
 
 

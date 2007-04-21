@@ -155,6 +155,7 @@ class Game:
 
     def start(self):
         """ Begin the hand. """
+        # Shouldn't be called on the base class.
         raise NotImplementedException()
 
     def process_action(self, action):
@@ -247,7 +248,9 @@ class TexasHoldemGame(Game):
         self.advance()
 
     def preflop(self):
+        """ Initiate preflop game state. """
         self.__collect_blinds()
+        self.__deal_hole_cards()
 
     def __collect_blinds(self):
         logger.info("Collecting small blind of %s from %s", 
@@ -260,8 +263,6 @@ class TexasHoldemGame(Game):
 
         self.__last_actor = self.big_blind
         self.__bet_to_match = self.limit.big_blind
-
-        self.__deal_hole_cards()
 
     def __continue_betting_round(self):
         """
@@ -280,7 +281,10 @@ class TexasHoldemGame(Game):
         self.advance()
 
     def add_to_pot(self, player, amount):
-        """ Adds the specified amount to the pot. """
+        """ 
+        Adds the specified amount to the pot. Handles adjustment of players
+        stack as well as internal tracking of who has contributed what.
+        """
         player.subtract_chips(amount)
         self.pot = self.pot + amount
         self.in_pot[player] = self.in_pot[player] + amount
@@ -297,6 +301,7 @@ class TexasHoldemGame(Game):
             p.cards.append(self.__deck.draw_card())
 
     def prompt_player(self, player, actions_list):
+        """ Prompt the given player with the given list of actions. """
         if (self.pending_actions.has_key(player)):
             # Shouldn't happen, but just in case:
             logger.error("Error adding pending actions for player: " +
@@ -317,7 +322,7 @@ class TexasHoldemGame(Game):
         
         # TODO: Clean this up:
         if isinstance(action, PostBlind):
-            raise RounderException("PostBlind action received while game underway.")
+            logger.warn("PostBlind action received while game underway.")
 
         if isinstance(action, SitOut):
             pass

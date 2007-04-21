@@ -35,7 +35,11 @@ HAND_UNDERWAY = "hand_underway"
 MIN_PLAYERS_FOR_HAND = 2
 
 class Seats:
-    """ Players seated at the table. """
+    """ 
+    Data structure to manage players seated at the table.
+    Tracks the dealer, small blind, big blind, and provides convenience
+    functionality for navigating taking into account who is sitting out.
+    """
 
     def __init__(self, num_seats=10):
         self.__seats = []
@@ -83,6 +87,7 @@ class Seats:
                 return seat_num
 
     def new_dealer(self):
+        """ Select a new dealer. """
         logger.debug("Selecting new dealer.")
         if self.dealer == None:
             self.dealer = self.__seats[self.__get_first_active_seat(0)]
@@ -92,6 +97,11 @@ class Seats:
         logger.debug("New dealer: %s" % self.dealer)
 
     def small_blind_to_prompt(self):
+        """ 
+        Return the next appropriate player for prompting the small blind. 
+        May be called multiple times in the event we prompt and the player
+        chooses to sit out rather than post.
+        """
         if self.small_blind != None:
             raise RounderException("Small blind already defined: %s" % 
                 self.get_player(self.__small_blind_index))
@@ -107,6 +117,11 @@ class Seats:
         return self.__seats[self.__get_first_active_seat(start_at)]
 
     def big_blind_to_prompt(self):
+        """ 
+        Return the next appropriate player for prompting the big blind. 
+        May be called multiple times in the event we prompt and the player
+        chooses to sit out rather than post.
+        """
         if self.big_blind != None:
             raise RounderException("Big blind already defined: %s" % 
                 self.get_player(self.__big_blind_index))
@@ -139,12 +154,22 @@ class Table:
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
         self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
 
-    def start_hand(self):
+    def begin(self):
+        """ 
+        Select a new dealer and prompt for players to agree to post
+        their blinds. Once we receive the appropriate responses the hand
+        will be started. 
+        """
         self.seats.new_dealer()
         if self.gsm.current == None:
             self.gsm.advance()
 
-    def restart_hand(self):
+    def __restart(self):
+        """
+        Restarts the action at this table. Mostly just useful in the event
+        we're three handed and the big blind sits out, requiring that we
+        find a new small blind.
+        """
         logger.debug("restarting hand")
         # TODO: exception if game is already underway
         self.small_blind = None
@@ -153,6 +178,7 @@ class Table:
         self.gsm.advance()
 
     def wait(self):
+        """ Put the table on hold while we wait for more players. """
         self.gsm.reset()
         self.small_blind = None
         self.big_blind = None
@@ -164,7 +190,12 @@ class Table:
         self.seats.seat_player(player, seat_num)
 
     def prompt_small_blind(self):
-
+        """
+        Prompt the small blind to agree to post. No chips actually change
+        hands here, but the table is responsible for finding the two players
+        who agree to post the blinds to pass into the next game played. The
+        game itself is responsible for collecting those blinds.
+        """
         sb = self.seats.small_blind_to_prompt()
         logger.debug("requesting small blind from: " + sb.name)
         post_sb = PostBlind(self, sb, self.limit.small_blind)
@@ -176,6 +207,12 @@ class Table:
         player.prompt(actions_list)
 
     def prompt_big_blind(self):
+        """
+        Prompt the big blind to agree to post. No chips actually change
+        hands here, but the table is responsible for finding the two players
+        who agree to post the blinds to pass into the next game played. The
+        game itself is responsible for collecting those blinds.
+        """
 
         # If heads-up, non-dealer becomes the big blind:
         bb = self.seats.big_blind_to_prompt()
@@ -184,23 +221,6 @@ class Table:
         sit_out = SitOut(self, bb)
         self.prompt_player(bb, [post_bb, sit_out])
 
-    def __get_small_blind(self):
-        return self.seats.small_blind 
-
-    def __set_small_blind(self, small_blind):
-        self.seats.small_blind = small_blind
-    small_blind = property(__get_small_blind, __set_small_blind)
-
-    def __get_big_blind(self):
-        return self.seats.big_blind 
-
-    def __set_big_blind(self, big_blind):
-        self.seats.big_blind = big_blind
-    big_blind = property(__get_big_blind, __set_big_blind)
-
-    def __get_dealer(self):
-        return self.seats.dealer
-    dealer = property(__get_dealer, None)
 
     def process_action(self, action):
         logger.info("Incoming action: " + str(action))
@@ -242,6 +262,25 @@ class Table:
                 p.sit_out()
                 if len(self.seats.active_players) == 2:
                     # if down to heads up, we need a different small blind:
-                    self.restart_hand()
+                    self.__restart()
                 self.prompt_big_blind()
 
+    # Setup two properties for the small and big blinds, which are actually
+    # stored on the tables seat object.
+    def __get_small_blind(self):
+        return self.seats.small_blind 
+
+    def __set_small_blind(self, small_blind):
+        self.seats.small_blind = small_blind
+    small_blind = property(__get_small_blind, __set_small_blind)
+
+    def __get_big_blind(self):
+        return self.seats.big_blind 
+
+    def __set_big_blind(self, big_blind):
+        self.seats.big_blind = big_blind
+    big_blind = property(__get_big_blind, __set_big_blind)
+
+    def __get_dealer(self):
+        return self.seats.dealer
+    dealer = property(__get_dealer, None)

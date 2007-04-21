@@ -128,7 +128,7 @@ class TableTests(unittest.TestCase):
 
     def test_standard_post_blinds(self):
         self.__create_table(3, 0)
-        self.table.start_hand()
+        self.table.begin()
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
         sb = self.players[1]
         self.assertEquals(2, len(sb.pending_actions))
@@ -150,7 +150,7 @@ class TableTests(unittest.TestCase):
 
     def test_small_blind_sitout_three_handed(self):
         self.__create_table(3, 0)
-        self.table.start_hand()
+        self.table.begin()
 
         # Player 1 rejects the small blind and chooses to sit out:
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
@@ -180,7 +180,7 @@ class TableTests(unittest.TestCase):
 
     def test_big_blind_sitout_three_handed(self):
         self.__create_table(3, 0)
-        self.table.start_hand()
+        self.table.begin()
         self.assertEquals(self.players[0], self.table.dealer)
 
         # Player 1 posts small blind:
@@ -199,7 +199,7 @@ class TableTests(unittest.TestCase):
     def test_heads_up_blinds(self):
         # Dealer should be the small blind in a heads up match:
         self.__create_table(2, 0)
-        self.table.start_hand()
+        self.table.begin()
 
         self.table.process_action(find_action_in_list(PostBlind, 
             self.players[0].pending_actions))
@@ -211,7 +211,7 @@ class TableTests(unittest.TestCase):
 
     def test_heads_up_small_blind_sitout(self):
         self.__create_table(2, 0)
-        self.table.start_hand()
+        self.table.begin()
 
         # Player 0 refuses the small blind:
         self.table.process_action(find_action_in_list(SitOut, 
