@@ -23,7 +23,7 @@
 from logging import getLogger
 logger = getLogger("rounder.game")
 
-from rounder.action import SitOut, Call, Raise, Fold
+from rounder.action import PostBlind, SitOut, Call, Raise, Fold
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 from rounder.currency import Currency
@@ -348,12 +348,13 @@ class TexasHoldemGame(Game):
         if isinstance(action, SitOut):
             pass
 
+        if isinstance(action, Call):
+            self.add_to_pot(action.player, action.amount)
+
         # Remove this player from the pending actions map:
         self.pending_actions.pop(action.player)
         action.player.clear_pending_actions()
-
-        # TODO: continue betting round
-        #self.advance()
+        self.__continue_betting_round()
 
     def advance(self):
         """ 

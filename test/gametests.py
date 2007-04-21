@@ -27,7 +27,7 @@ import unittest
 
 import settestpath
 
-from rounder.action import SitOut, PostBlind
+from rounder.action import SitOut, PostBlind, Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
@@ -192,10 +192,25 @@ class TexasHoldemTests(unittest.TestCase):
         for player in self.players:
             self.assertEquals(2, len(player.cards))
 
-    def test_flop_everybody_in(self):
+    def test_preflop_everybody_in(self):
         self.__create_game(4, 0, 1, 2)
+
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
-        self.assertEquals(3, len(self.players[3].pending_actions))
+        next = self.players[3]
+        self.assertEquals(3, len(next.pending_actions))
+        call = find_action_in_list(Call, next.pending_actions)
+        self.assertEquals(2, call.amount)
+        self.game.process_action(call)
+        self.assertEquals(CHIPS - 2, next.chips)
+
+        next = self.players[0]
+        self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
+        self.assertEquals(3, len(next.pending_actions))
+        call = find_action_in_list(Call, next.pending_actions)
+        self.assertEquals(2, call.amount)
+        self.game.process_action(call)
+        self.assertEquals(CHIPS - 2, next.chips)
+
 
     #def test_prompt_player_actions_already_pending(self):
     #    self.__create_game(3, 0, 1, 2)
