@@ -48,7 +48,8 @@ def find_next_to_act(players, last_actor_position, bets_this_round,
     next_to_act = None
     for i in range(len(players)):
         p = players[(last_actor_position + 1 + i) % len(players)]
-        if not p.folded and bets_this_round[p] < bet_to_match:
+        if not p.folded and (bet_to_match == 0 or 
+            bets_this_round[p] < bet_to_match):
             next_to_act = p
             break
 
@@ -235,13 +236,6 @@ class TexasHoldemGame(Game):
         self.small_blind = self.players[sb_index]
         self.big_blind = self.players[bb_index]
 
-        # Members for tracking the current round of betting:
-        self.__last_actor = None
-        self.__bet_to_match = None
-        self.__in_pot_this_betting_round = {}
-        for p in self.players:
-            self.__in_pot_this_betting_round[p] = Currency(0.00)
-
         logger.info("Starting new TexasHoldemGame: " + str(self.id))
         logger.info("   Limit: " + str(limit))
         logger.info("   Players:")
@@ -266,6 +260,8 @@ class TexasHoldemGame(Game):
         # actions...
         self.pending_actions = {}
 
+        self.community_cards = []
+
         self.__deck = Deck()
         self.__deck.shuffle()
 
@@ -273,6 +269,19 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_PREFLOP, self.preflop)
         self.gsm.add_state(STATE_FLOP, self.flop)
         self.advance()
+
+    def __reset_betting_round_state(self):
+        """ 
+        Resets any members tracking data for the current round of betting. Can
+        be used both when starting a new game or moving on to the next round
+        of betting within an existing game.
+        """
+        logger.debug("Resetting betting round state.")
+        self.__last_actor = self.dealer # overridden in __collect_blinds
+        self.__bet_to_match = 0
+        self.__in_pot_this_betting_round = {}
+        for p in self.players:
+            self.__in_pot_this_betting_round[p] = Currency(0.00)
 
     def preflop(self):
         """ Initiate preflop game state. """
@@ -310,6 +319,7 @@ class TexasHoldemGame(Game):
         """
         # TODO: handle all-ins
         self._check_if_finished()
+        logger.debug("   last_actor = %s" % (self.__last_actor))
         last_actor_position = self.__positions[self.__last_actor]
         next_to_act = find_next_to_act(self.players, last_actor_position,
             self.__in_pot_this_betting_round, self.__bet_to_match)
@@ -337,7 +347,11 @@ class TexasHoldemGame(Game):
         Deal the flop and initiate the betting.
         """
         self._check_if_finished()
-        pass
+
+        for i in range(3):
+            self.community_cards.append(self.__deck.draw_card())
+
+        self.__continue_betting_round()
 
     def add_to_pot(self, player, amount):
         """ 
@@ -386,6 +400,7 @@ class TexasHoldemGame(Game):
             action.player.folded = True
 
         # Remove this player from the pending actions map:
+        self.__last_actor = action.player
         self.pending_actions.pop(action.player)
         action.player.clear_pending_actions()
         self.__continue_betting_round()
@@ -403,6 +418,7 @@ class TexasHoldemGame(Game):
 
         elif len(self.pending_actions.keys()) == 0:
             logger.debug("No actions pending, advancing game.")
+            self.__reset_betting_round_state()
             self.gsm.advance()
 
         else:

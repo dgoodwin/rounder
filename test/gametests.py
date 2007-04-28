@@ -228,11 +228,19 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
 
-    #def test_prompt_player_actions_already_pending(self):
-    #    self.__create_game(3, 0, 1, 2)
-    #    self.game.prompt_small_blind()
-    #    self.assertRaises(RounderException, self.game.prompt_small_blind)
+    def test_flop_checked_around(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
+        self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+        self.assertEquals(3, len(self.game.community_cards))
 
+        self.__call(self.players[1], 0, CHIPS - 2)
+
+    def test_flop_betting(self):
+        # TODO
+        pass
 
 
 def suite():
