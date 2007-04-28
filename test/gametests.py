@@ -32,7 +32,7 @@ from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
-from rounder.game import STATE_PREFLOP, STATE_FLOP
+from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 
@@ -237,6 +237,10 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(3, len(self.game.community_cards))
 
         self.__call(self.players[1], 0, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
+        self.__call(self.players[3], 0, CHIPS - 2)
+        self.__call(self.players[0], 0, CHIPS - 2)
+        self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
     def test_flop_betting(self):
         # TODO

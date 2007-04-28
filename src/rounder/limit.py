@@ -21,6 +21,7 @@
 """ The Rounder Limit Module """
 
 from rounder.action import Call, Raise, Fold
+from rounder.currency import Currency
 
 class Limit:
 
@@ -71,6 +72,8 @@ class FixedLimit(Limit):
         return "$" + str(self.small_bet) + "/" + str(self.big_bet) + " limit"
 
     def create_actions(self, player, in_pot, current_bet, bet_level):
+        if in_pot is None:
+            in_pot = Currency(0)
         call_action = Call(player, current_bet - in_pot)
         if bet_level == 1:
             raise_action = Raise(player, self.small_bet, self.small_bet)

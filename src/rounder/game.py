@@ -32,6 +32,7 @@ GAME_ID_COUNTER = 1
 
 STATE_PREFLOP = "preflop"
 STATE_FLOP = "flop"
+STATE_TURN = "turn"
 
 def find_next_to_act(players, last_actor_position, bets_this_round, 
     bet_to_match):
@@ -41,19 +42,36 @@ def find_next_to_act(players, last_actor_position, bets_this_round,
 
     players = List of players.
     last_actor_position = List index of last player to act.
-    bets_this_round = map of player to amount contributed in this round of
-        betting
+    bets_this_round = Map of player to amount contributed in this round of
+        betting. If a player is missing from the map, they haven't yet been
+        prompted for anything this round of betting. Used to determine who
+        we've prompted in the event the betting is checked around.
     bet_to_match = Pretty self explanitory.
     """
+    logger.debug("find_next_to_act")
     next_to_act = None
     for i in range(len(players)):
         p = players[(last_actor_position + 1 + i) % len(players)]
-        if not p.folded and (bet_to_match == 0 or 
-            bets_this_round[p] < bet_to_match):
-            next_to_act = p
-            break
+        if not p.folded: 
+            if bet_to_match == 0 and not bets_this_round.has_key(p):
+                logger.debug("   1")
+                next_to_act = p
+                break
+            elif bets_this_round.has_key(p) and \
+                bets_this_round[p] < bet_to_match:
+                logger.debug("   2")
+                next_to_act = p
+                break
+            elif not bets_this_round.has_key(p):
+                logger.debug("   3")
+                next_to_act = p
+                break
+            else:
+                logger.debug("   skipping %s" % p)
+        else:
+            logger.debug("   skipping %s" % p)
 
-    logger.debug("next to act: %s" % str(p))
+    logger.debug("next to act: %s" % str(next_to_act))
 
     return next_to_act
 
@@ -268,6 +286,7 @@ class TexasHoldemGame(Game):
         self.gsm = GameStateMachine()
         self.gsm.add_state(STATE_PREFLOP, self.preflop)
         self.gsm.add_state(STATE_FLOP, self.flop)
+        self.gsm.add_state(STATE_TURN, self.turn)
         self.advance()
 
     def __reset_betting_round_state(self):
@@ -280,8 +299,6 @@ class TexasHoldemGame(Game):
         self.__last_actor = self.dealer # overridden in __collect_blinds
         self.__bet_to_match = 0
         self.__in_pot_this_betting_round = {}
-        for p in self.players:
-            self.__in_pot_this_betting_round[p] = Currency(0.00)
 
     def preflop(self):
         """ Initiate preflop game state. """
@@ -319,7 +336,6 @@ class TexasHoldemGame(Game):
         """
         # TODO: handle all-ins
         self._check_if_finished()
-        logger.debug("   last_actor = %s" % (self.__last_actor))
         last_actor_position = self.__positions[self.__last_actor]
         next_to_act = find_next_to_act(self.players, last_actor_position,
             self.__in_pot_this_betting_round, self.__bet_to_match)
@@ -333,9 +349,11 @@ class TexasHoldemGame(Game):
             else:
                 bet_level = 2
 
+            in_pot = None
+            if self.__in_pot_this_betting_round.has_key(next_to_act):
+                in_pot = self.__in_pot_this_betting_round[next_to_act]
             options = self.limit.create_actions(next_to_act, 
-                self.__in_pot_this_betting_round[next_to_act], 
-                self.__bet_to_match, bet_level)
+                in_pot, self.__bet_to_match, bet_level)
             self.prompt_player(next_to_act, options)
             return
 
@@ -353,6 +371,10 @@ class TexasHoldemGame(Game):
 
         self.__continue_betting_round()
 
+    def turn(self):
+        """ Deal the turn and initiate the betting. """
+        pass
+
     def add_to_pot(self, player, amount):
         """ 
         Adds the specified amount to the pot. Handles adjustment of players
@@ -362,8 +384,13 @@ class TexasHoldemGame(Game):
         player.subtract_chips(amount)
         self.pot = self.pot + amount
         self.in_pot[player] = self.in_pot[player] + amount
-        self.__in_pot_this_betting_round[player] = \
-            self.__in_pot_this_betting_round[player] + amount
+
+        if not self.__in_pot_this_betting_round.has_key(player):
+            self.__in_pot_this_betting_round[player] = amount
+        else:
+            self.__in_pot_this_betting_round[player] = \
+                self.__in_pot_this_betting_round[player] + amount
+
         logger.debug("Adding " + str(amount) + " from " + str(player) + 
             " to pot: " + str(self.pot))
 
