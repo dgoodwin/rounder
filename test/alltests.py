@@ -34,6 +34,7 @@ import playertests
 import gametests
 import limittests
 import servertests
+import actiontests
 
 from unittest import TestSuite
 
@@ -48,6 +49,7 @@ def suite():
         playertests.suite(),
         gametests.suite(),
         limittests.suite(),
+        actiontests.suite(),
 #        servertests.suite(),
     ))
 

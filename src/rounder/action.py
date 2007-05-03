@@ -128,6 +128,7 @@ class Raise(Action):
         Action.__init__(self, player)
         self.max_bet = max_bet
         self.min_bet = min_bet
+        # TODO: protect the amount better?
         self.amount = None # unknown until we receive a response from the player
 
     def __repr__(self):
@@ -135,7 +136,7 @@ class Raise(Action):
             self.player.name + " $" + str(self.amount)
 
     def validate(self, params):
-        Action.validate(self)
+        Action.validate(self, params)
         self._check_params_length(params, 1)
         amount = Currency(params[0])
         if amount < self.min_bet or amount > self.max_bet:

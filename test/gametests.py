@@ -214,6 +214,15 @@ class TexasHoldemTests(unittest.TestCase):
         self.game.process_action(call)
         self.assertEquals(expected_chips, player.chips)
 
+    def __raise(self, player, amount, expected_chips):
+        self.assertEquals(3, len(player.pending_actions))
+        raise_action = find_action_in_list(Raise, player.pending_actions)
+        self.assertEquals(None, raise_action.amount)
+        raise_action.validate([amount])
+        self.game.process_action(raise_action)
+        self.assertEquals(amount, raise_action.amount)
+        self.assertEquals(expected_chips, player.chips)
+
     def __fold(self, player, expected_chips):
         self.assertEquals(3, len(player.pending_actions))
         fold = find_action_in_list(Fold, player.pending_actions)
@@ -227,6 +236,10 @@ class TexasHoldemTests(unittest.TestCase):
         self.__fold(self.players[1], CHIPS - 1)
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
+
+    def test_preflop_raises(self):
+        # TODO
+        pass
 
     def test_flop_checked_around(self):
         self.__create_game(4, 0, 1, 2)
@@ -243,6 +256,16 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
     def test_flop_betting(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
+        self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+        self.assertEquals(3, len(self.game.community_cards))
+    
+        self.__raise(self.players[1], 2, CHIPS - 4)
+
+    def test_flop_betting_with_raises_and_folds(self):
         # TODO
         pass
 

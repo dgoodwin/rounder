@@ -420,7 +420,7 @@ class TexasHoldemGame(Game):
         if isinstance(action, SitOut):
             pass
 
-        if isinstance(action, Call):
+        if isinstance(action, Call) or isinstance(action, Raise):
             self.add_to_pot(action.player, action.amount)
 
         if isinstance(action, Fold):
