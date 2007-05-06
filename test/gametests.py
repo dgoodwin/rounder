@@ -264,6 +264,15 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(3, len(self.game.community_cards))
     
         self.__raise(self.players[1], 2, CHIPS - 4)
+        self.__call(self.players[2], 2, CHIPS - 4)
+        self.__raise(self.players[3], 2, CHIPS - 6)
+        self.__call(self.players[0], 4, CHIPS - 6)
+        self.__raise(self.players[1], 2, CHIPS - 8)
+        self.__call(self.players[2], 4, CHIPS - 8)
+        self.__raise(self.players[3], 2, CHIPS - 10)
+        self.__call(self.players[0], 4, CHIPS - 10)
+        self.__call(self.players[1], 2, CHIPS - 10)
+        self.__call(self.players[2], 2, CHIPS - 10)
 
     def test_flop_betting_with_raises_and_folds(self):
         # TODO

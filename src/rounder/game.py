@@ -349,7 +349,7 @@ class TexasHoldemGame(Game):
             else:
                 bet_level = 2
 
-            in_pot = None
+            in_pot = Currency(0)
             if self.__in_pot_this_betting_round.has_key(next_to_act):
                 in_pot = self.__in_pot_this_betting_round[next_to_act]
             options = self.limit.create_actions(next_to_act, 
@@ -404,6 +404,8 @@ class TexasHoldemGame(Game):
             logger.error("   Pre-existing pending actions: " +
                 str(self.pending_actions[player]))
             raise RounderException("Pending actions already exist")
+        logger.debug("Prompting %s with actions: %s" % (player.name,
+            actions_list))
         self.pending_actions[player] = actions_list
 
         player.prompt(actions_list)
@@ -420,8 +422,15 @@ class TexasHoldemGame(Game):
         if isinstance(action, SitOut):
             pass
 
-        if isinstance(action, Call) or isinstance(action, Raise):
+        if isinstance(action, Call):
             self.add_to_pot(action.player, action.amount)
+
+        if isinstance(action, Raise):
+            self.__bet_to_match += action.amount
+            amount = self.__bet_to_match
+            if self.__in_pot_this_betting_round.has_key(action.player):
+                amount -= self.__in_pot_this_betting_round[action.player]
+            self.add_to_pot(action.player, amount)
 
         if isinstance(action, Fold):
             action.player.folded = True

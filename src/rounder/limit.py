@@ -20,8 +20,12 @@
 
 """ The Rounder Limit Module """
 
+from logging import getLogger
+logger = getLogger("rounder.limit")
+
 from rounder.action import Call, Raise, Fold
 from rounder.currency import Currency
+
 
 class Limit:
 
@@ -72,6 +76,11 @@ class FixedLimit(Limit):
         return "$" + str(self.small_bet) + "/" + str(self.big_bet) + " limit"
 
     def create_actions(self, player, in_pot, current_bet, bet_level):
+        logger.debug("creating actions")
+        logger.debug("   player: %s" % player)
+        logger.debug("   in_pot: %s" % in_pot)
+        logger.debug("   current_bet: %s" % current_bet)
+        logger.debug("   bet_level: %s" % bet_level)
         if in_pot is None:
             in_pot = Currency(0)
         call_action = Call(player, current_bet - in_pot)
