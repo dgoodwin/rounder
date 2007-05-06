@@ -274,9 +274,25 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[1], 2, CHIPS - 10)
         self.__call(self.players[2], 2, CHIPS - 10)
 
+        self.assertEquals(40, self.game.pot)
+        self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
+
     def test_flop_betting_with_raises_and_folds(self):
-        # TODO
-        pass
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
+        self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+        self.assertEquals(3, len(self.game.community_cards))
+
+        self.__raise(self.players[1], 2, CHIPS - 4)
+        self.__call(self.players[2], 2, CHIPS - 4)
+        self.__fold(self.players[3], CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 4)
+
+        self.assertEquals(14, self.game.pot)
+        self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
+
 
 
 def suite():
