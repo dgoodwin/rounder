@@ -204,7 +204,18 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
         self.__call(self.players[1], 1, CHIPS - 2)
         
+        self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
+        self.__call(self.players[2], 0, CHIPS - 2)
+        
         # Onward to the flop!
+        self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+
+    def test_preflop_big_blind_checks(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
 
     def __call(self, player, expected_amount, expected_chips):
@@ -236,16 +247,15 @@ class TexasHoldemTests(unittest.TestCase):
         self.__fold(self.players[1], CHIPS - 1)
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
-
-    def test_preflop_raises(self):
-        # TODO
-        pass
+        self.assertEquals(3, self.game.pot)
+        self.assertEquals(CHIPS + 1, self.players[2].chips)
 
     def test_flop_checked_around(self):
         self.__create_game(4, 0, 1, 2)
         self.__call(self.players[3], 2, CHIPS - 2)
         self.__call(self.players[0], 2, CHIPS - 2)
         self.__call(self.players[1], 1, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
         self.assertEquals(3, len(self.game.community_cards))
 
@@ -260,6 +270,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[3], 2, CHIPS - 2)
         self.__call(self.players[0], 2, CHIPS - 2)
         self.__call(self.players[1], 1, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
         self.assertEquals(3, len(self.game.community_cards))
     
@@ -282,6 +293,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[3], 2, CHIPS - 2)
         self.__call(self.players[0], 2, CHIPS - 2)
         self.__call(self.players[1], 1, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
         self.assertEquals(3, len(self.game.community_cards))
 
@@ -292,6 +304,24 @@ class TexasHoldemTests(unittest.TestCase):
 
         self.assertEquals(14, self.game.pot)
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
+
+    def test_hand_ends_on_flop(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
+
+        # Flop:
+        self.__raise(self.players[1], 2, CHIPS - 4)
+        self.__fold(self.players[2], CHIPS - 2)
+        self.__fold(self.players[3], CHIPS - 2)
+        self.__fold(self.players[0], CHIPS - 2)
+
+        self.assertTrue(self.game.finished)
+        self.assertTrue(self.game_over)
+        self.assertEquals(10, self.game.pot)
+        self.assertEquals(CHIPS + 6, self.players[1].chips)
 
 
 
