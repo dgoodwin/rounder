@@ -33,6 +33,7 @@ GAME_ID_COUNTER = 1
 STATE_PREFLOP = "preflop"
 STATE_FLOP = "flop"
 STATE_TURN = "turn"
+STATE_RIVER = "river"
 
 def find_next_to_act(players, last_actor_position, bets_this_round, 
     bet_to_match, bb_exception=None):
@@ -309,6 +310,7 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_PREFLOP, self.preflop)
         self.gsm.add_state(STATE_FLOP, self.flop)
         self.gsm.add_state(STATE_TURN, self.turn)
+        self.gsm.add_state(STATE_RIVER, self.river)
         self.advance()
 
     def __reset_betting_round_state(self):
@@ -406,6 +408,12 @@ class TexasHoldemGame(Game):
 
     def turn(self):
         """ Deal the turn and initiate the betting. """
+        self._check_if_finished()
+        self.community_cards.append(self.__deck.draw_card())
+        self.__continue_betting_round()
+
+    def river(self):
+        """ Deal the river and initiate the betting. """
         pass
 
     def add_to_pot(self, player, amount):

@@ -32,7 +32,7 @@ from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
-from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN
+from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 
@@ -322,6 +322,29 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertTrue(self.game_over)
         self.assertEquals(10, self.game.pot)
         self.assertEquals(CHIPS + 6, self.players[1].chips)
+
+    def test_full_hand_betting(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+        self.__call(self.players[1], 1, CHIPS - 2)
+        self.__call(self.players[2], 0, CHIPS - 2)
+        self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+        self.assertEquals(3, len(self.game.community_cards))
+    
+        self.__raise(self.players[1], 2, CHIPS - 4)
+        self.__call(self.players[2], 2, CHIPS - 4)
+        self.__call(self.players[3], 2, CHIPS - 4)
+        self.__call(self.players[0], 2, CHIPS - 4)
+
+        self.assertEquals(16, self.game.pot)
+        self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
+
+        self.__call(self.players[1], 0, CHIPS - 4)
+        self.__call(self.players[2], 0, CHIPS - 4)
+        self.__call(self.players[3], 0, CHIPS - 4)
+        self.__call(self.players[0], 0, CHIPS - 4)
+        self.assertEquals(STATE_RIVER, self.game.gsm.get_current_state())
 
 
 
