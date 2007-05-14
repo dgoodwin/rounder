@@ -40,7 +40,17 @@ class Player:
         self.table = table
         self.seat = seat
         self.cards = []
+        self.final_hand = None
+        self.final_hand_rank = None
         self.sitting_out = False
+        self.folded = False
+        self.pending_actions = []
+
+    def reset(self):
+        """ Reset player state specific to a hand. """
+        self.cards = []
+        self.final_hand = None
+        self.final_hand_rank = None
         self.folded = False
         self.pending_actions = []
         

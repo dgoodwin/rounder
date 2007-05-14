@@ -300,6 +300,27 @@ class DefaultHandProcessor:
         raise RounderException("Unable to determine hand rank for: " + \
             array_to_string(cards))
 
+    def determine_winners(self, players):
+        """ Return the winner(s) from the given list of players. """
+        logger.info("Determining winners.")
+        # Copying list of players so we don't muck with the order of the 
+        # original:
+        players_copy = []
+        players_copy.extend(players)
+
+        players_copy.sort(cmp=lambda x, y: x.final_hand_rank.id
+            - y.final_hand_rank.id, reverse=True)
+
+        # TODO: deal with same ranked hands that need to be differentiated
+        # or returned as a tie
+
+        logger.info("Final rankings:")
+        for p in players_copy:
+            logger.info("   %s %s" % (p.name, p.final_hand_rank.displayName))
+
+        return [players_copy[0]]
+
+
 class NotEnoughCardsException(RounderException):
     """
     Thrown when we try to evaluate a hand containing less than 5 cards.
@@ -309,6 +330,17 @@ class NotEnoughCardsException(RounderException):
 
     def __str__(self):
         return repr(self.value)
+
+
+
+def sort_players_by_hand_rank(x, y):
+    """ 
+    Sort a list of players by their rank ranks in descending order.
+    (i.e. strongest hand ranks first) Note this does not guarantee
+    the correct final ordering if two players have the same hand rank.
+    """
+    players.sort(cmp=lambda x, y: x.final_hand_rank - y.final_hand_rank,
+        reverse=True)
 
 def check_for_straight(sortedCards):
     """

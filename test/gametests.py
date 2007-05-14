@@ -32,7 +32,8 @@ from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
-from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER
+from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \
+    STATE_GAMEOVER
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 
@@ -218,12 +219,13 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
 
-    def __call(self, player, expected_amount, expected_chips):
+    def __call(self, player, expected_amount, expected_chips=None):
         self.assertEquals(3, len(player.pending_actions))
         call = find_action_in_list(Call, player.pending_actions)
         self.assertEquals(expected_amount, call.amount)
         self.game.process_action(call)
-        self.assertEquals(expected_chips, player.chips)
+        if expected_chips:
+            self.assertEquals(expected_chips, player.chips)
 
     def __raise(self, player, amount, expected_chips):
         self.assertEquals(3, len(player.pending_actions))
@@ -345,6 +347,16 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[3], 0, CHIPS - 4)
         self.__call(self.players[0], 0, CHIPS - 4)
         self.assertEquals(STATE_RIVER, self.game.gsm.get_current_state())
+
+        self.__call(self.players[1], 0)
+        self.__call(self.players[2], 0)
+        self.__call(self.players[3], 0)
+        self.__call(self.players[0], 0)
+        self.assertEquals(STATE_GAMEOVER, self.game.gsm.get_current_state())
+        self.assertTrue(self.game.finished)
+        self.assertEquals(16, self.game.pot)
+
+        # TODO check that there was a winner and they received the pot?
 
 
 

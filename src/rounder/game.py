@@ -27,6 +27,7 @@ from rounder.action import SitOut, Call, Raise, Fold
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 from rounder.currency import Currency
+from rounder.hand import DefaultHandProcessor
 
 GAME_ID_COUNTER = 1
 
@@ -34,6 +35,7 @@ STATE_PREFLOP = "preflop"
 STATE_FLOP = "flop"
 STATE_TURN = "turn"
 STATE_RIVER = "river"
+STATE_GAMEOVER = "gameover"
 
 def find_next_to_act(players, last_actor_position, bets_this_round, 
     bet_to_match, bb_exception=None):
@@ -159,7 +161,7 @@ class Game:
 
         self.aborted = False
         self.finished = False
-        self.winner = None # Player who won this hand
+        self.winners = None # Player who won this hand
 
         # List of players passed in should have empty seats and players
         # sitting out filtered out:
@@ -217,17 +219,32 @@ class Game:
         Finalize this game and return control to our parent object.
         (usually a table)
         """
+        logger.info("Game over.")
         self._check_if_finished()
         self.finished = True
 
         # Check if all but one player folded:
         if len(self.active_players) == 1:
-            self.winner = self.active_players[0]
+            self.winners = [self.active_players[0]]
+        else:
+            processor = DefaultHandProcessor()
+            for p in self.active_players:
+                cards = []
+                cards.extend(p.cards)
+                cards.extend(self.community_cards)
+                results = processor.evaluate(cards)
+                p.final_hand_rank = results[0]
+                p.final_hand = results[1]
+            self.winners = processor.determine_winners(self.active_players)
+            # TODO: handle more complex cases here
 
-        self.winner.add_chips(self.pot)
-        logger.info("Winner: %s" % self.winner.name)
+        self.winners[0].add_chips(self.pot)
+        logger.info("Winner: %s" % self.winners[0].name)
         logger.info("   pot: %s" % self.pot)
-        logger.info("   winners stack: %s" % self.winner.chips)
+        logger.info("   winners stack: %s" % self.winners[0].chips)
+
+        for p in self.players:
+            p.reset()
 
         # TODO: safe way to return without building a neverending callstack?
         self.callback()
@@ -311,6 +328,7 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_FLOP, self.flop)
         self.gsm.add_state(STATE_TURN, self.turn)
         self.gsm.add_state(STATE_RIVER, self.river)
+        self.gsm.add_state(STATE_GAMEOVER, self.game_over)
         self.advance()
 
     def __reset_betting_round_state(self):
@@ -414,7 +432,9 @@ class TexasHoldemGame(Game):
 
     def river(self):
         """ Deal the river and initiate the betting. """
-        pass
+        self._check_if_finished()
+        self.community_cards.append(self.__deck.draw_card())
+        self.__continue_betting_round()
 
     def add_to_pot(self, player, amount):
         """ 

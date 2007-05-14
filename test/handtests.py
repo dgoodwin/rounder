@@ -21,13 +21,20 @@
 #   02110-1301  USA
 
 import unittest
+
 import rounder
 import rounder.hand
 
-from rounder.card import Card
 from string import split
+
+from rounder.card import Card
+from rounder.player import Player
 from rounder.hand import DefaultHandProcessor
 from rounder.hand import check_for_straight
+
+from utils import create_players_list
+
+CHIPS = 1000
 
 def get_cards(handString):
     """
@@ -40,13 +47,6 @@ def get_cards(handString):
         cardList.append(Card(c))
     return cardList
 
-#def getHand(handString):
-#    hand = rounder.ai.base.Hand()
-#    cardStrings = split(handString, " ")
-#    for c in cardStrings:
-#        hand.addCard(Card(c))
-#    return hand
-
 def compare_hands(expectedHandStr, resultHand):
     expectedHand = get_cards(expectedHandStr)
     if (len(expectedHand) != 5 or len(resultHand) != 5):
@@ -57,6 +57,31 @@ def compare_hands(expectedHandStr, resultHand):
         if expectedHand[i].suit != resultHand[i].suit:
             return False
     return True
+
+class DetermineWinnerTests(unittest.TestCase):
+
+    def setUp(self):
+        self.players = create_players_list(2, CHIPS)
+        self.processor = DefaultHandProcessor()
+
+    def test_easy_case(self):
+        community_cards = " 5c 3c"
+        eval_results = self.processor.evaluate(
+            get_cards("3s 3d 7s 9s Jd" + community_cards))
+        self.players[0].final_hand_rank = eval_results[0]
+        self.players[0].final_hand = eval_results[1]
+
+        eval_results = self.processor.evaluate(
+            get_cards("2s 2d 8s Tc Ad" + community_cards))
+        self.players[1].final_hand_rank = eval_results[0]
+        self.players[1].final_hand = eval_results[1]
+
+        winners = self.processor.determine_winners(self.players)
+        self.assertEquals(1, len(winners))
+        self.assertEqual(self.players[0], winners[0])
+        self.assertEqual(rounder.hand.THREEOFAKIND, winners[0].final_hand_rank)
+
+
 
 class HandTests(unittest.TestCase):
 
@@ -171,6 +196,7 @@ class HandTests(unittest.TestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(HandTests))
+    suite.addTest(unittest.makeSuite(DetermineWinnerTests))
     return suite
 
 if __name__ == '__main__':
