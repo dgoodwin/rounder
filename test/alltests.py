@@ -35,6 +35,7 @@ import gametests
 import limittests
 import servertests
 import actiontests
+import pypokerevaltests
 
 from unittest import TestSuite
 
@@ -50,6 +51,7 @@ def suite():
         gametests.suite(),
         limittests.suite(),
         actiontests.suite(),
+        pypokerevaltests.suite(),
 #        servertests.suite(),
     ))
 

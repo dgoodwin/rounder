@@ -27,6 +27,8 @@ import rounder.hand
 
 from string import split
 
+from pokereval import PokerEval
+
 from rounder.card import Card
 from rounder.player import Player
 from rounder.hand import DefaultHandProcessor
