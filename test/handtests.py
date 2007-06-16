@@ -81,6 +81,23 @@ class DetermineWinnerTests(unittest.TestCase):
         self.assertEqual(self.players[0], winners[0])
         self.assertEqual(rounder.hand.THREEOFAKIND, winners[0].final_hand_rank)
 
+#    def test_same_rank_one_winner(self):
+#        community_cards = " 2c 3c"
+#        eval_results = self.processor.evaluate(
+#            get_cards("2s 2d 7s 9s Jd" + community_cards))
+#        self.players[0].final_hand_rank = eval_results[0]
+#        self.players[0].final_hand = eval_results[1]
+#
+#        eval_results = self.processor.evaluate(
+#            get_cards("3s 3d 8s Tc Ad" + community_cards))
+#        self.players[1].final_hand_rank = eval_results[0]
+#        self.players[1].final_hand = eval_results[1]
+#
+#        winners = self.processor.determine_winners(self.players)
+#        self.assertEquals(1, len(winners))
+#        self.assertEqual(self.players[1], winners[0])
+#        self.assertEqual(rounder.hand.THREEOFAKIND, winners[0].final_hand_rank)
+
 
 
 class HandTests(unittest.TestCase):
