@@ -83,7 +83,6 @@ class PostBlind(Action):
         self.amount = amount
 
     def __repr__(self):
-        print self.player
         return "PostBlind: " + str(self.player.table) + " " + \
             self.player.name + " $" + str(self.amount)
 

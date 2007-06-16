@@ -60,6 +60,15 @@ class PyPokerEvalTests(unittest.TestCase):
         result = evaluator.winners(game="holdem", pockets=pockets, board=board)
         self.assertEquals(3, len(result['hi']))
 
+    def test_premature_hand_end(self):
+        evaluator = PokerEval()
+        cards1 = ["ac", "ah"]
+        pockets = [cards1]
+        board = []
+        result = evaluator.winners(game="holdem", pockets=pockets, board=board)
+        self.assertEquals(1, len(result['hi']))
+        self.assertEquals(0, result['hi'][0])
+
 
 
 def suite():

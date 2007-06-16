@@ -357,6 +357,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(16, self.game.pot)
 
         # TODO check that there was a winner and they received the pot?
+        self.assertTrue(len(self.game.winners) > 0)
 
 
 

@@ -22,6 +22,9 @@
 
 from logging import getLogger
 logger = getLogger("rounder.game")
+from string import lower
+
+from pokereval import PokerEval
 
 from rounder.action import SitOut, Call, Raise, Fold
 from rounder.core import RounderException, NotImplementedException
@@ -212,41 +215,6 @@ class Game:
         if self.pot > 0:
             logger.error("Funds left in pot after refuding all players: " + 
                 str(self.pot))
-        self.callback()
-
-    def game_over(self):
-        """
-        Finalize this game and return control to our parent object.
-        (usually a table)
-        """
-        logger.info("Game over.")
-        self._check_if_finished()
-        self.finished = True
-
-        # Check if all but one player folded:
-        if len(self.active_players) == 1:
-            self.winners = [self.active_players[0]]
-        else:
-            processor = DefaultHandProcessor()
-            for p in self.active_players:
-                cards = []
-                cards.extend(p.cards)
-                cards.extend(self.community_cards)
-                results = processor.evaluate(cards)
-                p.final_hand_rank = results[0]
-                p.final_hand = results[1]
-            self.winners = processor.determine_winners(self.active_players)
-            # TODO: handle more complex cases here
-
-        self.winners[0].add_chips(self.pot)
-        logger.info("Winner: %s" % self.winners[0].name)
-        logger.info("   pot: %s" % self.pot)
-        logger.info("   winners stack: %s" % self.winners[0].chips)
-
-        for p in self.players:
-            p.reset()
-
-        # TODO: safe way to return without building a neverending callstack?
         self.callback()
 
     def _check_if_finished(self):
@@ -521,4 +489,58 @@ class TexasHoldemGame(Game):
             logger.debug("Actions still pending:")
             for p in self.pending_actions.keys():
                 logger.debug("   " + p.name + " " + str(self.pending_actions[p]))
+
+    def game_over(self):
+        """
+        Finalize this game and return control to our parent object.
+        (usually a table)
+        """
+        logger.info("Game over.")
+        self._check_if_finished()
+        self.finished = True
+        self.winners = []
+
+        # TODO: holdem specific code:
+        pockets = []
+        for p in self.active_players:
+            cards = []
+            cards.append(lower(str(p.cards[0])))
+            cards.append(lower(str(p.cards[1])))
+            pockets.append(cards)
+
+        board = []
+        for c in self.community_cards:
+            board.append(lower(str(c)))
+
+        evaluator = PokerEval()
+        result = evaluator.winners(game="holdem", pockets=pockets,
+            board=board)
+        for index in result['hi']:
+            self.winners.append(self.active_players[index])
+
+        ## Check if all but one player folded:
+        #if len(self.active_players) == 1:
+        #    self.winners = [self.active_players[0]]
+        #else:
+        #    processor = DefaultHandProcessor()
+        #    for p in self.active_players:
+        #        cards = []
+        #        cards.extend(p.cards)
+        #        cards.extend(self.community_cards)
+        #        results = processor.evaluate(cards)
+        #        p.final_hand_rank = results[0]
+        #        p.final_hand = results[1]
+        #    self.winners = processor.determine_winners(self.active_players)
+        #    # TODO: handle more complex cases here
+
+        self.winners[0].add_chips(self.pot)
+        logger.info("Winner: %s" % self.winners[0].name)
+        logger.info("   pot: %s" % self.pot)
+        logger.info("   winners stack: %s" % self.winners[0].chips)
+
+        for p in self.players:
+            p.reset()
+
+        # TODO: safe way to return without building a neverending callstack?
+        self.callback()
 
