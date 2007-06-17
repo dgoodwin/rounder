@@ -31,7 +31,8 @@ from rounder.action import SitOut, PostBlind, Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.player import Player
-from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
+from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act, \
+    split_pot
 from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \
     STATE_GAMEOVER
 from rounder.currency import Currency
@@ -361,11 +362,36 @@ class TexasHoldemTests(unittest.TestCase):
 
 
 
+class SplitPotTests(unittest.TestCase):
+
+    def test_simple_case(self):
+        self.players = create_players_list(4, 0)
+        pot = Currency(10)
+        split_pot(pot, [self.players[0]])
+        self.assertEquals(10, self.players[0].chips)
+
+    def test_even_split_case(self):
+        self.players = create_players_list(4, 0)
+        pot = Currency(10)
+        split_pot(pot, self.players[0:2])
+        self.assertEquals(5, self.players[0].chips)
+        self.assertEquals(5, self.players[1].chips)
+
+    def test_uneven_split_case(self):
+        self.players = create_players_list(4, 0)
+        pot = Currency(0.25)
+        split_pot(pot, self.players[0:2])
+        self.assertEquals(0.13, self.players[0].chips)
+        self.assertEquals(0.12, self.players[1].chips)
+
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(NextToActTests))
     suite.addTest(unittest.makeSuite(GameStateMachineTests))
     suite.addTest(unittest.makeSuite(TexasHoldemTests))
+    suite.addTest(unittest.makeSuite(SplitPotTests))
     return suite
 
 if __name__ == "__main__":

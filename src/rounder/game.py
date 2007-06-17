@@ -30,7 +30,6 @@ from rounder.action import SitOut, Call, Raise, Fold
 from rounder.core import RounderException, NotImplementedException
 from rounder.deck import Deck
 from rounder.currency import Currency
-from rounder.hand import DefaultHandProcessor
 
 GAME_ID_COUNTER = 1
 
@@ -39,6 +38,24 @@ STATE_FLOP = "flop"
 STATE_TURN = "turn"
 STATE_RIVER = "river"
 STATE_GAMEOVER = "gameover"
+
+def split_pot(pot, winners):
+    """ 
+    Split the pot up as evenly as possible amongst the list of winners. 
+
+    Potential remaining cent is given to first player in the list.
+    """
+    logger.info("Splitting pot: " + str(pot))
+    per_player = pot / len(winners)
+    remainder = pot - (per_player * len(winners))
+    logger.debug("remainder = " + str(remainder))
+    
+    for p in winners:
+        winnings = per_player + remainder
+        remainder = 0 # only add for the first player in the list
+        p.add_chips(winnings)
+        logger.info("   %s won %s" % (p.name, winnings))
+
 
 def find_next_to_act(players, last_actor_position, bets_this_round, 
     bet_to_match, bb_exception=None):
@@ -518,22 +535,7 @@ class TexasHoldemGame(Game):
         for index in result['hi']:
             self.winners.append(self.active_players[index])
 
-        ## Check if all but one player folded:
-        #if len(self.active_players) == 1:
-        #    self.winners = [self.active_players[0]]
-        #else:
-        #    processor = DefaultHandProcessor()
-        #    for p in self.active_players:
-        #        cards = []
-        #        cards.extend(p.cards)
-        #        cards.extend(self.community_cards)
-        #        results = processor.evaluate(cards)
-        #        p.final_hand_rank = results[0]
-        #        p.final_hand = results[1]
-        #    self.winners = processor.determine_winners(self.active_players)
-        #    # TODO: handle more complex cases here
-
-        self.winners[0].add_chips(self.pot)
+        split_pot(self.pot, self.winners)
         logger.info("Winner: %s" % self.winners[0].name)
         logger.info("   pot: %s" % self.pot)
         logger.info("   winners stack: %s" % self.winners[0].chips)
