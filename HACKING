@@ -1,4 +1,10 @@
 Rounder should never have to be 'installed' to be developed against. Most
 everything should be runnable from the base source directory.
 
+Unit test everything you possibly can. Keep tests pure if included in the
+default alltests.py, no disk/network access or persistent changes. If need
+arises for non-unit tests we'll setup infrastructure for a separate more time
+consuming suite, but avoid this whenever possible.
+
 To start a server:
+    TODO

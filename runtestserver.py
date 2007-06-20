@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #   Rounder - Poker for the GNOME Desktop
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
@@ -18,25 +20,10 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Server Module """
+import sys
+sys.path.insert(0, './src/')
 
-from twisted.internet import reactor, protocol
+from rounder.network.server import run_server
 
-from logging import getLogger
-logger = getLogger("rounder.network.server")
-
-SERVER_PORT = 35100
-
-class RounderProtocol(protocol.Protocol):
-    def dataReceived(self, data):
-        print "dataReceived: ", data
-        self.transport.write(data)
-
-def run_server():
-    logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
-    factory = protocol.ServerFactory()
-    factory.protocol = RounderProtocol
-    reactor.listenTCP(SERVER_PORT, factory)
-    reactor.run()
-    logger.info("server started.")
-
+if __name__ == '__main__':
+    run_server()

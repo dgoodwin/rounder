@@ -4,8 +4,6 @@ Thin script to run rounder from the source directory. (and not the installed
 version.
 """
 
-__revision__ = "$Revision"
-
 import sys
 sys.path.insert(0, './src/')
 
