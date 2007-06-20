@@ -38,5 +38,4 @@ def run_server():
     factory.protocol = RounderProtocol
     reactor.listenTCP(SERVER_PORT, factory)
     reactor.run()
-    logger.info("server started.")
 

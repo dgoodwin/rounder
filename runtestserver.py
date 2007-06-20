@@ -22,6 +22,9 @@
 
 import sys
 sys.path.insert(0, './src/')
+sys.path.insert(0, './test/')
+
+import configureLogging
 
 from rounder.network.server import run_server
 
