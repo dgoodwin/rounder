@@ -1,0 +1,4 @@
+Rounder should never have to be 'installed' to be developed against. Most
+everything should be runnable from the base source directory.
+
+To start a server:

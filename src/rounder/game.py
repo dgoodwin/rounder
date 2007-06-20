@@ -517,7 +517,6 @@ class TexasHoldemGame(Game):
         self.finished = True
         self.winners = []
 
-        # TODO: holdem specific code:
         pockets = []
         for p in self.active_players:
             cards = []

@@ -92,7 +92,8 @@ class Player:
         # NOTE: Separate function to hopefully help prevent errors.
         if amount < 0:
             raise RounderException("Negative amount, use add_chips instead.")
-        logger.debug("Subtracting chips from " + str(self.name) + ": " + str(amount))
+        logger.debug("Subtracting chips from " + str(self.name) + ": " + 
+            str(amount))
         self.chips = self.chips - amount
 
 

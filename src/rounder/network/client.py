@@ -25,8 +25,7 @@
 #from twisted.internet import reactor, protocol
 
 #from logging import getLogger
-#logger = getLogger("rounder.client")
-
+#logger = getLogger("rounder.network.client")
 
 #class RounderClient(protocol.Protocol):
 #    def connectionMade(self):
