@@ -28,11 +28,14 @@ from twisted.internet import reactor
 
 # Adjust path so we can see the src modules running from branch as well
 # as test dir:
+import sys
 sys.path.insert(0, './src/')
 sys.path.insert(0, '../src/')
 sys.path.insert(0, '../../src/')
-sys.path.insert(0, '../../../src/')
 sys.path.insert(0, './test/')
+sys.path.insert(0, './test/network/')
+sys.path.insert(0, '../test/')
+sys.path.insert(0, '../test/network/')
 
 import configureLogging
 

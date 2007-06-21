@@ -20,6 +20,27 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
+'''
+Script to run all the pure rounder unit tests.
+
+Everything here should run in-memory and extremely fast. (i.e. no file
+system/database/network access)
+
+Can also be run with testoob:
+
+    testoob runtests.py suite
+
+'''
+
+import sys
+# Adjust path so we can see the src modules running from branch as well
+# as test dir:
+sys.path.insert(0, './src/')
+sys.path.insert(0, '../src/')
+sys.path.insert(0, '../../src/')
+sys.path.insert(0, './test/')
+sys.path.insert(0, '../test/')
+
 import unittest
 import settestpath
 import configureLogging

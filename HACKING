@@ -1,3 +1,17 @@
+============
+RUNNNG TESTS
+============
+
+From the root of the source directory:
+
+./runtests.py               Runs all the pure unit tests. (very fast)
+./runnetworktests.py        Runs the network tests. Requires that the test
+                            sever be started. (./starttestserver.py)
+
+=============
+GENERAL NOTES
+=============
+
 Rounder should never have to be 'installed' to be developed against. Most
 everything should be runnable from the base source directory.
 
@@ -6,5 +20,3 @@ default alltests.py, no disk/network access or persistent changes. If need
 arises for non-unit tests we'll setup infrastructure for a separate more time
 consuming suite, but avoid this whenever possible.
 
-To start a server:
-    TODO
