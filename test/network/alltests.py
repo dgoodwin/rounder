@@ -20,32 +20,37 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Client Module """
+import unittest
 
-from twisted.internet import reactor, protocol
+from unittest import TestSuite
 
-from logging import getLogger
-logger = getLogger("rounder.network.client")
+from twisted.internet import reactor
 
-class RounderClient(protocol.Protocol):
-    def connectionMade(self):
-        self.transport.write("hello, world!")
+# Adjust path so we can see the src modules running from branch as well
+# as test dir:
+sys.path.insert(0, './src/')
+sys.path.insert(0, '../src/')
+sys.path.insert(0, '../../src/')
+sys.path.insert(0, '../../../src/')
+sys.path.insert(0, './test/')
 
-    def dataReceived(self, data):
-        print "Server said:", data
-        self.transport.loseConnection()
+import configureLogging
 
-    def connectionLost(self, reason):
-        print "connection lost"
+# Import all test modules here:
+import clienttests
 
-class RounderClientFactory(protocol.ClientFactory):
-    protocol = RounderClient
+from rounder.network.client import RounderClientFactory
+from rounder.network.server import SERVER_PORT
 
-    def clientConnectionFailed(self, connector, reason):
-        print "Connection failed, goodbye!"
-        reactor.stop()
+f = RounderClientFactory()
+reactor.connectTCP("localhost", SERVER_PORT, f)
+reactor.run()
 
-    def clientConnectionLost(self, connector, reason):
-        print "Connection failed, goodbye!"
-        reactor.stop()
+def suite():
+    # Append all test suites here:
+    return TestSuite((
+        clienttests.suite(),
+    ))
 
+if __name__ == "__main__":
+    unittest.main(defaultTest="suite")

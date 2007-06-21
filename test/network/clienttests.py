@@ -18,26 +18,28 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" Tests for the rounder.server module. """
+""" Tests for the rounder.network.client module. """
 
 import unittest
+import sys
 
-import settestpath
-import rounder.server
-import rounder.client
+# Adjust path so we can see the src modules running from branch as well
+# as test dir:
+sys.path.insert(0, './src/')
+sys.path.insert(0, '../src/')
+sys.path.insert(0, '../../src/')
+sys.path.insert(0, '../../../src/')
 
-class RounderServerTests(unittest.TestCase):
+class ClientTests(unittest.TestCase):
 
     def test_something(self):
         pass
-        #rounder.server.main()
-        #rounder.client.main()
 
 
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(RounderServerTests))
+    suite.addTest(unittest.makeSuite(ClientTests))
     return suite
 
 if __name__ == "__main__":
