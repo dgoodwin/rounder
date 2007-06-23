@@ -77,4 +77,8 @@ def suite():
     ))
 
 if __name__ == "__main__":
-    unittest.main(defaultTest="suite")
+    try:
+        import testoob
+        testoob.main(defaultTest="suite")
+    except ImportError:
+        unittest.main(defaultTest="suite")
