@@ -39,9 +39,6 @@ sys.path.insert(0, '../test/network/')
 
 import configureLogging
 
-# Import all test modules here:
-import clienttests
-
 from rounder.network.client import RounderClientFactory
 from rounder.network.server import SERVER_PORT
 
@@ -49,10 +46,15 @@ f = RounderClientFactory()
 reactor.connectTCP("localhost", SERVER_PORT, f)
 reactor.run()
 
+class ClientTests(unittest.TestCase):
+
+    def test_something(self):
+        pass
+
 def suite():
     # Append all test suites here:
     return TestSuite((
-        clienttests.suite(),
+        unittest.makeSuite(ClientTests),
     ))
 
 if __name__ == "__main__":

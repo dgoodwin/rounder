@@ -22,6 +22,7 @@
 
 """ The Rounder Client Module """
 
+import simplejson
 from twisted.internet import reactor, protocol
 
 from logging import getLogger
@@ -29,23 +30,35 @@ logger = getLogger("rounder.network.client")
 
 class RounderClient(protocol.Protocol):
     def connectionMade(self):
-        self.transport.write("hello, world!")
+        self.transport.write(simplejson.dumps("hello, world!"))
 
     def dataReceived(self, data):
-        print "Server said:", data
-        self.transport.loseConnection()
+        logger.debug("data received: %s", data)
+        obj = simplejson.loads(data)
+        logger.debug("   obj type = %s", type(obj))
+        logger.debug("   obj = %s", str(obj))
+#self.transport.loseConnection()
 
-    def connectionLost(self, reason):
-        print "connection lost"
+#    def connectionLost(self, reason):
+#        print "connection lost"
 
 class RounderClientFactory(protocol.ClientFactory):
     protocol = RounderClient
 
+    def startedConnecting(self, connector):
+        logger.debug("Connecting to server.")
+
+    def buildProtocol(self, addr):
+        logger.debug("Connected!")
+        return RounderClient()
+
     def clientConnectionFailed(self, connector, reason):
-        print "Connection failed, goodbye!"
+        logger.debug("Connection failed.")
         reactor.stop()
 
     def clientConnectionLost(self, connector, reason):
-        print "Connection failed, goodbye!"
+        # TODO: reconnect?
+        logger.debug("Connection lost.")
         reactor.stop()
+
 

@@ -20,6 +20,7 @@
 
 """ The Rounder Server Module """
 
+import simplejson
 from twisted.internet import reactor, protocol
 
 from logging import getLogger
@@ -28,9 +29,17 @@ logger = getLogger("rounder.network.server")
 SERVER_PORT = 35100
 
 class RounderProtocol(protocol.Protocol):
+
+    def connectionMade(self):
+        logger.debug("client connected")
+
     def dataReceived(self, data):
-        print "dataReceived: ", data
-        self.transport.write(data)
+        logger.debug("data received: %s", data)
+        obj = simplejson.loads(data)
+        logger.debug("   obj type = %s", type(obj))
+        logger.debug("   obj = %s", str(obj))
+
+
 
 def run_server():
     logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
