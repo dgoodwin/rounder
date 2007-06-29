@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 #   Rounder - Poker for the GNOME Desktop
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
@@ -22,19 +20,23 @@
 
 """ The Rounder Client Module """
 
-import simplejson
+import cerealizer
+
 from twisted.internet import reactor, protocol
 
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
+from rounder.network.protocol import LoginMessage
+
 class RounderClient(protocol.Protocol):
     def connectionMade(self):
-        self.transport.write(simplejson.dumps("hello, world!"))
+        self.transport.write(cerealizer.dumps(
+            LoginMessage('hello', 'world')))
 
     def dataReceived(self, data):
         logger.debug("data received: %s", data)
-        obj = simplejson.loads(data)
+        obj = cerealizer.loads(data)
         logger.debug("   obj type = %s", type(obj))
         logger.debug("   obj = %s", str(obj))
 #self.transport.loseConnection()
@@ -42,23 +44,23 @@ class RounderClient(protocol.Protocol):
 #    def connectionLost(self, reason):
 #        print "connection lost"
 
-class RounderClientFactory(protocol.ClientFactory):
-    protocol = RounderClient
+#class RounderClientFactory(protocol.ClientFactory):
+#    protocol = RounderClient
 
-    def startedConnecting(self, connector):
-        logger.debug("Connecting to server.")
+#    def startedConnecting(self, connector):
+#        logger.debug("Connecting to server.")
 
-    def buildProtocol(self, addr):
-        logger.debug("Connected!")
-        return RounderClient()
+#    def buildProtocol(self, addr):
+#        logger.debug("Connected!")
+#        return RounderClient()
 
-    def clientConnectionFailed(self, connector, reason):
-        logger.debug("Connection failed.")
-        reactor.stop()
+#    def clientConnectionFailed(self, connector, reason):
+#        logger.debug("Connection failed.")
+#        reactor.stop()
 
-    def clientConnectionLost(self, connector, reason):
-        # TODO: reconnect?
-        logger.debug("Connection lost.")
-        reactor.stop()
+#    def clientConnectionLost(self, connector, reason):
+#        # TODO: reconnect?
+#        logger.debug("Connection lost.")
+#        reactor.stop()
 
 

@@ -20,31 +20,41 @@
 
 """ The Rounder Server Module """
 
-import simplejson
+from twisted.spread import pb
 from twisted.internet import reactor, protocol
 
 from logging import getLogger
 logger = getLogger("rounder.network.server")
 
+#from rounder.network.protocol import register_message_classes
+
 SERVER_PORT = 35100
 
-class RounderProtocol(protocol.Protocol):
+#class RounderProtocol(protocol.Protocol):
 
-    def connectionMade(self):
-        logger.debug("client connected")
+#    def connectionMade(self):
+#        logger.debug("client connected")
 
-    def dataReceived(self, data):
-        logger.debug("data received: %s", data)
-        obj = simplejson.loads(data)
-        logger.debug("   obj type = %s", type(obj))
-        logger.debug("   obj = %s", str(obj))
+#    def dataReceived(self, data):
+#        obj = cerealizer.loads(data)
+#        logger.debug("received: %s", str(obj))
 
+class ServerController(pb.Root):
+    """
+    Core server controller, remotely referencable and the focal point for
+    all client requests.
+    """
+
+    def remote_login(self, login, password_hash):
+        """ Process a login request. """
+        logger.debug("Successful login: %s" % login)
 
 
 def run_server():
     logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
-    factory = protocol.ServerFactory()
-    factory.protocol = RounderProtocol
-    reactor.listenTCP(SERVER_PORT, factory)
+#    register_message_classes()
+#    factory = protocol.ServerFactory()
+#    factory.protocol = RounderProtocol
+    reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(ServerController()))
     reactor.run()
 
