@@ -38,16 +38,14 @@ from twisted.internet import reactor
 from twisted.spread import pb
 
 import configureLogging
+from logging import getLogger
+logger = getLogger("rounder.networktests")
 
 from rounder.network.server import SERVER_PORT
-#from rounder.network.protocol import register_message_classes
-
-sc = None # will be the server controller
 
 def launch_tests(root_object):
-    print "Got root object: ", root_object
-    print "Launching tests..."
-    sc = root_object
+    global controller 
+    controller = root_object
 
     # Kickoff the tests:
     try:
@@ -62,14 +60,17 @@ def error(reason):
 class ClientTests(unittest.TestCase):
 
     def test_login(self):
-        d = sc.callRemote("login", "joeblow", "encryptedpw")
+        print controller
+        d = controller.callRemote("login", "joeblow", "encryptedpw")
         d.addCallbacks(self.login_success, self.login_failure)
 
-    def login_success(self):
+    def login_success(self, a):
         print "Login successful!"
+        print a
 
-    def login_failure(self):
+    def login_failure(self, a):
         print "Login failure!!!"
+        print a
 
 
 
@@ -79,12 +80,12 @@ def suite():
         unittest.makeSuite(ClientTests),
     ))
 
-#if __name__ == "__main__":
-#    register_message_classes()
+# Will eventually be the server controller, assigned here so it's global:
+controller = None
+
 f = pb.PBClientFactory()
 reactor.connectTCP("localhost", SERVER_PORT, f)
 d = f.getRootObject()
 d.addCallbacks(launch_tests, error)
 reactor.run()
-print "made it here"
 
