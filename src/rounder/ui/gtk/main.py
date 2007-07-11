@@ -59,13 +59,48 @@ class RounderGtk:
         glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = glade_xml.get_widget('main-window')
 
-        #signals = {
-        #    'on_WujaAbout_close': self.__close_about_dialog,
-        #}
-        #glade_xml.signal_autoconnect(signals)
+        signals = {
+            'on_connect_activate': self.show_connect_dialog,
+        }
+        glade_xml.signal_autoconnect(signals)
 
         main_window.show_all()
 
     def main(self):
         """ Launches the GTK main loop. """
         gtk.main()
+
+    def show_connect_dialog(self, widget):
+        """ Opens the connect to server dialog. """
+        connect_dialog = ConnectDialog()
+
+
+
+
+class ConnectDialog:
+
+    """ Dialog for connecting to a server. """
+
+    def __init__(self):
+        logger.debug("Opening connect dialog.")
+        glade_file = 'rounder/ui/gtk/data/connect.glade'
+        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
+        connect_dialog = self.glade_xml.get_widget('connect-dialog')
+
+        signals = {
+            'on_connect_button_clicked': self.connect,
+        }
+        self.glade_xml.signal_autoconnect(signals)
+
+        connect_dialog.show_all()
+
+    def connect(self, widget):
+        """ Attempt to open a connection to the host and port specified. """
+
+        host_entry = self.glade_xml.get_widget('host-entry')
+        host = host_entry.get_text()
+        port_spinbutton = self.glade_xml.get_widget('port-spinbutton')
+        port = port_spinbutton.get_value_as_int()
+        logger.debug("Connecting to %s on port %s" % (host, port))
+
+
