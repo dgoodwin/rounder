@@ -18,36 +18,19 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Server Module """
+""" The Rounder Protocol Module """
 
-from twisted.spread import pb
-from twisted.internet import reactor, protocol
+import cerealizer
 
-from logging import getLogger
-logger = getLogger("rounder.network.server")
+def register_message_classes():
+    l = [
+        LoginMessage,
+    ]
+    for message_class in l:
+        cerealizer.register(LoginMessage)
 
-#from rounder.network.protocol import register_message_classes
-
-SERVER_PORT = 35100
-
-class ServerController(pb.Root):
-    """
-    Core server controller, remotely referencable and the focal point for
-    all client requests.
-    """
-
-    def remote_login(self, login, password_hash):
-        """ Process a login request. """
-        logger.debug("Successful login: %s" % login)
-        return login
-
-
-
-def run_server():
-    logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
-#    register_message_classes()
-#    factory = protocol.ServerFactory()
-#    factory.protocol = RounderProtocol
-    reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(ServerController()))
-    reactor.run()
+class LoginMessage:
+    def __init__(self, login, password_hash):
+        self.login = login
+        self.password_hash = password_hash
 

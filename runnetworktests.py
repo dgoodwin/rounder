@@ -36,16 +36,23 @@ from unittest import TestSuite
 
 from twisted.internet import reactor
 from twisted.spread import pb
-
 import configureLogging
 from logging import getLogger
 logger = getLogger("rounder.networktests")
 
 from rounder.network.server import SERVER_PORT
+from rounder.network.client import NetworkClient
+
+# The remote server object, assigned when the deferred callback is reached:
+server = None
 
 def launch_tests(root_object):
-    global controller 
-    controller = root_object
+    ''' 
+    Deferred callback that kicks off the tests once we have a referece to our
+    remote object.
+    '''
+    global server 
+    server = root_object
 
     # Kickoff the tests:
     try:
@@ -59,18 +66,15 @@ def error(reason):
 
 class ClientTests(unittest.TestCase):
 
+    def setUp(self):
+        self.client = NetworkClient(server)
+
     def test_login(self):
-        print controller
-        d = controller.callRemote("login", "joeblow", "encryptedpw")
-        d.addCallbacks(self.login_success, self.login_failure)
+        deferred = self.client.login("joeblow", "encryptedpw")
+        deferred.addCallback(self.assert_logged_in)
 
-    def login_success(self, a):
-        print "Login successful!"
-        print a
-
-    def login_failure(self, a):
-        print "Login failure!!!"
-        print a
+    def assert_logged_in(self, data):
+        self.assertTrue(self.client.logged_in)
 
 
 
@@ -80,12 +84,10 @@ def suite():
         unittest.makeSuite(ClientTests),
     ))
 
-# Will eventually be the server controller, assigned here so it's global:
-controller = None
-
-f = pb.PBClientFactory()
-reactor.connectTCP("localhost", SERVER_PORT, f)
-d = f.getRootObject()
-d.addCallbacks(launch_tests, error)
-reactor.run()
+if __name__ == '__main__':
+    f = pb.PBClientFactory()
+    reactor.connectTCP("localhost", SERVER_PORT, f)
+    d = f.getRootObject()
+    d.addCallbacks(launch_tests, error)
+    reactor.run()
 

@@ -22,6 +22,7 @@
 
 import cerealizer
 
+from twisted.spread import pb
 from twisted.internet import reactor, protocol
 
 from logging import getLogger
@@ -29,38 +30,35 @@ logger = getLogger("rounder.network.client")
 
 from rounder.network.protocol import LoginMessage
 
-class RounderClient(protocol.Protocol):
-    def connectionMade(self):
-        self.transport.write(cerealizer.dumps(
-            LoginMessage('hello', 'world')))
+class NetworkClient(pb.Root):
+    """
+    Focal point for all client side network communication.
 
-    def dataReceived(self, data):
-        logger.debug("data received: %s", data)
-        obj = cerealizer.loads(data)
-        logger.debug("   obj type = %s", type(obj))
-        logger.debug("   obj = %s", str(obj))
-#self.transport.loseConnection()
+    All local requests pass through here en route to the server, likewise
+    for all incoming data from the server.
 
-#    def connectionLost(self, reason):
-#        print "connection lost"
+    Maintains a reference to the remote server object.
 
-#class RounderClientFactory(protocol.ClientFactory):
-#    protocol = RounderClient
+    Maintains a reference to the local client side user interface, which
+    is notified on all incoming requests/responses.
+    """
 
-#    def startedConnecting(self, connector):
-#        logger.debug("Connecting to server.")
+    def __init__(self, server):
+        self.server = server
+        # TODO: pass ref to self back to the server
 
-#    def buildProtocol(self, addr):
-#        logger.debug("Connected!")
-#        return RounderClient()
+        self.logged_in = False
 
-#    def clientConnectionFailed(self, connector, reason):
-#        logger.debug("Connection failed.")
-#        reactor.stop()
+    def login(self, username, password):
+        deferred = self.server.callRemote("login", "joeblow", "encryptedpw")
+        deferred.addCallbacks(self.login_success_cb, self.login_failure_cb)
+        return deferred
 
-#    def clientConnectionLost(self, connector, reason):
-#        # TODO: reconnect?
-#        logger.debug("Connection lost.")
-#        reactor.stop()
+    def login_success_cb(self, data):
+        logger.debug("Logged in: " + data)
+        self.logged_in = True
+
+    def login_failure_cb(self, data):
+        logger.debug("Login failed: " + data)
 
 
