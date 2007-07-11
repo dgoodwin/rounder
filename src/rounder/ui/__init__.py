@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-#   Rounder - Poker for the GNOME Desktop
+#   Wuja - Google Calendar (tm) notifications for the GNOME desktop.
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
 #   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
@@ -20,17 +18,4 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-"""
-Thin script to run rounder from the source directory. (and not the installed
-version)
-"""
-
-import sys
-sys.path.insert(0, './src/')
-
-from rounder.ui.gtk.main import RounderGtk
-
-if __name__ == "__main__":
-    rounderApp = RounderGtk()
-    rounderApp.main()
-
+__all__ = []
