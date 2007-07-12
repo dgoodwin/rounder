@@ -31,13 +31,16 @@ logger = getLogger("rounder.network.server")
 SERVER_PORT = 35100
 
 class ServerController(pb.Root):
+
     """
     Core server controller, remotely referencable and the focal point for
     all client requests.
     """
 
     def remote_login(self, login, password_hash):
+
         """ Process a login request. """
+
         logger.debug("Successful login: %s" % login)
         return login
 

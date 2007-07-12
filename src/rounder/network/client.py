@@ -31,6 +31,7 @@ logger = getLogger("rounder.network.client")
 from rounder.network.protocol import LoginMessage
 
 class NetworkClient(pb.Root):
+
     """
     Focal point for all client side network communication.
 

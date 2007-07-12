@@ -34,12 +34,14 @@ from logging import getLogger
 logger = getLogger("rounder.ui.gtk.main")
 
 def find_file_on_path(pathname):
+
     """
     Scan the Python path and locate a file with the given name.
 
     See:
       http://www.linuxjournal.com/xstatic/articles/lj/0087/4702/4702l2.html
     """
+
     if os.path.isabs(pathname):
         return pathname
     for dirname in sys.path:
@@ -54,6 +56,7 @@ class RounderGtk:
     """ The Rounder GTK Client """
 
     def __init__(self):
+
         logger.info("Starting application.")
         glade_file = 'rounder/ui/gtk/data/rounder.glade'
         glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
@@ -67,11 +70,15 @@ class RounderGtk:
         main_window.show_all()
 
     def main(self):
-        """ Launches the GTK main loop. """
+
+        """ Launch the GTK main loop. """
+
         gtk.main()
 
     def show_connect_dialog(self, widget):
+        
         """ Opens the connect to server dialog. """
+
         connect_dialog = ConnectDialog()
 
 
@@ -82,6 +89,7 @@ class ConnectDialog:
     """ Dialog for connecting to a server. """
 
     def __init__(self):
+
         logger.debug("Opening connect dialog.")
         glade_file = 'rounder/ui/gtk/data/connect.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
@@ -95,6 +103,7 @@ class ConnectDialog:
         connect_dialog.show_all()
 
     def connect(self, widget):
+
         """ Attempt to open a connection to the host and port specified. """
 
         host_entry = self.glade_xml.get_widget('host-entry')
@@ -102,5 +111,4 @@ class ConnectDialog:
         port_spinbutton = self.glade_xml.get_widget('port-spinbutton')
         port = port_spinbutton.get_value_as_int()
         logger.debug("Connecting to %s on port %s" % (host, port))
-
 
