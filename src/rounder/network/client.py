@@ -28,8 +28,6 @@ from twisted.internet import reactor, protocol
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
-from rounder.network.protocol import LoginMessage
-
 class NetworkClient(pb.Root):
 
     """

@@ -54,9 +54,10 @@ import tabletests
 import playertests
 import gametests
 import limittests
-import servertests
 import actiontests
 import pypokerevaltests
+import network.servertests
+import network.clienttests
 
 from unittest import TestSuite
 
@@ -73,8 +74,9 @@ def suite():
         limittests.suite(),
         actiontests.suite(),
         pypokerevaltests.suite(),
-#        servertests.suite(),
-    ))
+        network.servertests.suite(),
+        network.clienttests.suite(),
+   ))
 
 if __name__ == "__main__":
     try:
