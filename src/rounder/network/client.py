@@ -23,12 +23,13 @@
 import cerealizer
 
 from twisted.spread import pb
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor
+from twisted.cred import credentials
 
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
-class NetworkClient(pb.Root):
+class RounderNetworkClient(pb.Referenceable):
 
     """
     Focal point for all client side network communication.
@@ -42,22 +43,31 @@ class NetworkClient(pb.Root):
     is notified on all incoming requests/responses.
     """
 
-    def __init__(self, server):
-        self.server = server
-        # TODO: pass ref to self back to the server
+    def remote_print(self, message):
+        print message
 
-        self.logged_in = False
+    def connect(self, host, port, user, password):
+        factory = pb.PBClientFactory()
+        reactor.connectTCP(host, port, factory)
+        def1 = factory.login(credentials.UsernamePassword(user, password),
+            client=self)
+        def1.addCallback(self.connected)
+        reactor.run()
 
-    def login(self, username, password):
-        deferred = self.server.callRemote("login", "joeblow", "encryptedpw")
-        deferred.addCallbacks(self.login_success_cb, self.login_failure_cb)
-        return deferred
+    def connected(self, perspective):
+        logger.debug("connected!")
+        logger.debug("perspective = %s" % perspective)
+        # this perspective is a reference to our User object
+#d = perspective.callRemote("joinGroup", "#lookingForFourth")
+#        d.addCallback(self.gotGroup)
 
-    def login_success_cb(self, data):
-        logger.debug("Logged in: " + data)
-        self.logged_in = True
+#def gotGroup(self, group):
+#    print "joined group, now sending a message to all members"
+#    # 'group' is a reference to the Group object (through a ViewPoint)
+#    d = group.callRemote("send", "You can call me Al.")
+#    d.addCallback(self.shutdown)
 
-    def login_failure_cb(self, data):
-        logger.debug("Login failed: " + data)
+    def shutdown(self, result):
+        reactor.stop()
 
 

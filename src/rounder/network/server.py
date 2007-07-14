@@ -20,8 +20,10 @@
 
 """ The Rounder Server Module """
 
+from zope.interface import implements
 from twisted.spread import pb
-from twisted.internet import reactor, protocol
+from twisted.cred import checkers, portal
+from twisted.internet import reactor
 
 from logging import getLogger
 logger = getLogger("rounder.network.server")
@@ -30,27 +32,55 @@ logger = getLogger("rounder.network.server")
 
 SERVER_PORT = 35100
 
-class ServerController(pb.Root):
+class RounderNetworkServer:
 
-    """
-    Core server controller, remotely referencable and the focal point for
-    all client requests.
-    """
+    """ Core Rounder Server """
 
-    def remote_login(self, login, password_hash):
+    def __init__(self):
+        pass
 
-        """ Process a login request. """
+    def joinTable(self):
+        pass
 
-        logger.debug("Successful login: %s" % login)
-        return login
+
+
+class RounderRealm:
+
+    """ Creates perspectives/avatars. """
+
+    implements(portal.IRealm) 
+    def requestAvatar(self, avatarId, mind, *interfaces):
+        assert pb.IPerspective in interfaces
+        avatar = User(avatarId)
+        avatar.server = self.server
+        avatar.attached(mind)
+        return pb.IPerspective, avatar, lambda a=avatar:a.detached(mind)
+
+
+
+class User(pb.Avatar):
+    def __init__(self, name):
+        self.name = name
+    def attached(self, mind):
+        self.remote = mind
+    def detached(self, mind):
+        self.remote = None
+#def perspective_joinGroup(self, groupname, allowMattress=True):
+#    return self.server.joinGroup(groupname, self, allowMattress)
+    def send(self, message):
+        self.remote.callRemote("print", message)
 
 
 
 def run_server():
     logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
-#    register_message_classes()
-#    factory = protocol.ServerFactory()
-#    factory.protocol = RounderProtocol
-    reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(ServerController()))
+    
+    realm = RounderRealm()
+    realm.server = Server()
+    checker = checkers.InMemoryUsernamePasswordDatabaseDontUse()
+    checker.addUser("joe", "password")
+    p = portal.Portal(realm, [checker])
+
+    reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(p))
     reactor.run()
 

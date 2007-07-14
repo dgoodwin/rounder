@@ -27,23 +27,23 @@ import unittest
 
 import settestpath
 
-from rounder.network.server import ServerController
+from rounder.network.server import RounderNetworkServer
 
-class ServerTests(unittest.TestCase):
+class RounderNetworkServerTests(unittest.TestCase):
 
     """ Tests exercising the server network controller. """
 
     def setUp(self):
-        self.server = ServerController()
+        self.server = RounderNetworkServer()
 
     def test_login(self):
-        self.server.remote_login("a", "b")
+        pass
 
 
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(ServerTests))
+    suite.addTest(unittest.makeSuite(RounderNetworkServerTests))
     return suite
 
 if __name__ == "__main__":
