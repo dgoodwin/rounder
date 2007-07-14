@@ -153,6 +153,7 @@ class Table:
         self.gsm.add_state(STATE_SMALL_BLIND, self.prompt_small_blind)
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
         self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
+        logger.debug("Created table: %s" % self)
 
     def __repr__(self):
         return self.name

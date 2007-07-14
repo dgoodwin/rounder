@@ -20,8 +20,6 @@
 
 """ The Rounder Client Module """
 
-import cerealizer
-
 from twisted.spread import pb
 from twisted.internet import reactor
 from twisted.cred import credentials
@@ -43,10 +41,21 @@ class RounderNetworkClient(pb.Referenceable):
     is notified on all incoming requests/responses.
     """
 
-    def remote_print(self, message):
-        print message
+    def __init__(self, ui):
+        
+        """ 
+        Initializes a network client.
+
+            ui = Reference to a client user interface where we can pass
+                responses on to.
+        """
+
+        self.ui = ui
 
     def connect(self, host, port, user, password):
+
+        """ Initiate connection to a server. """
+
         factory = pb.PBClientFactory()
         reactor.connectTCP(host, port, factory)
         def1 = factory.login(credentials.UsernamePassword(user, password),
@@ -55,17 +64,22 @@ class RounderNetworkClient(pb.Referenceable):
         reactor.run()
 
     def connected(self, perspective):
+        
+        """ Callback for successful connection. """
+
         logger.debug("connected!")
         logger.debug("perspective = %s" % perspective)
-        # this perspective is a reference to our User object
-#d = perspective.callRemote("joinGroup", "#lookingForFourth")
-#        d.addCallback(self.gotGroup)
+        self.perspective = perspective
+        self.ui.connected()
 
-#def gotGroup(self, group):
-#    print "joined group, now sending a message to all members"
-#    # 'group' is a reference to the Group object (through a ViewPoint)
-#    d = group.callRemote("send", "You can call me Al.")
-#    d.addCallback(self.shutdown)
+    def list_tables(self):
+        logger.debug("requesting table list")
+        d = self.perspective.callRemote("list_tables")
+        d.addCallback(self.got_list_tables)
+
+    def got_list_tables(self, data):
+        logger.debug("got table list")
+        self.ui.got_list_tables(data)
 
     def shutdown(self, result):
         reactor.stop()
