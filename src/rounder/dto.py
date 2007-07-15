@@ -18,19 +18,34 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" The Rounder Protocol Module """
+""" 
+Rounder Data Transfer Objects
 
-import cerealizer
+Various objects used to safely transmit game state or activity to clients.
+"""
 
-def register_message_classes():
-    l = [
-        LoginMessage,
-    ]
-    for message_class in l:
-        cerealizer.register(LoginMessage)
+class TableState:
 
-class LoginMessage:
-    def __init__(self, login, password_hash):
-        self.login = login
-        self.password_hash = password_hash
+    """ 
+    Representation of a table fit for sending to a table's observers. 
+    Must be careful not to expose any engine internals, this WILL be
+    transferred over the wire.
+    """
+
+    def __init__(self, table):
+        self.id = table.name
+        self.name = table.name
+
+        # for now represent seated players as a list of tuples, player name
+        # and stack size:
+        self.seats = []
+        for seat_num in range(table.seats.get_size()):
+            p = table.seats.get_player(seat_num)
+            if p is None:
+                self.seats.append((None, None))
+            else:
+                self.seats.append((p.name, p.chips))
+
+
+
 

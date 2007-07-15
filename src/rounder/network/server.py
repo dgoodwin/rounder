@@ -28,10 +28,11 @@ from twisted.internet import reactor
 from logging import getLogger
 logger = getLogger("rounder.network.server")
 
-#from rounder.network.protocol import register_message_classes
 from rounder.limit import FixedLimit
 from rounder.table import Table
 from rounder.currency import Currency
+from rounder.dto import TableState
+from rounder.network.serialize import register_message_classes, dumps, loads
 
 SERVER_PORT = 35100
 
@@ -46,16 +47,33 @@ class RounderNetworkServer:
 
     def __init__(self):
         self.users = {} # hash of usernames to their perspectives
-        self.tables = {}
+        self.table_views = {}
         self.table_counter = 0 # used to name the tables for now
 
     def create_table(self):
-        
+        """ Create a new table. """
+        # TODO: stop hard coding everything :)
         limit = FixedLimit(small_bet=Currency(1), big_bet=Currency(2))
         self.table_counter += 1
         table_name = "Table %s" % self.table_counter
         table = Table(name=table_name, limit=limit, seats=10)
-        self.tables[table_name] = table
+
+        view = TableView(table)
+        self.table_views[table_name] = view
+
+    def open_table(self, table_id, user):
+        """ 
+        Subscribe a user to a table. 
+
+        Returns a tuple of TableState and the table view. Client can then use
+        table state to render their initial table representation.
+        """
+        logger.debug("Opening table %s for user %s" % (table_id, user.name))
+        # TODO: check if user should be allowed to observe this table.
+        table = self.table_views[table_id].table
+        table.observers.append(user)
+        state = TableState(table)
+        return (dumps(state), self.table_views[table_id])
 
 
 
@@ -74,7 +92,10 @@ class RounderRealm:
 
 class User(pb.Avatar):
 
+    """ An authenticated user's perspective. """
+
     def __init__(self, name, server):
+
         logger.info("User authenticated: %s" % name)
         self.name = name
         self.server = server
@@ -86,26 +107,45 @@ class User(pb.Avatar):
     def detached(self, mind):
         self.remote = None
 
-#def perspective_joinGroup(self, groupname, allowMattress=True):
-#    return self.server.joinGroup(groupname, self, allowMattress)
-
     def send(self, message):
         self.remote.callRemote("print", message)
 
     def perspective_list_tables(self):
-
         """ Lists available tables. """
-        
         tables = []
-        for t in self.server.tables.values():
-            tables.append(t.name)
-
+        for t in self.server.table_views.values():
+            tables.append(t.table.name)
         return tables
+
+    def perspective_open_table(self, table_id):
+        """ Process a users request to view a table. """
+        return self.server.open_table(table_id, self)
+
+
+
+class TableView(pb.Viewable):
+
+    """ 
+    User's perspective of a table. Created at the same time a 
+    rounder.table.Table would be.
+
+    One created per table, not per user.
+
+    Protects from spoofing by inserting a reference to the users avatar
+    automatically into the arguments of all remote calls.
+
+    Remote methods prefixed with view_ here.
+    """
+
+    def __init__(self, table):
+        self.table = table
+         
 
 
 
 def run_server():
     logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
+    register_message_classes()
     
     realm = RounderRealm()
     realm.server = RounderNetworkServer()

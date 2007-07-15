@@ -27,6 +27,8 @@ from twisted.cred import credentials
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
+from rounder.network.serialize import dumps, loads
+
 class RounderNetworkClient(pb.Referenceable):
 
     """
@@ -42,20 +44,17 @@ class RounderNetworkClient(pb.Referenceable):
     """
 
     def __init__(self, ui):
-        
         """ 
         Initializes a network client.
 
             ui = Reference to a client user interface where we can pass
                 responses on to.
         """
-
         self.ui = ui
+        self.table_views = {}
 
     def connect(self, host, port, user, password):
-
         """ Initiate connection to a server. """
-
         factory = pb.PBClientFactory()
         reactor.connectTCP(host, port, factory)
         def1 = factory.login(credentials.UsernamePassword(user, password),
@@ -63,25 +62,36 @@ class RounderNetworkClient(pb.Referenceable):
         def1.addCallback(self.connected)
         reactor.run()
 
-    def connected(self, perspective):
-        
-        """ Callback for successful connection. """
-
-        logger.debug("connected!")
-        logger.debug("perspective = %s" % perspective)
-        self.perspective = perspective
-        self.ui.connected()
-
-    def list_tables(self):
-        logger.debug("requesting table list")
-        d = self.perspective.callRemote("list_tables")
-        d.addCallback(self.got_list_tables)
-
-    def got_list_tables(self, data):
-        logger.debug("got table list")
-        self.ui.got_list_tables(data)
-
     def shutdown(self, result):
         reactor.stop()
 
+    def connected(self, perspective):
+        """ Callback for successful connection. """
+        logger.debug("connected!")
+        self.perspective = perspective
+        self.ui.connected()
 
+    def get_table_list(self):
+        """ Request a list of tables from the server. """
+        logger.debug("requesting table list")
+        d = self.perspective.callRemote("list_tables")
+        d.addCallback(self.got_table_list)
+
+    def got_table_list(self, data):
+        """ Called when a list of tables is received. """
+        logger.debug("got table list")
+        self.ui.got_table_list(data)
+
+    def open_table(self, table_id):
+        """ Open a table. """
+        logger.debug("Opening table: %s" % table_id)
+        d = self.perspective.callRemote("open_table", table_id)
+        d.addCallback(self.table_opened)
+
+    def table_opened(self, data):
+        """ Callback for a successful table open. """
+        table_state = loads(data[0])
+        table_view = data[1]
+        logger.debug("Table opened successfully: %s" % table_state.name)
+        self.table_views[table_state.id] = table_view
+        self.ui.table_opened(table_state)

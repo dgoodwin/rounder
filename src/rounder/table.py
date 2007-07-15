@@ -155,6 +155,8 @@ class Table:
         self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
         logger.debug("Created table: %s" % self)
 
+        self.observers = []
+
     def __repr__(self):
         return self.name
 
@@ -289,3 +291,8 @@ class Table:
     def __get_dealer(self):
         return self.seats.dealer
     dealer = property(__get_dealer, None)
+
+    def notify_player_seated(self):
+        """ Notify observers of this table that a player was seated. """
+        for o in self.observers:
+            o.notify_player_seated

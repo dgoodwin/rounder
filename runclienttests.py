@@ -22,7 +22,6 @@
 
 import sys
 sys.path.insert(0, './src/')
-#sys.path.insert(0, './test/')
 
 from rounder.log import setup_logging
 import logging
@@ -32,24 +31,39 @@ setup_logging(log_conf_locations)
 
 from rounder.network.client import RounderNetworkClient
 from rounder.network.server import SERVER_PORT
+from rounder.network.serialize import register_message_classes
 
-class FakeRounderClientUI:
+class TestClientUI:
+
+    """ 
+    Test UI implementation.
+    """
 
     def __init__(self):
+
         self.client = RounderNetworkClient(self)
         self.client.connect('localhost', SERVER_PORT, "joe", "password")
 
     def connected(self):
-        print "Connected!"
-        tables = self.client.list_tables()
 
-    def got_list_tables(self, tables):
+        print "Connected!"
+        tables = self.client.get_table_list()
+
+    def got_table_list(self, tables):
+
         print "got list of tables:"
         for t in tables:
             print "   %s" % t
 
+        # Attempt to open the first table:
+        self.client.open_table(tables[0])
+
+    def table_opened(self, table_state):
+        pass
+
 
 
 if __name__ == '__main__':
-    ui = FakeRounderClientUI()
+    register_message_classes()
+    ui = TestClientUI()
 

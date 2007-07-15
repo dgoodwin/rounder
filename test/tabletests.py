@@ -110,19 +110,27 @@ class SeatsTests(unittest.TestCase):
         self.seats.new_dealer()
         self.assertEquals(self.player1, self.seats.dealer)
 
+def create_table(num_players, dealer_index):
+    limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+    table = Table(name="Test Table", limit=limit, seats=10)
+
+    players = []
+    for i in range(num_players):
+        new_player = Player('player' + str(i), Currency(CHIPS))
+        table.seat_player(new_player, i)
+        players.append(new_player)
+
+    return (limit, table, players)
+
 
 
 class TableTests(unittest.TestCase):
 
     def __create_table(self, num_players, dealer_index):
-        self.limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
-        self.table = Table(name="Test Table", limit=self.limit, seats=10)
-
-        self.players = []
-        for i in range(num_players):
-            new_player = Player('player' + str(i), Currency(CHIPS))
-            self.table.seat_player(new_player, i)
-            self.players.append(new_player)
+        tuple = create_table(num_players, dealer_index)
+        self.limit = tuple[0]
+        self.table = tuple[1]
+        self.players = tuple[2]
 
     # def test_not_enough_players_to_start_game
 
