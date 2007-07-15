@@ -27,7 +27,8 @@ import unittest
 
 import settestpath
 
-from rounder.network.server import RounderNetworkServer
+from rounder.network.server import RounderNetworkServer, User, TableView
+from rounder.dto import TableState
 
 class RounderNetworkServerTests(unittest.TestCase):
 
@@ -35,9 +36,21 @@ class RounderNetworkServerTests(unittest.TestCase):
 
     def setUp(self):
         self.server = RounderNetworkServer()
+        self.table_name = "Test Table 1"
+        self.table = self.server.create_table(self.table_name)
+        self.table_id = self.table.id
 
-    def test_login(self):
-        pass
+        self.user = User("Test Player 1", self.server)
+
+    def test_open_table(self):
+        tuple = self.server.open_table(self.table_id, self.user)
+        self.assertTrue(isinstance(tuple[0], TableView))
+
+    def test_list_tables(self):
+        table_list = self.server.list_tables()
+
+    def test_seat_player(self):
+        self.server.seat_player(self.user, self.table, 0)
 
 
 

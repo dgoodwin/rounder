@@ -34,6 +34,10 @@ HAND_UNDERWAY = "hand_underway"
 
 MIN_PLAYERS_FOR_HAND = 2
 
+# Incremented every time a new table is created. Likely to be replaced with
+# a database auto-increment down the road.
+table_id_counter = 0
+
 class Seats:
     """ 
     Data structure to manage players seated at the table.
@@ -145,9 +149,13 @@ class Table:
     """
 
     def __init__(self, name, limit, seats=10):
+        global table_id_counter
+        table_id_counter += 1
+        self.id = table_id_counter
+
+        self.name = name
         self.limit = limit
         self.seats = Seats(num_seats=seats)
-        self.name = name
 
         self.gsm = GameStateMachine()
         self.gsm.add_state(STATE_SMALL_BLIND, self.prompt_small_blind)
@@ -158,7 +166,7 @@ class Table:
         self.observers = []
 
     def __repr__(self):
-        return self.name
+        return "%s (#%s)" % (self.name, self.id)
 
     def begin(self):
         """ 
@@ -195,6 +203,8 @@ class Table:
     def seat_player(self, player, seat_num):
         self.seats.seat_player(player, seat_num)
         player.table = self
+        logger.debug("%s seated at table %s in seat %s" % (player.name,
+            player.table.name, seat_num))
 
     def prompt_small_blind(self):
         """

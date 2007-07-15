@@ -53,13 +53,13 @@ class TestClientUI:
 
         print "got list of tables:"
         for t in tables:
-            print "   %s" % t
+            print "   %s" % t[1]
 
         # Attempt to open the first table:
-        self.client.open_table(tables[0])
+        self.client.open_table(tables[0][0])
 
     def table_opened(self, table_state):
-        pass
+        self.client.sit(table_state.id, 0)
 
 
 

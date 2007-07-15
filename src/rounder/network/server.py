@@ -32,6 +32,8 @@ from rounder.limit import FixedLimit
 from rounder.table import Table
 from rounder.currency import Currency
 from rounder.dto import TableState
+from rounder.player import Player
+from rounder.currency import Currency
 from rounder.network.serialize import register_message_classes, dumps, loads
 
 SERVER_PORT = 35100
@@ -50,7 +52,7 @@ class RounderNetworkServer:
         self.table_views = {}
         self.table_counter = 0 # used to name the tables for now
 
-    def create_table(self):
+    def create_table(self, name):
         """ Create a new table. """
         # TODO: stop hard coding everything :)
         limit = FixedLimit(small_bet=Currency(1), big_bet=Currency(2))
@@ -58,22 +60,37 @@ class RounderNetworkServer:
         table_name = "Table %s" % self.table_counter
         table = Table(name=table_name, limit=limit, seats=10)
 
-        view = TableView(table)
-        self.table_views[table_name] = view
+        view = TableView(table, self)
+        self.table_views[table.id] = view
+        return table
+
+    def list_tables(self):
+        tables = []
+        for t in self.table_views.values():
+            tables.append((t.table.id, t.table.name))
+        return tables
 
     def open_table(self, table_id, user):
         """ 
         Subscribe a user to a table. 
 
-        Returns a tuple of TableState and the table view. Client can then use
-        table state to render their initial table representation.
+        Returns a tuple of the user's newly created table view, and a 
+        TableState snapshot the client can use to draw the current table
+        state.
         """
         logger.debug("Opening table %s for user %s" % (table_id, user.name))
         # TODO: check if user should be allowed to observe this table.
         table = self.table_views[table_id].table
         table.observers.append(user)
         state = TableState(table)
-        return (dumps(state), self.table_views[table_id])
+        return (self.table_views[table_id], dumps(state))
+
+    def seat_player(self, user, table, seat_num):
+        """ Seat a player at a table in a specific seat. """
+        player = Player(user.name, chips=Currency(1000))
+        # TODO: error handling, what if seat already taken?
+        table.seat_player(player, seat_num)
+        return (table.id, seat_num)
 
 
 
@@ -112,10 +129,7 @@ class User(pb.Avatar):
 
     def perspective_list_tables(self):
         """ Lists available tables. """
-        tables = []
-        for t in self.server.table_views.values():
-            tables.append(t.table.name)
-        return tables
+        return self.server.list_tables()
 
     def perspective_open_table(self, table_id):
         """ Process a users request to view a table. """
@@ -137,10 +151,13 @@ class TableView(pb.Viewable):
     Remote methods prefixed with view_ here.
     """
 
-    def __init__(self, table):
+    def __init__(self, table, server):
         self.table = table
-         
+        self.server = server
 
+    def view_sit(self, from_user, seat):
+        return self.server.seat_player(from_user, self.table, seat)
+         
 
 
 def run_server():
@@ -153,7 +170,7 @@ def run_server():
     checker.addUser("joe", "password")
     p = portal.Portal(realm, [checker])
 
-    realm.server.create_table()
+    realm.server.create_table("Table 1")
 
     reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(p))
     reactor.run()

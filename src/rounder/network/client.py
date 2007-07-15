@@ -62,7 +62,7 @@ class RounderNetworkClient(pb.Referenceable):
         def1.addCallback(self.connected)
         reactor.run()
 
-    def shutdown(self, result):
+    def shutdown(self):
         reactor.stop()
 
     def connected(self, perspective):
@@ -90,8 +90,20 @@ class RounderNetworkClient(pb.Referenceable):
 
     def table_opened(self, data):
         """ Callback for a successful table open. """
-        table_state = loads(data[0])
-        table_view = data[1]
+        table_view = data[0]
+        table_state = loads(data[1])
         logger.debug("Table opened successfully: %s" % table_state.name)
         self.table_views[table_state.id] = table_view
         self.ui.table_opened(table_state)
+
+    def sit(self, table_id, seat):
+        """ Request the specified seat index at the specified table. """
+        d= self.table_views[table_id].callRemote("sit", seat)
+        d.addCallback(self.sit_success)
+
+    def sit_success(self, data):
+        """ Callback for successfully sitting down. """
+        table_id = data[0]
+        seat_num = data[1]
+        logger.debug("Succesfully took seat %s at table: %s" % (seat_num,
+            table_id))

@@ -33,7 +33,7 @@ class TableState:
     """
 
     def __init__(self, table):
-        self.id = table.name
+        self.id = table.id
         self.name = table.name
 
         # for now represent seated players as a list of tuples, player name
