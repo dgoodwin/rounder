@@ -66,7 +66,6 @@ def suite():
     return TestSuite((
         cardtests.suite(),
         decktests.suite(),
-#        handtests.suite(), # defunct
         pokerroomtests.suite(),
         tabletests.suite(),
         playertests.suite(),
