@@ -64,6 +64,7 @@ class RounderGtk:
 
         signals = {
             'on_connect_activate': self.show_connect_dialog,
+            'on_main_window_destroy' : self.shutdown,
         }
         glade_xml.signal_autoconnect(signals)
 
@@ -80,6 +81,13 @@ class RounderGtk:
         """ Opens the connect to server dialog. """
 
         connect_dialog = ConnectDialog()
+
+    def shutdown(self, widget):
+
+        """ Closes the application. """
+
+        logger.info("Stopping application.")
+        gtk.main_quit()
 
 
 
