@@ -33,8 +33,7 @@ from rounder.table import Table
 from rounder.currency import Currency
 from rounder.dto import TableState
 from rounder.player import Player
-from rounder.currency import Currency
-from rounder.network.serialize import register_message_classes, dumps, loads
+from rounder.network.serialize import register_message_classes, dumps
 
 SERVER_PORT = 35100
 

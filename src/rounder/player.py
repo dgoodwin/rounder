@@ -23,8 +23,7 @@
 from logging import getLogger
 logger = getLogger("rounder.player")
 
-from rounder.core import NotImplementedException, RounderException
-from rounder.action import PostBlind
+from rounder.core import RounderException
 
 class Player:
 

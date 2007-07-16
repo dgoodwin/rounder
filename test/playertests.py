@@ -24,9 +24,9 @@ import unittest
 
 import settestpath
 
-from rounder.player import Player
-from rounder.core import NotImplementedException
-from rounder.currency import Currency
+# from rounder.player import Player
+# from rounder.core import NotImplementedException
+# from rounder.currency import Currency
 
 class PlayerTests(unittest.TestCase):
 

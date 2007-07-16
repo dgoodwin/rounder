@@ -24,7 +24,6 @@ import sys
 sys.path.insert(0, './src/')
 
 from rounder.log import setup_logging
-import logging
 # Configure logging: (needs to be done before importing our modules)
 log_conf_locations = ["./logging.conf"]
 setup_logging(log_conf_locations)

@@ -22,7 +22,6 @@
 
 __revision__ = "$Revision$"
 
-import logging
 import logging.config
 from os.path import expanduser, exists, abspath
 

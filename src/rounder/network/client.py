@@ -27,7 +27,7 @@ from twisted.cred import credentials
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
-from rounder.network.serialize import dumps, loads
+from rounder.network.serialize import loads
 
 class RounderNetworkClient(pb.Referenceable):
 

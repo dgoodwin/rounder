@@ -48,7 +48,6 @@ import configureLogging
 # Import all test modules here:
 import cardtests
 import decktests
-import handtests
 import pokerroomtests
 import tabletests
 import playertests
