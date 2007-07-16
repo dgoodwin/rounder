@@ -45,6 +45,8 @@ class RounderNetworkServer:
     
     Maintains the internal engine objects, as well as the lists of connected
     clients etc.
+
+    Interface between the network layer and the underlying business objects.
     """
 
     def __init__(self):

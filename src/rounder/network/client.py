@@ -41,6 +41,13 @@ class RounderNetworkClient(pb.Referenceable):
 
     Maintains a reference to the local client side user interface, which
     is notified on all incoming requests/responses.
+
+    Responsible for ANY de-serialization or parsing of tuples returned from
+    the server. Calls to the UI should be clean, readable, and use objects
+    whenever possible.
+
+    Callback methods for a method X should be named X_success_cb and 
+    X_success_failure_cb.
     """
 
     def __init__(self, ui):
@@ -75,9 +82,9 @@ class RounderNetworkClient(pb.Referenceable):
         """ Request a list of tables from the server. """
         logger.debug("requesting table list")
         d = self.perspective.callRemote("list_tables")
-        d.addCallback(self.got_table_list)
+        d.addCallback(self.get_table_list_success_cb)
 
-    def got_table_list(self, data):
+    def get_table_list_success_cb(self, data):
         """ Called when a list of tables is received. """
         logger.debug("got table list")
         self.ui.got_table_list(data)
@@ -86,9 +93,9 @@ class RounderNetworkClient(pb.Referenceable):
         """ Open a table. """
         logger.debug("Opening table: %s" % table_id)
         d = self.perspective.callRemote("open_table", table_id)
-        d.addCallback(self.table_opened)
+        d.addCallback(self.open_table_success_cb)
 
-    def table_opened(self, data):
+    def open_table_success_cb(self, data):
         """ Callback for a successful table open. """
         table_view = data[0]
         table_state = loads(data[1])
@@ -96,12 +103,12 @@ class RounderNetworkClient(pb.Referenceable):
         self.table_views[table_state.id] = table_view
         self.ui.table_opened(table_state)
 
-    def sit(self, table_id, seat):
+    def take_seat(self, table_id, seat):
         """ Request the specified seat index at the specified table. """
         d= self.table_views[table_id].callRemote("sit", seat)
-        d.addCallback(self.sit_success)
+        d.addCallback(self.take_seat_success_cb)
 
-    def sit_success(self, data):
+    def take_seat_success_cb(self, data):
         """ Callback for successfully sitting down. """
         table_id = data[0]
         seat_num = data[1]
