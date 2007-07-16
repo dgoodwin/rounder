@@ -22,7 +22,6 @@
 
 from logging import getLogger
 logger = getLogger("rounder.game")
-from string import lower
 
 from pokereval import PokerEval
 
@@ -520,13 +519,13 @@ class TexasHoldemGame(Game):
         pockets = []
         for p in self.active_players:
             cards = []
-            cards.append(lower(str(p.cards[0])))
-            cards.append(lower(str(p.cards[1])))
+            cards.append(str(p.cards[0]).lower())
+            cards.append(str(p.cards[1]).lower())
             pockets.append(cards)
 
         board = []
         for c in self.community_cards:
-            board.append(lower(str(c)))
+            board.append(str(c).lower())
 
         evaluator = PokerEval()
         result = evaluator.winners(game="holdem", pockets=pockets,
