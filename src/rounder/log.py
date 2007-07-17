@@ -37,7 +37,7 @@ def setup_logging(conf_file_locations):
             break
 
     if actual_log_conf_location != None:
-        logging.config.fileConfig(expanduser(location))
+        logging.config.fileConfig(expanduser(actual_log_conf_location))
     else:
         print("Unable to locate logging configuration in the " + \
             "following locations:")
