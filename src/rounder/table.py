@@ -38,7 +38,7 @@ MIN_PLAYERS_FOR_HAND = 2
 # a database auto-increment down the road.
 table_id_counter = 0
 
-class Seats:
+class Seats(object):
     """ 
     Data structure to manage players seated at the table.
     Tracks the dealer, small blind, big blind, and provides convenience
@@ -142,7 +142,7 @@ class Seats:
 
 
 
-class Table:
+class Table(object):
 
     """ 
     Representation of a table at which a poker game is taking place.

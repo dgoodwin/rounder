@@ -162,7 +162,7 @@ class GameStateMachine:
 
 
 
-class Game:
+class Game(object):
 
     """ Parent class of all poker games. """
 
