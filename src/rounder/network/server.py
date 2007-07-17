@@ -104,7 +104,7 @@ class RounderRealm:
         assert pb.IPerspective in interfaces
         avatar = User(avatarId, self.server)
         avatar.attached(mind)
-        return pb.IPerspective, avatar, lambda a=avatar:a.detached(mind)
+        return pb.IPerspective, avatar, lambda a = avatar : a.detached(mind)
 
 
 

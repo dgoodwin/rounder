@@ -110,7 +110,7 @@ class Seats(object):
             raise RounderException("Small blind already defined: %s" % 
                 self.get_player(self.__small_blind_index))
 
-        if self.dealer== None:
+        if self.dealer == None:
             raise RounderException("Need a dealer before small blind.")
 
         if len(self.active_players) == 2:
@@ -130,7 +130,7 @@ class Seats(object):
             raise RounderException("Big blind already defined: %s" % 
                 self.get_player(self.__big_blind_index))
 
-        if self.dealer== None:
+        if self.dealer == None:
             raise RounderException("Need a dealer before big blind.")
 
         if len(self.active_players) == 2:
