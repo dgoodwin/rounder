@@ -504,7 +504,8 @@ class TexasHoldemGame(Game):
         else:
             logger.debug("Actions still pending:")
             for p in self.pending_actions.keys():
-                logger.debug("   " + p.name + " " + str(self.pending_actions[p]))
+                logger.debug("   " + p.name + " " +
+                        str(self.pending_actions[p]))
 
     def game_over(self):
         """
