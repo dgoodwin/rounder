@@ -108,7 +108,7 @@ class Card:
                 raise RounderException("Bad card: " + rank)
             suit = rank[-1:]
             rank = rank[:-1]
-        self.__create_card(rank,suit)
+        self.__create_card(rank, suit)
 
     def __create_card(self, rank, suit):
         if type(rank) == types.IntType and rank >= 2 and rank <= 14:

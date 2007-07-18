@@ -38,7 +38,7 @@ MIN_PLAYERS_FOR_HAND = 2
 # a database auto-increment down the road.
 table_id_counter = 0
 
-class Seats:
+class Seats(object):
     """ 
     Data structure to manage players seated at the table.
     Tracks the dealer, small blind, big blind, and provides convenience
@@ -110,7 +110,7 @@ class Seats:
             raise RounderException("Small blind already defined: %s" % 
                 self.get_player(self.__small_blind_index))
 
-        if self.dealer== None:
+        if self.dealer == None:
             raise RounderException("Need a dealer before small blind.")
 
         if len(self.active_players) == 2:
@@ -130,7 +130,7 @@ class Seats:
             raise RounderException("Big blind already defined: %s" % 
                 self.get_player(self.__big_blind_index))
 
-        if self.dealer== None:
+        if self.dealer == None:
             raise RounderException("Need a dealer before big blind.")
 
         if len(self.active_players) == 2:
@@ -142,7 +142,7 @@ class Seats:
 
 
 
-class Table:
+class Table(object):
 
     """ 
     Representation of a table at which a poker game is taking place.

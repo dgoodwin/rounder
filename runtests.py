@@ -48,7 +48,6 @@ import configureLogging
 # Import all test modules here:
 import cardtests
 import decktests
-import handtests
 import pokerroomtests
 import tabletests
 import playertests
@@ -67,7 +66,6 @@ def suite():
     return TestSuite((
         cardtests.suite(),
         decktests.suite(),
-#        handtests.suite(), # defunct
         pokerroomtests.suite(),
         tabletests.suite(),
         playertests.suite(),

@@ -33,8 +33,7 @@ from rounder.table import Table
 from rounder.currency import Currency
 from rounder.dto import TableState
 from rounder.player import Player
-from rounder.currency import Currency
-from rounder.network.serialize import register_message_classes, dumps, loads
+from rounder.network.serialize import register_message_classes, dumps
 
 SERVER_PORT = 35100
 
@@ -102,7 +101,7 @@ class RounderRealm:
         assert pb.IPerspective in interfaces
         avatar = User(avatarId, self.server)
         avatar.attached(mind)
-        return pb.IPerspective, avatar, lambda a=avatar:a.detached(mind)
+        return pb.IPerspective, avatar, lambda a = avatar : a.detached(mind)
 
 
 

@@ -27,7 +27,7 @@ from twisted.cred import credentials
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
-from rounder.network.serialize import dumps, loads
+from rounder.network.serialize import loads
 
 class RounderNetworkClient(pb.Referenceable):
 
@@ -105,7 +105,7 @@ class RounderNetworkClient(pb.Referenceable):
 
     def take_seat(self, table_id, seat):
         """ Request the specified seat index at the specified table. """
-        d= self.table_views[table_id].callRemote("sit", seat)
+        d = self.table_views[table_id].callRemote("sit", seat)
         d.addCallback(self.take_seat_success_cb)
 
     def take_seat_success_cb(self, data):

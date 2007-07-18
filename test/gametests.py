@@ -27,10 +27,9 @@ import unittest
 
 import settestpath
 
-from rounder.action import SitOut, PostBlind, Call, Raise, Fold
+from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
-from rounder.player import Player
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act, \
     split_pot
 from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \

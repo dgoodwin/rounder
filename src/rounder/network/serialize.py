@@ -38,11 +38,11 @@ def register_message_classes():
 
 def dumps(obj):
     """ Serialize the given object and return it's string form. """
-    str = cerealizer.dumps(obj)
-    return str
+    objstr = cerealizer.dumps(obj)
+    return objstr
 
-def loads(str):
+def loads(objstr):
     """ De-serialize the given string into it's original form. """
-    obj = cerealizer.loads(str)
+    obj = cerealizer.loads(objstr)
     logger.debug("De-serialized object: %s" % obj)
     return obj

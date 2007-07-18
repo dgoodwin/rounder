@@ -24,8 +24,6 @@ import unittest
 
 import settestpath
 
-import rounder.card
-
 from rounder.card import SPADE
 from rounder.card import DIAMOND
 from rounder.card import HEART

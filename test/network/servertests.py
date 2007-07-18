@@ -28,7 +28,6 @@ import unittest
 import settestpath
 
 from rounder.network.server import RounderNetworkServer, User, TableView
-from rounder.dto import TableState
 
 class RounderNetworkServerTests(unittest.TestCase):
 
