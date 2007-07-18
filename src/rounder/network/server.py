@@ -118,6 +118,7 @@ class User(pb.Avatar):
         self.name = name
         self.server = server
         self.server.users[self.name] = self
+        self.remote = None
 
     def attached(self, mind):
         self.remote = mind
