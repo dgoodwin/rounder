@@ -108,20 +108,25 @@ class Card:
                 raise RounderException("Bad card: " + rank)
             suit = rank[-1:]
             rank = rank[:-1]
-        self.__create_card(rank, suit)
 
-    def __create_card(self, rank, suit):
+        self.rank = self._parse_rank(rank)
+        self.suit = self._parse_suit(suit)
+
+    def _parse_rank(self, rank):
+        """ Check the rank value to ensure it is valid. """
         if type(rank) == types.IntType and rank >= 2 and rank <= 14:
-            self.rank = rank
+            return rank
         elif STRING_TO_RANK.has_key(str(rank)):
-            self.rank = STRING_TO_RANK.get(str(rank))
+            return STRING_TO_RANK.get(str(rank))
         else:
             raise RounderException("Bad card rank: " + str(rank))
 
+    def _parse_suit(self, suit):
+        """ Check the suit value to ensure it is valid. """
         if isinstance(suit, Suit):
-            self.suit = suit
+            return suit
         elif STRING_TO_SUIT.has_key(str(suit)):
-            self.suit = STRING_TO_SUIT.get(str(suit))
+            return STRING_TO_SUIT.get(str(suit))
         else:
             raise RounderException("Bad card suit: " + str(suit))
 
