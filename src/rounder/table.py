@@ -185,8 +185,10 @@ class Table(object):
 
         Intended to be called by a parent object, usually a server.
         """
-        # TODO: raise exception here if less than 2 active players, parent
-        # could theoretically request this too early.
+        if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
+            raise RounderException(
+                "Table %s: %s players required to begin hand." %
+                (self.id, MIN_PLAYERS_FOR_HAND))
         self.seats.new_dealer()
         if self.gsm.current == None:
             self.gsm.advance()
@@ -242,7 +244,8 @@ class Table(object):
         """ 
         Put the table on hold while we wait for more players. 
 
-        Parent will normally restart the action.
+        Parent will normally restart the action. Should never be called when
+        a hand is already underway.
         """
         logger.info("Table %s: Waiting for more players.")
         self.gsm.reset()
@@ -324,13 +327,13 @@ class Table(object):
                     (self.id))
                 self.wait()
 
-            if find_action_in_list(PostBlind, pending_actions_copy) != None and \
-                self.gsm.get_current_state() == STATE_SMALL_BLIND:
+            if find_action_in_list(PostBlind, pending_actions_copy) != None \
+                and self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 p.sit_out()
                 self.prompt_small_blind()
 
-            if find_action_in_list(PostBlind, pending_actions_copy) != None and \
-                self.gsm.get_current_state() == STATE_BIG_BLIND:
+            if find_action_in_list(PostBlind, pending_actions_copy) != None \
+                and self.gsm.get_current_state() == STATE_BIG_BLIND:
                 p.sit_out()
                 if len(self.seats.active_players) == 2:
                     # if down to heads up, we need a different small blind:

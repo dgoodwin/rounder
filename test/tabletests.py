@@ -134,6 +134,10 @@ class TableTests(unittest.TestCase):
 
     # def test_not_enough_players_to_start_game
 
+    def test_begin_with_too_few_players(self):
+        self.__create_table(1, 0)
+        self.assertRaises(RounderException, self.table.begin)
+
     def test_standard_post_blinds(self):
         self.__create_table(3, 0)
         self.table.begin()
