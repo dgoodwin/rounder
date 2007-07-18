@@ -45,12 +45,10 @@ class TestClientUI:
         self.client.connect('localhost', SERVER_PORT, "joe", "password")
 
     def connected(self):
-
         print "Connected!"
         tables = self.client.get_table_list()
 
     def got_table_list(self, tables):
-
         print "got list of tables:"
         for t in tables:
             print "   %s" % t[1]
@@ -60,6 +58,7 @@ class TestClientUI:
 
     def table_opened(self, table_state):
         self.client.take_seat(table_state.id, 0)
+        table_state.print_state()
 
 
 

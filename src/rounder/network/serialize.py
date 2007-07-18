@@ -25,10 +25,12 @@ logger = getLogger("rounder.serialize")
 
 import cerealizer
 from rounder.dto import TableState
+from rounder.card import Card
 
 def register_message_classes():
     """ Registers all classes we'll be serializing with cerealizer. """
     l = [
+        Card,
         TableState,
     ]
     for message_class in l:

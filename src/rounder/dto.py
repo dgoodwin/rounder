@@ -35,6 +35,8 @@ class TableState:
     def __init__(self, table):
         self.id = table.id
         self.name = table.name
+        # TODO: board cards
+        # TODO: player states
 
         # for now represent seated players as a list of tuples, player name
         # and stack size:
@@ -46,6 +48,10 @@ class TableState:
             else:
                 self.seats.append((p.name, p.chips))
 
-
+    def print_state(self):
+        """ Print the table state. """
+        print "Table state for table: %s" % self.name
+        for s in self.seats:
+            print "   %s - %s" % (s[0], s[1])
 
 

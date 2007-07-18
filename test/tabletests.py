@@ -28,7 +28,7 @@ from rounder.table import Table, Seats
 from rounder.player import Player
 from rounder.core import RounderException
 from rounder.currency import Currency
-from rounder.table import STATE_SMALL_BLIND, STATE_BIG_BLIND
+from rounder.table import STATE_SMALL_BLIND, STATE_BIG_BLIND, HAND_UNDERWAY
 from rounder.limit import FixedLimit
 from rounder.action import SitOut, PostBlind
 
@@ -155,6 +155,7 @@ class TableTests(unittest.TestCase):
         self.assertEquals(None, self.table.big_blind)
         self.table.process_action(post_bb_action)
         self.assertEquals(bb, self.table.big_blind)
+        self.assertEquals(HAND_UNDERWAY, self.table.gsm.get_current_state())
 
     def test_small_blind_sitout_three_handed(self):
         self.__create_table(3, 0)
@@ -228,8 +229,6 @@ class TableTests(unittest.TestCase):
         self.assertEquals(self.players[0], self.table.dealer)
         self.assertEquals(None, self.table.small_blind)
         self.assertEquals(None, self.table.big_blind)
-
-    # def test_dealer_maintained_when_table_dies
 
 
 

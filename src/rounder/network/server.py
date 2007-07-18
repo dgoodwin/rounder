@@ -52,15 +52,12 @@ class RounderNetworkServer:
     def __init__(self):
         self.users = {} # hash of usernames to their perspectives
         self.table_views = {}
-        self.table_counter = 0 # used to name the tables for now
 
     def create_table(self, name):
         """ Create a new table. """
         # TODO: stop hard coding everything :)
         limit = FixedLimit(small_bet=Currency(1), big_bet=Currency(2))
-        self.table_counter += 1
-        table_name = "Table %s" % self.table_counter
-        table = Table(name=table_name, limit=limit, seats=10)
+        table = Table(name=name, limit=limit, seats=10)
 
         view = TableView(table, self)
         self.table_views[table.id] = view

@@ -185,6 +185,7 @@ class Game:
 
         # List of players passed in should have empty seats and players
         # sitting out filtered out:
+        # TODO: check for empty/sitting out spots:
         self.players = players
 
         # A map of player to amount contributed to the pot, can be used both

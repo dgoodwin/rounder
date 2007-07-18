@@ -25,7 +25,7 @@ logger = getLogger("rounder.table")
 
 from rounder.action import PostBlind, SitOut
 from rounder.core import RounderException
-from rounder.game import GameStateMachine
+from rounder.game import GameStateMachine, TexasHoldemGame
 from rounder.utils import find_action_in_list
 
 STATE_SMALL_BLIND = "small_blind"
@@ -148,7 +148,7 @@ class Table:
     Representation of a table at which a poker game is taking place.
     """
 
-    def __init__(self, name, limit, seats=10):
+    def __init__(self, name, limit, seats=10, game_over_callback=None):
         global table_id_counter
         table_id_counter += 1
         self.id = table_id_counter
@@ -161,9 +161,18 @@ class Table:
         self.gsm.add_state(STATE_SMALL_BLIND, self.prompt_small_blind)
         self.gsm.add_state(STATE_BIG_BLIND, self.prompt_big_blind)
         self.gsm.add_state(HAND_UNDERWAY, self.__begin_hand)
-        logger.debug("Created table: %s" % self)
+        logger.info("Created table: %s" % self)
 
         self.observers = []
+        self.game = None
+
+        # Action is typically driven by a parent object who decides when there
+        # are enough players seated at the table to begin a game, as well as 
+        # when a new hand should be started after one has finished. While 
+        # requests to sit will normally filter in through the parent object,
+        # it will need a callback to signal when a hand has been completed 
+        # at a particular table:
+        self.game_over_callback = game_over_callback
 
     def __repr__(self):
         return "%s (#%s)" % (self.name, self.id)
@@ -173,10 +182,48 @@ class Table:
         Select a new dealer and prompt for players to agree to post
         their blinds. Once we receive the appropriate responses the hand
         will be started. 
+
+        Intended to be called by a parent object, usually a server.
         """
+        # TODO: raise exception here if less than 2 active players, parent
+        # could theoretically request this too early.
         self.seats.new_dealer()
         if self.gsm.current == None:
             self.gsm.advance()
+
+    def __find_players_index(self, player_list, player):
+        """ This needs to go... """
+        i = 0
+        for p in player_list:
+            if p.name == player.name:
+                return i
+            i += 1
+        return None
+
+    def __begin_hand(self):
+        """ 
+        GameStateMachine callback to actually begin a game.
+        """
+        logger.info("Table %s: New game starting" % self.id)
+        active_players = self.seats.active_players
+
+        dealer_index = self.__find_players_index(active_players, 
+                self.seats.dealer)
+        sb_index = self.__find_players_index(active_players, 
+                self.small_blind)
+        bb_index = self.__find_players_index(active_players, 
+                self.big_blind)
+
+        self.game = TexasHoldemGame(limit=self.limit, 
+            players=self.seats.active_players, dealer_index=dealer_index, 
+            sb_index=sb_index, bb_index=bb_index,
+            callback=self.game_over_callback)
+
+    def game_over(self):
+        """ Called by a game when it has finished. """
+        logger.debug("Table %s: Game over" % self.id)
+        if self.game_over_callback != None:
+            self.game_over_callback()
 
     def __restart(self):
         """
@@ -184,7 +231,7 @@ class Table:
         we're three handed and the big blind sits out, requiring that we
         find a new small blind.
         """
-        logger.debug("restarting hand")
+        logger.debug("Table %s: Restarting hand" % self.id)
         # TODO: exception if game is already underway
         self.small_blind = None
         self.big_blind = None
@@ -192,19 +239,22 @@ class Table:
         self.gsm.advance()
 
     def wait(self):
-        """ Put the table on hold while we wait for more players. """
+        """ 
+        Put the table on hold while we wait for more players. 
+
+        Parent will normally restart the action.
+        """
+        logger.info("Table %s: Waiting for more players.")
         self.gsm.reset()
         self.small_blind = None
         self.big_blind = None
-
-    def __begin_hand(self):
-        pass
+        self.game = None
 
     def seat_player(self, player, seat_num):
         self.seats.seat_player(player, seat_num)
         player.table = self
-        logger.debug("%s seated at table %s in seat %s" % (player.name,
-            player.table.name, seat_num))
+        logger.debug("Table %s: %s took seat %s" % (self.id, player.name,
+            seat_num))
 
     def prompt_small_blind(self):
         """
@@ -214,7 +264,8 @@ class Table:
         game itself is responsible for collecting those blinds.
         """
         sb = self.seats.small_blind_to_prompt()
-        logger.debug("requesting small blind from: " + sb.name)
+        logger.debug("Table %s: Requesting small blind from: %s" % (self.id,
+            sb.name))
         post_sb = PostBlind(sb, self.limit.small_blind)
         sit_out = SitOut(sb)
         self.prompt_player(sb, [post_sb, sit_out])
@@ -233,14 +284,15 @@ class Table:
 
         # If heads-up, non-dealer becomes the big blind:
         bb = self.seats.big_blind_to_prompt()
-        logger.debug("requesting big blind from: %s" % bb.name)
+        logger.debug("Table %s: Requesting big blind from: %s" % (self.id,
+            bb.name))
         post_bb = PostBlind(bb, self.limit.big_blind)
         sit_out = SitOut(bb)
         self.prompt_player(bb, [post_bb, sit_out])
 
 
     def process_action(self, action):
-        logger.info("Incoming action: " + str(action))
+        logger.info("Table %s: Incoming action: %s" % (self.id, action))
         p = action.player
 
         # TODO: verify the action coming back has valid params?
@@ -262,11 +314,14 @@ class Table:
 
         elif isinstance(action, SitOut):
 
-            logger.info("Sitting player out: " + str(p))
+            logger.info("Table %s: Sitting player out: %s" % (self.id, p))
             p.sit_out()
 
             if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
-                logger.debug("Not enough players for a new hand.")
+                # TODO: fishy, might need some work, suspect this is going
+                # to interfere with hands underway.
+                logger.debug("Table %s: Not enough players for a new hand." %
+                    (self.id))
                 self.wait()
 
             if find_action_in_list(PostBlind, pending_actions_copy) != None and \
