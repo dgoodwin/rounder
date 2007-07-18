@@ -96,6 +96,9 @@ class RounderRealm:
 
     """ Creates perspectives/avatars. """
 
+    def __init__(self):
+        self.server = None
+
     implements(portal.IRealm) 
     def requestAvatar(self, avatarId, mind, *interfaces):
         assert pb.IPerspective in interfaces
