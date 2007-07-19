@@ -33,6 +33,7 @@ from rounder.table import Table
 from rounder.currency import Currency
 from rounder.dto import TableState
 from rounder.player import Player
+from rounder.core import RounderException
 from rounder.network.serialize import register_message_classes, dumps
 
 SERVER_PORT = 35100
@@ -63,6 +64,7 @@ class RounderNetworkServer:
         return table
 
     def list_tables(self):
+        """ Returns a list of visible tables to the client. """
         tables = []
         for t in self.table_views.values():
             tables.append((t.table.id, t.table.name))
@@ -159,6 +161,19 @@ class TableView(pb.Viewable):
 
     def view_sit(self, from_user, seat):
         return self.server.seat_player(from_user, self.table, seat)
+
+    def view_start_game(self, from_user):
+        """ 
+        Called when a user requests a new hand be started.
+
+        Verifies that when this request is received, a hand is not already
+        underway, and that we have enough players, before anything
+        actually happens.
+        """
+        try:
+            self.table.begin()
+        except RounderException:
+            logger.warn("Error starting game at table. Not enough players?")
          
 
 

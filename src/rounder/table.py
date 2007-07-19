@@ -65,6 +65,13 @@ class Seats(object):
         if self.__seats[seat_number] != None:
             raise RounderException("Seat already occupied: " + str(seat_number))
 
+        # Ensure a player can't get seated twice at one table:
+        for seat in self.__seats:
+            if seat != None:
+                if seat.name == player.name:
+                    raise RounderException("%s already seated at table" %
+                        (player.name))
+
         self.__seats[seat_number] = player
         player.seat = seat_number
 
@@ -364,3 +371,10 @@ class Table(object):
         """ Notify observers of this table that a player was seated. """
         for o in self.observers:
             o.notify_player_seated
+
+    def game_underway(self):
+        """ Return True if there's currently a game underway at this table. """
+        print self.gsm.current
+        if self.gsm.get_current_state() == HAND_UNDERWAY:
+            return True
+        return False

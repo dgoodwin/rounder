@@ -28,6 +28,7 @@ import unittest
 import settestpath
 
 from rounder.network.server import RounderNetworkServer, User, TableView
+from rounder.table import STATE_SMALL_BLIND
 
 class RounderNetworkServerTests(unittest.TestCase):
 
@@ -39,17 +40,38 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.table = self.server.create_table(self.table_name)
         self.table_id = self.table.id
 
-        self.user = User("Test Player 1", self.server)
+        self.user1 = User("Test Player 1", self.server)
+        self.user2 = User("Test Player 2", self.server)
 
     def test_open_table(self):
-        tuple = self.server.open_table(self.table_id, self.user)
+        tuple = self.server.open_table(self.table_id, self.user1)
         self.assertTrue(isinstance(tuple[0], TableView))
 
     def test_list_tables(self):
         table_list = self.server.list_tables()
 
     def test_seat_player(self):
-        self.server.seat_player(self.user, self.table, 0)
+        self.server.seat_player(self.user1, self.table, 0)
+
+    def test_start_game(self):
+        tuple = self.server.open_table(self.table_id, self.user1)
+        user1_table_view = tuple[0]
+        user1_table_view.view_sit(self.user1, 0)
+
+        tuple = self.server.open_table(self.table_id, self.user2)
+        user2_table_view = tuple[0]
+        user1_table_view.view_sit(self.user2, 1)
+
+        user1_table_view.view_start_game(self.user1)
+        self.assertEquals(STATE_SMALL_BLIND, 
+            self.table.gsm.get_current_state())
+
+    def test_start_game_only_one_player(self):
+        tuple = self.server.open_table(self.table_id, self.user1)
+        table_view = tuple[0]
+        table_view.view_start_game(self.user1)
+        self.assertEquals(None, self.table.gsm.get_current_state())
+
 
 
 

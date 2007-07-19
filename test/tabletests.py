@@ -160,6 +160,7 @@ class TableTests(unittest.TestCase):
         self.table.process_action(post_bb_action)
         self.assertEquals(bb, self.table.big_blind)
         self.assertEquals(HAND_UNDERWAY, self.table.gsm.get_current_state())
+        self.assertTrue(self.table.game_underway())
 
     def test_small_blind_sitout_three_handed(self):
         self.__create_table(3, 0)
@@ -233,6 +234,13 @@ class TableTests(unittest.TestCase):
         self.assertEquals(self.players[0], self.table.dealer)
         self.assertEquals(None, self.table.small_blind)
         self.assertEquals(None, self.table.big_blind)
+
+    def test_player_attempts_to_be_seated_twice(self):
+        # No legit client would allow this, but a modified one might:
+        self.__create_table(2, 0)
+        same_player = Player('player1', Currency(CHIPS))
+        self.assertRaises(RounderException, self.table.seat_player,
+            same_player, 5)
 
 
 
