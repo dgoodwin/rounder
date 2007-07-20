@@ -200,7 +200,8 @@ class Table(object):
         if self.gsm.current == None:
             self.gsm.advance()
 
-    def __find_players_index(self, player_list, player):
+    @staticmethod
+    def __find_players_index(player_list, player):
         """ This needs to go... """
         i = 0
         for p in player_list:
@@ -280,7 +281,8 @@ class Table(object):
         sit_out = SitOut(sb)
         self.prompt_player(sb, [post_sb, sit_out])
 
-    def prompt_player(self, player, actions_list):
+    @staticmethod
+    def prompt_player(player, actions_list):
         #self.pending_actions[player] = actions_list
         player.prompt(actions_list)
 

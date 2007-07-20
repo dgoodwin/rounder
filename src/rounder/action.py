@@ -58,7 +58,8 @@ class Action:
         """
         pass
 
-    def _check_params_length(self, params, expected_length):
+    @staticmethod
+    def _check_params_length(params, expected_length):
         """ 
         Raise an ActionValidationException if the params list is not of the
         expected length.

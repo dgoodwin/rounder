@@ -69,19 +69,22 @@ class RounderGtk:
 
         main_window.show_all()
 
-    def main(self):
+    @staticmethod
+    def main():
 
         """ Launch the GTK main loop. """
 
         gtk.main()
 
-    def show_connect_dialog(self, widget):
+    @staticmethod
+    def show_connect_dialog(widget):
         
         """ Opens the connect to server dialog. """
 
         connect_dialog = ConnectDialog()
 
-    def shutdown(self, widget):
+    @staticmethod
+    def shutdown(widget):
 
         """ Closes the application. """
 

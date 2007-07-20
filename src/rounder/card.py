@@ -112,7 +112,8 @@ class Card:
         self.rank = self._parse_rank(rank)
         self.suit = self._parse_suit(suit)
 
-    def _parse_rank(self, rank):
+    @staticmethod
+    def _parse_rank(rank):
         """ Check the rank value to ensure it is valid. """
         if type(rank) == types.IntType and rank >= 2 and rank <= 14:
             return rank
@@ -121,7 +122,8 @@ class Card:
         else:
             raise RounderException("Bad card rank: " + str(rank))
 
-    def _parse_suit(self, suit):
+    @staticmethod
+    def _parse_suit(suit):
         """ Check the suit value to ensure it is valid. """
         if isinstance(suit, Suit):
             return suit

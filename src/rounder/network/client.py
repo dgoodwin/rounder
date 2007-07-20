@@ -69,7 +69,8 @@ class RounderNetworkClient(pb.Referenceable):
         def1.addCallback(self.connected)
         reactor.run()
 
-    def shutdown(self):
+    @staticmethod
+    def shutdown():
         reactor.stop()
 
     def connected(self, perspective):
@@ -84,7 +85,8 @@ class RounderNetworkClient(pb.Referenceable):
         d = self.perspective.callRemote("list_tables")
         d.addCallback(self.get_table_list_success_cb)
 
-    def get_table_list_success_cb(self, data):
+    @staticmethod
+    def get_table_list_success_cb(data):
         """ Called when a list of tables is received. """
         logger.debug("got table list")
         self.ui.got_table_list(data)
