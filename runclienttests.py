@@ -56,8 +56,15 @@ class TestClientUI:
         self.client.open_table(tables[0][0])
 
     def table_opened(self, table_state):
-        self.client.take_seat(table_state.id, 0)
         table_state.print_state()
+        # Find the first available seat:
+        for i in range(10):
+            if table_state.seats[i] == None:
+                self.client.take_seat(table_state.id, 0)
+                break
+
+    def took_seat(self, table_id, seat_num):
+        self.client.start_game(table_id)
 
 
 

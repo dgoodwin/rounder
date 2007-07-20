@@ -44,14 +44,31 @@ class TableState:
         for seat_num in range(table.seats.get_size()):
             p = table.seats.get_player(seat_num)
             if p is None:
-                self.seats.append((None, None))
+                self.seats.append(None)
             else:
-                self.seats.append((p.name, p.chips))
+                self.seats.append(PlayerState(p))
 
     def print_state(self):
         """ Print the table state. """
         print "Table state for table: %s" % self.name
         for s in self.seats:
-            print "   %s - %s" % (s[0], s[1])
+            print s
 
 
+
+class PlayerState:
+
+    """ 
+    Representation of a Player safe for transmitting over the wire.
+    """
+
+    def __init__(self, player):
+        self.name = player.name
+        self.chips = player.chips
+        self.seat = player.seat
+        self.sitting_out = player.sitting_out
+        self.folded = player.folded
+
+
+    def __str__(self):
+        return "%s - %s" % (self.name, self.chips)

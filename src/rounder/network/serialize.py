@@ -24,7 +24,7 @@ from logging import getLogger
 logger = getLogger("rounder.serialize")
 
 import cerealizer
-from rounder.dto import TableState
+from rounder.dto import TableState, PlayerState
 from rounder.card import Card
 from rounder.currency import Currency
 
@@ -34,6 +34,7 @@ def register_message_classes():
         Card,
         TableState,
         Currency,
+        PlayerState,
     ]
     for message_class in l:
         cerealizer.register(message_class)

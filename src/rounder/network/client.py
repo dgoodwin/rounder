@@ -114,3 +114,8 @@ class RounderNetworkClient(pb.Referenceable):
         seat_num = data[1]
         logger.debug("Succesfully took seat %s at table: %s" % (seat_num,
             table_id))
+        self.ui.took_seat(table_id, seat_num)
+
+    def start_game(self, table_id):
+        """ Request the server start a new game at a table. """
+        d = self.table_views[table_id].callRemote("start_game")
