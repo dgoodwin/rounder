@@ -376,7 +376,6 @@ class Table(object):
 
     def game_underway(self):
         """ Return True if there's currently a game underway at this table. """
-        print self.gsm.current
         if self.gsm.get_current_state() == HAND_UNDERWAY:
             return True
         return False
