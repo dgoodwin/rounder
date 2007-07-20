@@ -26,7 +26,7 @@ logger = getLogger("rounder.game")
 from pokereval import PokerEval
 
 from rounder.action import SitOut, Call, Raise, Fold
-from rounder.core import RounderException, NotImplementedException
+from rounder.core import RounderException
 from rounder.deck import Deck
 from rounder.currency import Currency
 
@@ -201,7 +201,7 @@ class Game(object):
     def start(self):
         """ Begin the hand. """
         # Shouldn't be called on the base class.
-        raise NotImplementedException()
+        raise NotImplementedError()
 
     def process_action(self, action):
         """ 
@@ -215,7 +215,7 @@ class Game(object):
         the parameters returned from the player. (to prevent users from
         modifying the client source and returning bogus actions)
         """
-        raise NotImplementedException()
+        raise NotImplementedError()
 
     def abort(self):
         """ 
