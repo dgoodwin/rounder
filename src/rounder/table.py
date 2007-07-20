@@ -46,10 +46,7 @@ class Seats(object):
     """
 
     def __init__(self, num_seats=10):
-        self.__seats = []
-        for i in range(num_seats):
-            self.__seats.append(None)
-
+        self.__seats = [None] * num_seats
         self.dealer = None
         self.small_blind = None
         self.big_blind = None
