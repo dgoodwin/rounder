@@ -152,7 +152,7 @@ class Table(object):
     Representation of a table at which a poker game is taking place.
     """
 
-    def __init__(self, name, limit, seats=10, game_over_callback=None):
+    def __init__(self, name, limit, seats=10, server=None):
         global table_id_counter
         table_id_counter += 1
         self.id = table_id_counter
@@ -170,13 +170,10 @@ class Table(object):
         self.observers = []
         self.game = None
 
-        # Action is typically driven by a parent object who decides when there
-        # are enough players seated at the table to begin a game, as well as 
-        # when a new hand should be started after one has finished. While 
-        # requests to sit will normally filter in through the parent object,
-        # it will need a callback to signal when a hand has been completed 
-        # at a particular table:
-        self.game_over_callback = game_over_callback
+        # Optional server object represents a parent object that creates tables.
+        # If provided, it will be used for any communication with players,
+        # as well as notified whenever a hand has ended.
+        self.server = server
 
     def __repr__(self):
         return "%s (#%s)" % (self.name, self.id)
@@ -224,12 +221,14 @@ class Table(object):
         self.game = TexasHoldemGame(limit=self.limit, 
             players=self.seats.active_players, dealer_index=dealer_index, 
             sb_index=sb_index, bb_index=bb_index,
-            callback=self.game_over_callback)
+            callback=self.game_over)
 
     def game_over(self):
         """ Called by a game when it has finished. """
-        logger.debug("Table %s: Game over" % self.id)
-        if self.game_over_callback != None:
+        logger.info("Table %s: Game over" % self.id)
+
+        # Pass control up to the server if we were provided one.
+        if self.server != None:
             self.game_over_callback()
 
     def __restart(self):
@@ -274,14 +273,20 @@ class Table(object):
         sb = self.seats.small_blind_to_prompt()
         logger.debug("Table %s: Requesting small blind from: %s" % (self.id,
             sb.name))
-        post_sb = PostBlind(sb, self.limit.small_blind)
-        sit_out = SitOut(sb)
+        post_sb = PostBlind(self.limit.small_blind)
+        sit_out = SitOut()
         self.prompt_player(sb, [post_sb, sit_out])
 
-    @staticmethod
-    def prompt_player(player, actions_list):
+    def prompt_player(self, player, actions_list):
         #self.pending_actions[player] = actions_list
+
+        # TODO: is this even needed?
+        # Doesn't actuall prompt the player.
         player.prompt(actions_list)
+
+        if self.server != None:
+            self.server.prompt_player(self, player.name, actions_list)
+
 
     def prompt_big_blind(self):
         """
@@ -295,18 +300,31 @@ class Table(object):
         bb = self.seats.big_blind_to_prompt()
         logger.debug("Table %s: Requesting big blind from: %s" % (self.id,
             bb.name))
-        post_bb = PostBlind(bb, self.limit.big_blind)
-        sit_out = SitOut(bb)
+        post_bb = PostBlind(self.limit.big_blind)
+        sit_out = SitOut()
         self.prompt_player(bb, [post_bb, sit_out])
 
 
-    def process_action(self, action):
+    def process_action(self, username, action):
         logger.info("Table %s: Incoming action: %s" % (self.id, action))
-        p = action.player
+
+        # TODO: clean this up, game tracks pending actions by player...
+        # Must be a better way to find the player we want and validate
+        # the incoming action.
+        p = None
+        for i in range(self.seats.get_size()):
+            player_to_check = self.seats.get_player(i)
+            if player_to_check != None and player_to_check.name == username:
+                p = player_to_check
+                break
+
+        if p is None:
+            raise RounderException("Unable to find player %s at table %s" % 
+                (username, self.id))
 
         # TODO: verify the action coming back has valid params?
         # TODO: asserting the player responding to the action actually was
-        #   given the option, perhaps at another layer (server?)
+        #   given the option
         
         pending_actions_copy = []
         pending_actions_copy.extend(p.pending_actions)

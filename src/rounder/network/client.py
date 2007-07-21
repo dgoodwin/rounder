@@ -50,13 +50,14 @@ class RounderNetworkClient(pb.Referenceable):
     X_success_failure_cb.
     """
 
-    def __init__(self, ui):
+    def __init__(self, username, ui):
         """ 
         Initializes a network client.
 
             ui = Reference to a client user interface where we can pass
                 responses on to.
         """
+        self.username = username
         self.ui = ui
         self.table_views = {}
 
@@ -121,3 +122,18 @@ class RounderNetworkClient(pb.Referenceable):
     def start_game(self, table_id):
         """ Request the server start a new game at a table. """
         d = self.table_views[table_id].callRemote("start_game")
+
+    def remote_prompt(self, table_id, actions):
+        """
+        Prompt player to choose one of the given actions for a table.
+        """
+        logger.debug("Table %s: %s received actions:" % (table_id, 
+            self.username))
+        deserialized_actions = []
+        for serialized_action in actions:
+            action = loads(serialized_action)
+            logger.debug("   %s" % action)
+            deserialized_actions.append(action)
+
+    def remote_print(self, msg):
+        logger.warn("Server said: %s" % msg)

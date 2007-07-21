@@ -45,7 +45,7 @@ class TestClientUI:
         global PLAYERS
         self.username = "player" + str(PLAYERS)
         PLAYERS += 1
-        self.client = RounderNetworkClient(self)
+        self.client = RounderNetworkClient(self.username, self)
         self.client.connect('localhost', SERVER_PORT, self.username, "password")
 
     def connected(self):
@@ -71,11 +71,12 @@ class TestClientUI:
     def took_seat(self, table_id, seat_num):
         # if any seats remain empty, create another dummy player, otherwise
         # request that we start a game:
-        if PLAYERS < 10:
-            TestClientUI()
-        else:
-            print "%s requesting game" % self.username
-            self.client.start_game(table_id)
+        #if PLAYERS < 10:
+        #    TestClientUI()
+        #else:
+        #    print "%s requesting game" % self.username
+        #    self.client.start_game(table_id)
+        pass
 
 
 

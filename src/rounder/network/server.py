@@ -57,7 +57,7 @@ class RounderNetworkServer:
         """ Create a new table. """
         # TODO: stop hard coding everything :)
         limit = FixedLimit(small_bet=Currency(1), big_bet=Currency(2))
-        table = Table(name=name, limit=limit, seats=10)
+        table = Table(name=name, limit=limit, seats=10, server=self)
 
         view = TableView(table, self)
         self.table_views[table.id] = view
@@ -92,9 +92,22 @@ class RounderNetworkServer:
         try:
             table.seat_player(player, seat_num)
         except RounderException, e:
-            print e
             raise e
         return (table.id, seat_num)
+
+    def game_over(self, table):
+        """ Called by a table whenever a game ends. """
+        logger.debug("Table %s: game over")
+
+    def prompt_player(self, table, username, actions):
+        """ Called by a table to prompt a player with a list of actions. """
+        logger.debug("Table %s: Prompting %s with actions:" % (table.id,
+            username))
+        serialized_actions = []
+        for action in actions:
+            logger.debug("   %s" % action)
+            serialized_actions.append(dumps(action))
+        self.users[username].prompt(table.id, serialized_actions)
 
 
 
@@ -128,6 +141,7 @@ class User(pb.Avatar):
 
     def attached(self, mind):
         self.remote = mind
+        self.remote.callRemote("print", "hello world")
 
     def detached(self, mind):
         self.remote = None
@@ -142,6 +156,27 @@ class User(pb.Avatar):
     def perspective_open_table(self, table_id):
         """ Process a users request to view a table. """
         return self.server.open_table(table_id, self)
+
+    def prompt(self, table_id, serialized_actions):
+        """ 
+        Prompt the player with a call to their remote perspective. 
+        
+        Remote could be None in the case of testing, in which case we do
+        nothing.
+        """
+        if self.remote != None:
+            print self.remote
+            #d = self.remote.callRemote("prompt", table_id, serialized_actions)
+            self.remote.callRemote("print", "hello world")
+            #d.addCallback(self.prompt_success_cb, self.prompt_failure_cb)
+
+    def prompt_success_cb(self, data):
+        """ Successful prompt callback. """
+        logger.debug("Prompt was successful.")
+
+    def prompt_failure_cb(self, data):
+        """ Failed prompt callback. """
+        logger.debug("Prompt failed.")
 
 
 

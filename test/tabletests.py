@@ -148,7 +148,7 @@ class TableTests(unittest.TestCase):
 
         # simulate player posting small blind:
         post_sb_action = find_action_in_list(PostBlind, sb.pending_actions)
-        self.table.process_action(post_sb_action)
+        self.table.process_action(sb.name, post_sb_action)
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(sb, self.table.small_blind)
         bb = self.players[2]
@@ -157,7 +157,7 @@ class TableTests(unittest.TestCase):
         # simulate player posting big blind:
         post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
         self.assertEquals(None, self.table.big_blind)
-        self.table.process_action(post_bb_action)
+        self.table.process_action(bb.name, post_bb_action)
         self.assertEquals(bb, self.table.big_blind)
         self.assertEquals(HAND_UNDERWAY, self.table.gsm.get_current_state())
         self.assertTrue(self.table.game_underway())
@@ -169,8 +169,8 @@ class TableTests(unittest.TestCase):
         # Player 1 rejects the small blind and chooses to sit out:
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(2, len(self.players[1].pending_actions))
-        self.table.process_action(find_action_in_list(SitOut, 
-            self.players[1].pending_actions))
+        self.table.process_action(self.players[1].name, 
+            find_action_in_list(SitOut, self.players[1].pending_actions))
         self.assertEquals(0, len(self.players[1].pending_actions))
         self.assertEquals(True, self.players[1].sitting_out)
         self.assertEquals(None, self.table.small_blind)
@@ -178,8 +178,8 @@ class TableTests(unittest.TestCase):
         # Player 0 (not 2) becomes the small blind:
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(2, len(self.players[0].pending_actions))
-        self.table.process_action(find_action_in_list(PostBlind, 
-            self.players[0].pending_actions))
+        self.table.process_action(self.players[0].name,
+            find_action_in_list(PostBlind, self.players[0].pending_actions))
         self.assertEquals(0, len(self.players[0].pending_actions))
         self.assertEquals(self.players[0], self.table.small_blind)
 
@@ -187,8 +187,8 @@ class TableTests(unittest.TestCase):
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(None, self.table.big_blind)
         self.assertEquals(2, len(self.players[2].pending_actions))
-        self.table.process_action(find_action_in_list(PostBlind, 
-            self.players[2].pending_actions))
+        self.table.process_action(self.players[2].name,
+            find_action_in_list(PostBlind, self.players[2].pending_actions))
         self.assertEquals(0, len(self.players[2].pending_actions))
         self.assertEquals(self.players[2], self.table.big_blind)
 
@@ -198,14 +198,14 @@ class TableTests(unittest.TestCase):
         self.assertEquals(self.players[0], self.table.dealer)
 
         # Player 1 posts small blind:
-        self.table.process_action(find_action_in_list(PostBlind, 
-            self.players[1].pending_actions))
+        self.table.process_action(self.players[1].name,
+            find_action_in_list(PostBlind, self.players[1].pending_actions))
         self.assertEquals(self.players[1], self.table.small_blind)
 
         # Player 2 refuses the big blind:
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
-        self.table.process_action(find_action_in_list(SitOut, 
-            self.players[2].pending_actions))
+        self.table.process_action(self.players[2].name, 
+            find_action_in_list(SitOut, self.players[2].pending_actions))
         self.assertEquals(None, self.table.small_blind)
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(2, len(self.players[0].pending_actions))
@@ -215,12 +215,12 @@ class TableTests(unittest.TestCase):
         self.__create_table(2, 0)
         self.table.begin()
 
-        self.table.process_action(find_action_in_list(PostBlind, 
-            self.players[0].pending_actions))
+        self.table.process_action(self.players[0].name,
+            find_action_in_list(PostBlind, self.players[0].pending_actions))
         self.assertEquals(self.players[0], self.table.small_blind)
 
-        self.table.process_action(find_action_in_list(PostBlind, 
-            self.players[1].pending_actions))
+        self.table.process_action(self.players[1].name, 
+            find_action_in_list(PostBlind, self.players[1].pending_actions))
         self.assertEquals(self.players[1], self.table.big_blind)
 
     def test_heads_up_small_blind_sitout(self):
@@ -228,8 +228,8 @@ class TableTests(unittest.TestCase):
         self.table.begin()
 
         # Player 0 refuses the small blind:
-        self.table.process_action(find_action_in_list(SitOut, 
-            self.players[0].pending_actions))
+        self.table.process_action(self.players[0].name, 
+            find_action_in_list(SitOut, self.players[0].pending_actions))
         self.assertEquals(None, self.table.gsm.current)
         self.assertEquals(self.players[0], self.table.dealer)
         self.assertEquals(None, self.table.small_blind)

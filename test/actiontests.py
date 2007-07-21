@@ -33,19 +33,19 @@ class RaiseTests(unittest.TestCase):
 
     def test_too_many_validation_params(self):
         p = Player(name="Player", chips=CHIPS)
-        action = Raise(p, 2, 2)
+        action = Raise(2, 2)
         self.assertRaises(ActionValidationException, action.validate, 
             ["2", "lkl", "kkak"])
 
     def test_bogus_limit_raise(self):
         p = Player(name="Player", chips=CHIPS)
-        action = Raise(p, 2, 2)
+        action = Raise(2, 2)
         self.assertRaises(ActionValidationException, action.validate,
             [3])
 
     def test_limit_raise(self):
         p = Player(name="Player", chips=CHIPS)
-        action = Raise(p, 2, 2)
+        action = Raise(2, 2)
         self.assertEquals(None, action.amount)
         action.validate([2])
         self.assertEquals(2, action.amount)

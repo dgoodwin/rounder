@@ -223,7 +223,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(3, len(player.pending_actions))
         call = find_action_in_list(Call, player.pending_actions)
         self.assertEquals(expected_amount, call.amount)
-        self.game.process_action(call)
+        self.game.process_action(player, call)
         if expected_chips:
             self.assertEquals(expected_chips, player.chips)
 
@@ -232,14 +232,14 @@ class TexasHoldemTests(unittest.TestCase):
         raise_action = find_action_in_list(Raise, player.pending_actions)
         self.assertEquals(None, raise_action.amount)
         raise_action.validate([amount])
-        self.game.process_action(raise_action)
+        self.game.process_action(player, raise_action)
         self.assertEquals(amount, raise_action.amount)
         self.assertEquals(expected_chips, player.chips)
 
     def __fold(self, player, expected_chips):
         self.assertEquals(3, len(player.pending_actions))
         fold = find_action_in_list(Fold, player.pending_actions)
-        self.game.process_action(fold)
+        self.game.process_action(player, fold)
         self.assertEquals(expected_chips, player.chips)
 
     def test_preflop_fold_to_big_blind(self):

@@ -83,11 +83,11 @@ class FixedLimit(Limit):
         logger.debug("   bet_level: %s" % bet_level)
         if in_pot is None:
             in_pot = Currency(0)
-        call_action = Call(player, current_bet - in_pot)
+        call_action = Call(current_bet - in_pot)
         if bet_level == 1:
-            raise_action = Raise(player, self.small_bet, self.small_bet)
+            raise_action = Raise(self.small_bet, self.small_bet)
         else:
-            raise_action = Raise(player, self.big_bet, self.big_bet)
-        fold_action = Fold(player)
+            raise_action = Raise(self.big_bet, self.big_bet)
+        fold_action = Fold()
         return [call_action, raise_action, fold_action]
 

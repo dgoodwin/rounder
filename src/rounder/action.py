@@ -42,8 +42,8 @@ class Action:
     sitting at a table can be faced with.
     """
 
-    def __init__(self, player):
-        self.player = player
+    def __init__(self):
+        pass
 
     def validate(self, params):
         """ 
@@ -79,13 +79,12 @@ class PostBlind(Action):
     """
     # Can double as an Ante?
 
-    def __init__(self, player, amount):
-        Action.__init__(self, player)
+    def __init__(self, amount):
+        Action.__init__(self)
         self.amount = amount
 
     def __repr__(self):
-        return "PostBlind: " + str(self.player.table) + " " + \
-            self.player.name + " $" + str(self.amount)
+        return "PostBlind: " + " $" + str(self.amount)
 
 
 
@@ -93,11 +92,11 @@ class SitOut(Action):
 
     """ Action a player can take to sit out of the next hand. """
 
-    def __init__(self, player):
-        Action.__init__(self, player)
+    def __init__(self):
+        Action.__init__(self)
 
     def __repr__(self):
-        return "SitOut: " + str(self.player.table) + " " + self.player.name
+        return "SitOut: " 
 
 
 
@@ -108,13 +107,12 @@ class Call(Action):
     next hand.
     """
 
-    def __init__(self, player, amount):
-        Action.__init__(self, player)
+    def __init__(self, amount):
+        Action.__init__(self)
         self.amount = amount
 
     def __repr__(self):
-        return "Call: " + str(self.player.table) + " " + \
-            self.player.name + " $" + str(self.amount)
+        return "Call: " + " $" + str(self.amount)
 
 
 
@@ -124,16 +122,15 @@ class Raise(Action):
     Action a player can take to raise the current bet.
     """
 
-    def __init__(self, player, max_bet, min_bet):
-        Action.__init__(self, player)
+    def __init__(self, max_bet, min_bet):
+        Action.__init__(self)
         self.max_bet = max_bet
         self.min_bet = min_bet
         # TODO: protect the amount better?
         self.amount = None # unknown until we receive a response from the player
 
     def __repr__(self):
-        return "Raise: " + str(self.player.table) + " " + \
-            self.player.name + " $" + str(self.amount)
+        return "Raise: " + " $" + str(self.amount)
 
     def validate(self, params):
         Action.validate(self, params)
@@ -150,11 +147,11 @@ class Fold(Action):
     Action a player can take to fold the current hand.
     """
 
-    def __init__(self, player):
-        Action.__init__(self, player)
+    def __init__(self):
+        Action.__init__(self)
 
     def __repr__(self):
-        return "Fold: " + str(self.player.table) + " " + self.player.name
+        return "Fold: "
 
 
 

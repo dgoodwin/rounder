@@ -456,7 +456,7 @@ class TexasHoldemGame(Game):
 
         player.prompt(actions_list)
 
-    def process_action(self, action):
+    def process_action(self, player, action):
         logger.info("Incoming action: " + str(action))
         self._check_if_finished()
 
@@ -469,7 +469,7 @@ class TexasHoldemGame(Game):
             pass
 
         if isinstance(action, Call):
-            self.add_to_pot(action.player, action.amount)
+            self.add_to_pot(player, action.amount)
 
         if isinstance(action, Raise):
             if self.gsm.get_current_state() == STATE_PREFLOP:
@@ -477,17 +477,17 @@ class TexasHoldemGame(Game):
 
             self.__bet_to_match += action.amount
             amount = self.__bet_to_match
-            if self.__in_pot_this_betting_round.has_key(action.player):
-                amount -= self.__in_pot_this_betting_round[action.player]
-            self.add_to_pot(action.player, amount)
+            if self.__in_pot_this_betting_round.has_key(player):
+                amount -= self.__in_pot_this_betting_round[player]
+            self.add_to_pot(player, amount)
 
         if isinstance(action, Fold):
-            action.player.folded = True
+            player.folded = True
 
         # Remove this player from the pending actions map:
-        self.__last_actor = action.player
-        self.pending_actions.pop(action.player)
-        action.player.clear_pending_actions()
+        self.__last_actor = player
+        self.pending_actions.pop(player)
+        player.clear_pending_actions()
         self.__continue_betting_round()
 
     def advance(self):

@@ -34,6 +34,7 @@ class Player:
     """
 
     def __init__(self, name, table=None, seat=None, chips=0):
+        # TODO: Refactor name to username?
         self.name = name
         self.chips = chips
         self.table = table
