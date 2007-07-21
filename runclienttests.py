@@ -32,6 +32,8 @@ from rounder.network.client import RounderNetworkClient
 from rounder.network.server import SERVER_PORT
 from rounder.network.serialize import register_message_classes
 
+PLAYERS = 0
+
 class TestClientUI:
 
     """ 
@@ -40,8 +42,11 @@ class TestClientUI:
 
     def __init__(self):
 
+        global PLAYERS
+        self.username = "player" + str(PLAYERS)
+        PLAYERS += 1
         self.client = RounderNetworkClient(self)
-        self.client.connect('localhost', SERVER_PORT, "joe", "password")
+        self.client.connect('localhost', SERVER_PORT, self.username, "password")
 
     def connected(self):
         print "Connected!"
@@ -60,11 +65,17 @@ class TestClientUI:
         # Find the first available seat:
         for i in range(10):
             if table_state.seats[i] == None:
-                self.client.take_seat(table_state.id, 0)
+                self.client.take_seat(table_state.id, i)
                 break
 
     def took_seat(self, table_id, seat_num):
-        self.client.start_game(table_id)
+        # if any seats remain empty, create another dummy player, otherwise
+        # request that we start a game:
+        if PLAYERS < 10:
+            TestClientUI()
+        else:
+            print "%s requesting game" % self.username
+            self.client.start_game(table_id)
 
 
 

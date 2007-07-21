@@ -85,8 +85,7 @@ class RounderNetworkClient(pb.Referenceable):
         d = self.perspective.callRemote("list_tables")
         d.addCallback(self.get_table_list_success_cb)
 
-    @staticmethod
-    def get_table_list_success_cb(data):
+    def get_table_list_success_cb(self, data):
         """ Called when a list of tables is received. """
         logger.debug("got table list")
         self.ui.got_table_list(data)
@@ -107,6 +106,7 @@ class RounderNetworkClient(pb.Referenceable):
 
     def take_seat(self, table_id, seat):
         """ Request the specified seat index at the specified table. """
+        logger.debug("Requesting seat %s at table %s" % (seat, table_id))
         d = self.table_views[table_id].callRemote("sit", seat)
         d.addCallback(self.take_seat_success_cb)
 

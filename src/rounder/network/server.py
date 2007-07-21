@@ -89,7 +89,11 @@ class RounderNetworkServer:
         """ Seat a player at a table in a specific seat. """
         player = Player(user.name, chips=Currency(1000))
         # TODO: error handling, what if seat already taken?
-        table.seat_player(player, seat_num)
+        try:
+            table.seat_player(player, seat_num)
+        except RounderException, e:
+            print e
+            raise e
         return (table.id, seat_num)
 
 
@@ -185,6 +189,16 @@ def run_server():
     realm.server = RounderNetworkServer()
     checker = checkers.InMemoryUsernamePasswordDatabaseDontUse()
     checker.addUser("joe", "password")
+    checker.addUser("player0", "password")
+    checker.addUser("player1", "password")
+    checker.addUser("player2", "password")
+    checker.addUser("player3", "password")
+    checker.addUser("player4", "password")
+    checker.addUser("player5", "password")
+    checker.addUser("player6", "password")
+    checker.addUser("player7", "password")
+    checker.addUser("player8", "password")
+    checker.addUser("player9", "password")
     p = portal.Portal(realm, [checker])
 
     realm.server.create_table("Table 1")
