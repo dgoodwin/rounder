@@ -52,7 +52,7 @@ class TableState:
         """ Print the table state. """
         print "Table state for table: %s" % self.name
         for s in self.seats:
-            print s
+            print "   " + str(s)
 
 
 

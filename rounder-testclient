@@ -23,6 +23,8 @@
 import sys
 sys.path.insert(0, './src/')
 
+from optparse import OptionParser
+
 from rounder.log import setup_logging
 # Configure logging: (needs to be done before importing our modules)
 log_conf_locations = ["./logging.conf"]
@@ -32,21 +34,18 @@ from rounder.network.client import RounderNetworkClient
 from rounder.network.server import SERVER_PORT
 from rounder.network.serialize import register_message_classes
 
-PLAYERS = 0
-
 class TestClientUI:
 
     """ 
     Test UI implementation.
     """
 
-    def __init__(self):
+    def __init__(self, username, password, interactive):
 
-        global PLAYERS
-        self.username = "player" + str(PLAYERS)
-        PLAYERS += 1
+        self.username = username
         self.client = RounderNetworkClient(self.username, self)
-        self.client.connect('localhost', SERVER_PORT, self.username, "password")
+        self.client.connect('localhost', SERVER_PORT, self.username, password)
+        self.interactive = interactive
 
     def connected(self):
         print "Connected!"
@@ -62,7 +61,7 @@ class TestClientUI:
 
     def table_opened(self, table_state):
         table_state.print_state()
-        # Find the first available seat:
+        # Find and take the first available seat:
         for i in range(10):
             if table_state.seats[i] == None:
                 self.client.take_seat(table_state.id, i)
@@ -82,5 +81,15 @@ class TestClientUI:
 
 if __name__ == '__main__':
     register_message_classes()
-    ui = TestClientUI()
+    parser = OptionParser()
+    parser.add_option("-u", "--username", dest="username",
+        help="username on the server")
+    parser.add_option("-p", "--password", dest="password",
+        help="password on the server")
+    parser.add_option("-i", "--interactive", action="store_true", 
+        dest="interactive", help="interactively drive the action")
+    parser.set_defaults(drive=False)
+
+    (options, args) = parser.parse_args()
+    ui = TestClientUI(options.username, options.password, options.interactive)
 
