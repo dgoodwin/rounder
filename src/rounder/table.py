@@ -190,9 +190,11 @@ class Table(object):
             raise RounderException(
                 "Table %s: %s players required to begin hand." %
                 (self.id, MIN_PLAYERS_FOR_HAND))
-        self.seats.new_dealer()
         if self.gsm.current == None:
+            self.seats.new_dealer()
             self.gsm.advance()
+        else:
+            raise RounderException("Table %s: hand already underway.")
 
     @staticmethod
     def __find_players_index(player_list, player):

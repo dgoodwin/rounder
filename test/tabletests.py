@@ -138,6 +138,11 @@ class TableTests(unittest.TestCase):
         self.__create_table(1, 0)
         self.assertRaises(RounderException, self.table.begin)
 
+    def test_begin_with_hand_already_underway(self):
+        self.__create_table(3, 0)
+        self.table.begin()
+        self.assertRaises(RounderException, self.table.begin)
+
     def test_standard_post_blinds(self):
         self.__create_table(3, 0)
         self.table.begin()
