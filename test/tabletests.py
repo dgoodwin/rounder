@@ -30,7 +30,7 @@ from rounder.core import RounderException
 from rounder.currency import Currency
 from rounder.table import STATE_SMALL_BLIND, STATE_BIG_BLIND, HAND_UNDERWAY
 from rounder.limit import FixedLimit
-from rounder.action import SitOut, PostBlind
+from rounder.action import PostBlind
 
 from rounder.utils import find_action_in_list
 
@@ -148,7 +148,7 @@ class TableTests(unittest.TestCase):
         self.table.begin()
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
         sb = self.players[1]
-        self.assertEquals(2, len(sb.pending_actions))
+        self.assertEquals(1, len(sb.pending_actions))
         self.assertEquals(None, self.table.small_blind)
 
         # simulate player posting small blind:
@@ -157,7 +157,7 @@ class TableTests(unittest.TestCase):
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(sb, self.table.small_blind)
         bb = self.players[2]
-        self.assertEquals(2, len(bb.pending_actions))
+        self.assertEquals(1, len(bb.pending_actions))
 
         # simulate player posting big blind:
         post_bb_action = find_action_in_list(PostBlind, bb.pending_actions)
@@ -173,16 +173,15 @@ class TableTests(unittest.TestCase):
 
         # Player 1 rejects the small blind and chooses to sit out:
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
-        self.assertEquals(2, len(self.players[1].pending_actions))
-        self.table.process_action(self.players[1].name, 
-            find_action_in_list(SitOut, self.players[1].pending_actions))
+        self.assertEquals(1, len(self.players[1].pending_actions))
+        self.table.sit_out(self.players[1])
         self.assertEquals(0, len(self.players[1].pending_actions))
         self.assertEquals(True, self.players[1].sitting_out)
         self.assertEquals(None, self.table.small_blind)
 
         # Player 0 (not 2) becomes the small blind:
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
-        self.assertEquals(2, len(self.players[0].pending_actions))
+        self.assertEquals(1, len(self.players[0].pending_actions))
         self.table.process_action(self.players[0].name,
             find_action_in_list(PostBlind, self.players[0].pending_actions))
         self.assertEquals(0, len(self.players[0].pending_actions))
@@ -191,7 +190,7 @@ class TableTests(unittest.TestCase):
         # Player 2 should be the big blind:
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
         self.assertEquals(None, self.table.big_blind)
-        self.assertEquals(2, len(self.players[2].pending_actions))
+        self.assertEquals(1, len(self.players[2].pending_actions))
         self.table.process_action(self.players[2].name,
             find_action_in_list(PostBlind, self.players[2].pending_actions))
         self.assertEquals(0, len(self.players[2].pending_actions))
@@ -209,11 +208,10 @@ class TableTests(unittest.TestCase):
 
         # Player 2 refuses the big blind:
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
-        self.table.process_action(self.players[2].name, 
-            find_action_in_list(SitOut, self.players[2].pending_actions))
+        self.table.sit_out(self.players[2])
         self.assertEquals(None, self.table.small_blind)
         self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
-        self.assertEquals(2, len(self.players[0].pending_actions))
+        self.assertEquals(1, len(self.players[0].pending_actions))
 
     def test_heads_up_blinds(self):
         # Dealer should be the small blind in a heads up match:
@@ -233,8 +231,7 @@ class TableTests(unittest.TestCase):
         self.table.begin()
 
         # Player 0 refuses the small blind:
-        self.table.process_action(self.players[0].name, 
-            find_action_in_list(SitOut, self.players[0].pending_actions))
+        self.table.sit_out(self.players[0])
         self.assertEquals(None, self.table.gsm.current)
         self.assertEquals(self.players[0], self.table.dealer)
         self.assertEquals(None, self.table.small_blind)

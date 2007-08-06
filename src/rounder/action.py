@@ -88,18 +88,6 @@ class PostBlind(Action):
 
 
 
-class SitOut(Action):
-
-    """ Action a player can take to sit out of the next hand. """
-
-    def __init__(self):
-        Action.__init__(self)
-
-    def __repr__(self):
-        return "SitOut: " 
-
-
-
 class Call(Action):
 
     """ 

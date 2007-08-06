@@ -23,7 +23,7 @@
 from logging import getLogger
 logger = getLogger("rounder.table")
 
-from rounder.action import PostBlind, SitOut
+from rounder.action import PostBlind
 from rounder.core import RounderException
 from rounder.game import GameStateMachine, TexasHoldemGame
 from rounder.utils import find_action_in_list
@@ -276,8 +276,7 @@ class Table(object):
         logger.debug("Table %s: Requesting small blind from: %s" % (self.id,
             sb.name))
         post_sb = PostBlind(self.limit.small_blind)
-        sit_out = SitOut()
-        self.prompt_player(sb, [post_sb, sit_out])
+        self.prompt_player(sb, [post_sb])
 
     def prompt_player(self, player, actions_list):
         #self.pending_actions[player] = actions_list
@@ -303,11 +302,43 @@ class Table(object):
         logger.debug("Table %s: Requesting big blind from: %s" % (self.id,
             bb.name))
         post_bb = PostBlind(self.limit.big_blind)
-        sit_out = SitOut()
-        self.prompt_player(bb, [post_bb, sit_out])
+        self.prompt_player(bb, [post_bb])
 
+    def sit_out(self, player):
+        """ Called by a player who wishes to sit out. """
+        logger.info("Table %s: Sitting player out: %s" % (self.id, player))
+        pending_actions_copy = []
+        pending_actions_copy.extend(player.pending_actions)
+        player.clear_pending_actions()
+        player.sit_out()
+
+        if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
+            # TODO: make sure this doesn't interfere with hands underway
+            logger.debug("Table %s: Not enough players for a new hand." %
+                (self.id))
+            self.wait()
+
+        if find_action_in_list(PostBlind, pending_actions_copy) != None \
+            and self.gsm.get_current_state() == STATE_SMALL_BLIND:
+            player.sit_out()
+            self.prompt_small_blind()
+
+        if find_action_in_list(PostBlind, pending_actions_copy) != None \
+            and self.gsm.get_current_state() == STATE_BIG_BLIND:
+            player.sit_out()
+            if len(self.seats.active_players) == 2:
+                # if down to heads up, we need a different small blind:
+                self.__restart()
+            self.prompt_big_blind()
 
     def process_action(self, username, action):
+        """
+        Process an incoming action from a player.
+
+        Actions are supplied to the player as a list, but to ensure a player 
+        never performs an action they weren't allowed to in the first place,
+        clients return an action index into the original list.
+        """
         logger.info("Table %s: Incoming action: %s" % (self.id, action))
 
         # TODO: clean this up, game tracks pending actions by player...
@@ -340,31 +371,6 @@ class Table(object):
             elif self.gsm.get_current_state() == STATE_BIG_BLIND:
                 self.big_blind = p
                 self.gsm.advance()
-
-        elif isinstance(action, SitOut):
-
-            logger.info("Table %s: Sitting player out: %s" % (self.id, p))
-            p.sit_out()
-
-            if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
-                # TODO: fishy, might need some work, suspect this is going
-                # to interfere with hands underway.
-                logger.debug("Table %s: Not enough players for a new hand." %
-                    (self.id))
-                self.wait()
-
-            if find_action_in_list(PostBlind, pending_actions_copy) != None \
-                and self.gsm.get_current_state() == STATE_SMALL_BLIND:
-                p.sit_out()
-                self.prompt_small_blind()
-
-            if find_action_in_list(PostBlind, pending_actions_copy) != None \
-                and self.gsm.get_current_state() == STATE_BIG_BLIND:
-                p.sit_out()
-                if len(self.seats.active_players) == 2:
-                    # if down to heads up, we need a different small blind:
-                    self.__restart()
-                self.prompt_big_blind()
 
     # Setup two properties for the small and big blinds, which are actually
     # stored on the tables seat object.

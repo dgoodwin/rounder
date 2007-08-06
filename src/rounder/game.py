@@ -25,7 +25,7 @@ logger = getLogger("rounder.game")
 
 from pokereval import PokerEval
 
-from rounder.action import SitOut, Call, Raise, Fold
+from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.deck import Deck
 from rounder.currency import Currency
@@ -464,10 +464,6 @@ class TexasHoldemGame(Game):
         # TODO: asserting the player responding to the action actually was
         #   given the option, perhaps at another layer (server?)
         
-        # TODO: Clean this up:
-        if isinstance(action, SitOut):
-            pass
-
         if isinstance(action, Call):
             self.add_to_pot(player, action.amount)
 

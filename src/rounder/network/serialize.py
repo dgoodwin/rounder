@@ -27,7 +27,7 @@ import cerealizer
 from rounder.dto import TableState, PlayerState
 from rounder.card import Card
 from rounder.currency import Currency
-from rounder.action import PostBlind, SitOut, Call, Raise, Fold
+from rounder.action import PostBlind, Call, Raise, Fold
 
 def register_message_classes():
     """ Registers all classes we'll be serializing with cerealizer. """
@@ -37,7 +37,6 @@ def register_message_classes():
         Currency,
         PlayerState,
         PostBlind,
-        SitOut, 
         Call,
         Raise,
         Fold,
