@@ -22,6 +22,7 @@
 
 import sys
 sys.path.insert(0, './src/')
+import random
 
 from optparse import OptionParser
 
@@ -43,9 +44,11 @@ class TestClientUI:
     def __init__(self, username, password, interactive):
 
         self.username = username
-        self.client = RounderNetworkClient(self.username, self)
-        self.client.connect('localhost', SERVER_PORT, self.username, password)
+        self.password = password
         self.interactive = interactive
+        self.client = RounderNetworkClient(self.username, self)
+        self.client.connect('localhost', SERVER_PORT, self.username, 
+            self.password)
 
     def connected(self):
         print "Connected!"
@@ -75,7 +78,15 @@ class TestClientUI:
         #else:
         #    print "%s requesting game" % self.username
         #    self.client.start_game(table_id)
-        pass
+        if self.interactive:
+            self.client.start_game(table_id)
+
+    def prompt(self, table_id, actions):
+        """ 
+        Choose one of the actions in the given list, return it's index and any
+        parameters required.
+        """
+        self.client.act(table_id, random.randint(0, len(actions) - 1))
 
 
 

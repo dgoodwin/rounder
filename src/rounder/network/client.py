@@ -135,5 +135,19 @@ class RounderNetworkClient(pb.Referenceable):
             logger.debug("   %s" % action)
             deserialized_actions.append(action)
 
+        # TODO: save actions provided for client side validation
+        self.ui.prompt(table_id, deserialized_actions)
+
+    def act(self, table_id, action_index):
+        """
+        Server prompts clients with a list of actions. To ensure the client
+        never carries out an action it wasn't given the option to, actions are
+        selected by an index into the list the server sent.
+        """
+        # TODO: add parameters here
+        logger.debug("Table %s: Sending action index %s to server." % 
+            (table_id, action_index))
+        self.table_views[table_id].callRemote("process_action", action_index)
+
     def remote_print(self, msg):
         logger.warn("Server said: %s" % msg)

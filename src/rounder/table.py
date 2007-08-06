@@ -396,3 +396,7 @@ class Table(object):
         if self.gsm.get_current_state() == HAND_UNDERWAY:
             return True
         return False
+
+    def hand_underway(self):
+        """ Return True if a hand is currently underway. """
+        return self.gsm.current == None

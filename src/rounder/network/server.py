@@ -141,7 +141,7 @@ class User(pb.Avatar):
 
     def attached(self, mind):
         self.remote = mind
-        self.remote.callRemote("print", "hello world")
+        #self.remote.callRemote("print", "hello world")
 
     def detached(self, mind):
         self.remote = None
@@ -165,12 +165,11 @@ class User(pb.Avatar):
         nothing.
         """
         if self.remote != None:
-            print self.remote
-            #d = self.remote.callRemote("prompt", table_id, serialized_actions)
-            self.remote.callRemote("print", "hello world")
-            #d.addCallback(self.prompt_success_cb, self.prompt_failure_cb)
+            d = self.remote.callRemote("prompt", table_id, serialized_actions)
+            #self.remote.callRemote("print", "hello world")
+            d.addCallback(self.prompt_success_cb, self.prompt_failure_cb)
 
-    def prompt_success_cb(self, data):
+    def prompt_success_cb(self, data, failure_cb):
         """ Successful prompt callback. """
         logger.debug("Prompt was successful.")
 
@@ -213,6 +212,13 @@ class TableView(pb.Viewable):
             self.table.begin()
         except RounderException:
             logger.warn("Error starting game at table. Not enough players?")
+
+    def view_process_action(self, from_user, action_index):
+        """
+        Called by clients attempting to perform an action.
+        """
+        logger.debug("Table %s: Received action index %s from %s." %
+            (self.table.id, action_index, from_user.name))
          
 
 

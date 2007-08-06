@@ -53,5 +53,4 @@ def dumps(obj):
 def loads(objstr):
     """ De-serialize the given string into it's original form. """
     obj = cerealizer.loads(objstr)
-    logger.debug("De-serialized object: %s" % obj)
     return obj
