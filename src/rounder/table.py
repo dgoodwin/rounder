@@ -51,6 +51,9 @@ class Seats(object):
         self.small_blind = None
         self.big_blind = None
 
+        # Map usernames to player objects:
+        self.players_by_username = {}
+
     def get_size(self):
         return len(self.__seats)
 
@@ -71,6 +74,14 @@ class Seats(object):
 
         self.__seats[seat_number] = player
         player.seat = seat_number
+
+        self.players_by_username[player.name] = player
+
+    def has_username(self, username):
+        """
+        Check if a player with the given username is seated at the table.
+        """
+        return self.players_by_username.has_key(username)
 
     def get_player(self, seat_number):
         return self.__seats[seat_number]
@@ -341,19 +352,10 @@ class Table(object):
         """
         logger.info("Table %s: Incoming action: %s" % (self.id, action))
 
-        # TODO: clean this up, game tracks pending actions by player...
-        # Must be a better way to find the player we want and validate
-        # the incoming action.
-        p = None
-        for i in range(self.seats.get_size()):
-            player_to_check = self.seats.get_player(i)
-            if player_to_check != None and player_to_check.name == username:
-                p = player_to_check
-                break
-
-        if p is None:
+        if not self.seats.has_username(username):
             raise RounderException("Unable to find player %s at table %s" % 
                 (username, self.id))
+        p = self.seats.players_by_username[username]
 
         # TODO: verify the action coming back has valid params?
         # TODO: asserting the player responding to the action actually was
