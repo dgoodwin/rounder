@@ -342,24 +342,31 @@ class Table(object):
                 self.__restart()
             self.prompt_big_blind()
 
-    def process_action(self, username, action):
+    def process_action(self, username, action_index, params):
         """
         Process an incoming action from a player.
 
         Actions are supplied to the player as a list, but to ensure a player 
         never performs an action they weren't allowed to in the first place,
         clients return an action index into the original list.
+
+        Actions can accept parameters, which are returned from the client
+        as a list and passed to the actual action for validation and use.
         """
-        logger.info("Table %s: Incoming action: %s" % (self.id, action))
+        logger.info("Table %s: processing action: %s" % (self.id, 
+            action_index))
 
         if not self.seats.has_username(username):
             raise RounderException("Unable to find player %s at table %s" % 
                 (username, self.id))
         p = self.seats.players_by_username[username]
 
+        # Verify the action index is valid:
+        if action_index < 0 or action_index > len(p.pending_actions) - 1:
+            raise RounderException("Invalid action index: %s" % action_index)
+        action = p.pending_actions[action_index]
+
         # TODO: verify the action coming back has valid params?
-        # TODO: asserting the player responding to the action actually was
-        #   given the option
         
         pending_actions_copy = []
         pending_actions_copy.extend(p.pending_actions)
