@@ -4,9 +4,17 @@ RUNNNG TESTS
 
 From the root of the source directory:
 
-./runtests.py               Runs all the pure unit tests. (very fast)
-./runnetworktests.py        Runs the network tests. Requires that the test
-                            sever be started. (./starttestserver.py)
+    ./runtests.py               Runs all the pure unit tests. (very fast)
+
+To test the network using dummy clients that just randomly choose an action:
+
+    ./rounder-server
+    ./rounder-testclient -u player0 -p password
+    ./rounder-testclient -u player1 -p password -i
+
+    NOTE: more test clients can be created, just add -i to the last one. 
+    The server currently is configured for several playerX logins and 
+    passwords as above.
 
 =============
 GENERAL NOTES
