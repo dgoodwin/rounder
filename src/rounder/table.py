@@ -234,15 +234,15 @@ class Table(object):
         self.game = TexasHoldemGame(limit=self.limit, 
             players=self.seats.active_players, dealer_index=dealer_index, 
             sb_index=sb_index, bb_index=bb_index,
-            callback=self.game_over)
+            callback=self.game_over, table=self)
 
     def game_over(self):
         """ Called by a game when it has finished. """
         logger.info("Table %s: Game over" % self.id)
 
         # Pass control up to the server if we were provided one.
-        if self.server != None:
-            self.game_over_callback()
+        #if self.server != None:
+        #    self.game_over_callback()
 
     def __restart(self):
         """
@@ -293,7 +293,7 @@ class Table(object):
         #self.pending_actions[player] = actions_list
 
         # TODO: is this even needed?
-        # Doesn't actuall prompt the player.
+        # Doesn't actually prompt the player.
         player.prompt(actions_list)
 
         if self.server != None:
@@ -380,6 +380,8 @@ class Table(object):
             elif self.gsm.get_current_state() == STATE_BIG_BLIND:
                 self.big_blind = p
                 self.gsm.advance()
+        else:
+            self.game.process_action(p, action)
 
     # Setup two properties for the small and big blinds, which are actually
     # stored on the tables seat object.

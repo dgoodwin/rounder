@@ -166,13 +166,15 @@ class Game(object):
 
     """ Parent class of all poker games. """
 
-    def __init__(self, players, callback):
+    def __init__(self, players, callback, table=None):
         """
         Constructor expects the list of players to all be active, no one
         sitting out.
         """
         # Every hand played needs a unique ID:
         self.id = ++GAME_ID_COUNTER
+
+        self.table = table
 
         # A callback method we can call when this game is finished to return
         # control to the object that created us:
@@ -258,13 +260,17 @@ class TexasHoldemGame(Game):
     """ Texas Hold'em, the Cadillac of poker. """
 
     def __init__(self, limit, players, dealer_index, sb_index, bb_index, 
-        callback):
+        callback, table=None):
         """
         Blind indicies indicate players who have agreed to post the blinds for
         this hand, thus we can immediately retrieve them and get underway.
+
+        Players list represents only those players who were actively at the table
+        AND sitting in when the hand began. Positions in the list are not relative.
+        All the game cares about is where they sit in relation to one another.
         """
 
-        Game.__init__(self, players, callback)
+        Game.__init__(self, players, callback, table)
 
         self.limit = limit
         self.dealer = self.players[dealer_index]
@@ -335,6 +341,11 @@ class TexasHoldemGame(Game):
         self.__continue_betting_round()
 
     def __collect_blinds(self):
+        """ 
+        Collect blinds from the players who agreed to post them. (normally handled
+        by the table.
+        """
+
         self._check_if_finished()
         logger.info("Collecting small blind of %s from %s", 
             self.limit.small_blind, self.small_blind.name)
@@ -441,7 +452,7 @@ class TexasHoldemGame(Game):
             " to pot: " + str(self.pot))
 
     def prompt_player(self, player, actions_list):
-        """ Prompt the given player with the given list of actions. """
+        """ Prompt the player with a list of actions. """
         self._check_if_finished()
         if (self.pending_actions.has_key(player)):
             # Shouldn't happen, but just in case:
@@ -455,6 +466,8 @@ class TexasHoldemGame(Game):
         self.pending_actions[player] = actions_list
 
         player.prompt(actions_list)
+        if self.table != None:
+            self.table.prompt_player(player, actions_list)
 
     def process_action(self, player, action):
         logger.info("Incoming action: " + str(action))

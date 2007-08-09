@@ -171,7 +171,7 @@ class User(pb.Avatar):
 
     def prompt_success_cb(self, data, failure_cb):
         """ Successful prompt callback. """
-        logger.debug("Prompt was successful.")
+        pass
 
     def prompt_failure_cb(self, data):
         """ Failed prompt callback. """
@@ -213,12 +213,13 @@ class TableView(pb.Viewable):
         except RounderException:
             logger.warn("Error starting game at table. Not enough players?")
 
-    def view_process_action(self, from_user, action_index):
+    def view_process_action(self, from_user, action_index, params):
         """
         Called by clients attempting to perform an action.
         """
         logger.debug("Table %s: Received action index %s from %s." %
             (self.table.id, action_index, from_user.name))
+        self.table.process_action(from_user.name, action_index, params)
          
 
 
