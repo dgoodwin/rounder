@@ -367,6 +367,7 @@ class Table(object):
         action = p.pending_actions[action_index]
 
         # TODO: verify the action coming back has valid params?
+        action.validate(params)
         
         pending_actions_copy = []
         pending_actions_copy.extend(p.pending_actions)

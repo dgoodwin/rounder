@@ -118,7 +118,8 @@ class Raise(Action):
         self.amount = None # unknown until we receive a response from the player
 
     def __repr__(self):
-        return "Raise: " + " $" + str(self.amount)
+        return "Raise ($%s - $%s): $%s" % (self.min_bet, self.max_bet, 
+            self.amount)
 
     def validate(self, params):
         Action.validate(self, params)

@@ -31,6 +31,7 @@ from rounder.log import setup_logging
 log_conf_locations = ["./logging.conf"]
 setup_logging(log_conf_locations)
 
+from rounder.action import Raise
 from rounder.network.client import RounderNetworkClient
 from rounder.network.server import SERVER_PORT
 from rounder.network.serialize import register_message_classes
@@ -86,7 +87,13 @@ class TestClientUI:
         Choose one of the actions in the given list, return it's index and any
         parameters required.
         """
-        self.client.act(table_id, random.randint(0, len(actions) - 1))
+        r = random.randint(0, len(actions) - 1)
+        random_action = actions[r]
+        params = []
+        print "Chose random action: %s" % random_action
+        if isinstance(random_action, Raise):
+            params.append(str(random_action.min_bet))
+        self.client.act(table_id, r, params)
 
 
 

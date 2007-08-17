@@ -219,7 +219,11 @@ class TableView(pb.Viewable):
         """
         logger.debug("Table %s: Received action index %s from %s." %
             (self.table.id, action_index, from_user.name))
-        self.table.process_action(from_user.name, action_index, params)
+        try:
+            self.table.process_action(from_user.name, action_index, params)
+        except Exception, e:
+            print e
+            raise e
          
 
 

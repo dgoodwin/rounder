@@ -129,16 +129,20 @@ class RounderNetworkClient(pb.Referenceable):
         """
         logger.debug("Table %s: %s received actions:" % (table_id, 
             self.username))
-        deserialized_actions = []
-        for serialized_action in actions:
-            action = loads(serialized_action)
-            logger.debug("   %s" % action)
-            deserialized_actions.append(action)
+        try:
+            deserialized_actions = []
+            for serialized_action in actions:
+                action = loads(serialized_action)
+                logger.debug("   %s" % action)
+                deserialized_actions.append(action)
 
-        # TODO: save actions provided for client side validation
-        self.ui.prompt(table_id, deserialized_actions)
+            # TODO: save actions provided for client side validation
+            self.ui.prompt(table_id, deserialized_actions)
+        except Exception, e:
+            logger.error(e)
+            raise e
 
-    def act(self, table_id, action_index):
+    def act(self, table_id, action_index, params):
         """
         Server prompts clients with a list of actions. To ensure the client
         never carries out an action it wasn't given the option to, actions are
@@ -148,7 +152,7 @@ class RounderNetworkClient(pb.Referenceable):
         logger.debug("Table %s: Sending action index %s to server." % 
             (table_id, action_index))
         self.table_views[table_id].callRemote("process_action", action_index,
-            [])
+            params)
 
     def remote_print(self, msg):
         logger.warn("Server said: %s" % msg)
