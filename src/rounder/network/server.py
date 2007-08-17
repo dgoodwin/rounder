@@ -141,7 +141,6 @@ class User(pb.Avatar):
 
     def attached(self, mind):
         self.remote = mind
-        #self.remote.callRemote("print", "hello world")
 
     def detached(self, mind):
         self.remote = None
@@ -222,7 +221,7 @@ class TableView(pb.Viewable):
         try:
             self.table.process_action(from_user.name, action_index, params)
         except Exception, e:
-            print e
+            logger.error(e)
             raise e
          
 

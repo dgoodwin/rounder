@@ -1,1 +1,6 @@
 This is rounder.
+
+Requirements:
+
+- Twisted
+- Cerealizer

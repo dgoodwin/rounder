@@ -149,8 +149,8 @@ class RounderNetworkClient(pb.Referenceable):
         selected by an index into the list the server sent.
         """
         # TODO: add parameters here
-        logger.debug("Table %s: Sending action index %s to server." % 
-            (table_id, action_index))
+        logger.debug("Table %s: Sending action index %s to server: %s" % 
+            (table_id, action_index, params))
         self.table_views[table_id].callRemote("process_action", action_index,
             params)
 
