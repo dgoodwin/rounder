@@ -31,7 +31,7 @@ import settestpath
 from rounder.network.server import RounderNetworkServer, User, TableView
 from rounder.table import STATE_SMALL_BLIND
 from rounder.network.serialize import loads
-from rounder.action import Raise
+from rounder.action import Raise, Call, Fold
 
 class RounderNetworkServerTests(unittest.TestCase):
 
@@ -63,13 +63,25 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.user1_table.view_sit(self.user1, 0)
         self.user2_table.view_sit(self.user2, 1)
 
-        self.user1.table_views[self.table.id].view_start_game(self.user1)
+        self.user1_table.view_start_game(self.user1)
         self.assertEquals(STATE_SMALL_BLIND, 
             self.table.gsm.get_current_state())
 
     def test_cannot_start_game_only_one_player(self):
         self.user1_table.view_start_game(self.user1)
         self.assertEquals(None, self.table.gsm.get_current_state())
+
+    def test_full_hand(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+
+        self.user1_table.view_start_game(self.user1)
+
+        self.user1.act_randomly(self.table.id)
+        self.user2.act_randomly(self.table.id)
+
+        self.user1.act(self.table.id, Call)
+        self.user2.act(self.table.id, Call) # actually a check
 
 
 
@@ -81,12 +93,16 @@ class TestUser(User):
         instead of a live one.
         """
         
+        # TODO: refactor to list of pending actions per table
         self.pending_actions = []
         for a in serialized_actions:
             action = loads(a)
             self.pending_actions.append(action)
 
-    def act_randomly(self):
+    def act_randomly(self, table_id):
+        """
+        Choose a random action from the pending list.
+        """
         if (len(self.pending_actions) == 0):
             raise Exception("No pending actions.")
 
@@ -97,6 +113,27 @@ class TestUser(User):
             params.append(str(random_action.min_bet))
         self.server.process_action(self.table_views[table_id].table,
             self, r, params)
+        self.pending_actions = []
+
+    def act(self, table_id, action_type, param=None):
+        """
+        Locate an action of the specified type in the pending list and submit
+        to the server, with an optional parameter.
+        """
+        if (len(self.pending_actions) == 0):
+            raise Exception("No pending actions.")
+
+        found = False
+        i = 0
+        for a in self.pending_actions:
+            if isinstance(a, action_type):
+                self.server.process_action(self.table_views[table_id].table,
+                        self, i, param)
+                return
+            else:
+                i = i + 1
+        if not found:
+            raise Exception("Unable to locate action of type: %s", action_type)
 
 
 
