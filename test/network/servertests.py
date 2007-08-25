@@ -49,6 +49,8 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.user1_table = self.user1.table_views[self.table.id]
         self.user2_table = self.user1.table_views[self.table.id]
 
+        self.users = [self.user1, self.user2]
+
     def test_open_table(self):
         self.assertTrue(isinstance(self.user1.table_views[self.table.id], 
             TableView))
@@ -80,19 +82,22 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.user1.act_randomly(self.table.id)
         self.user2.act_randomly(self.table.id)
 
-        self.user1.act(self.table.id, Call)
-        self.user2.act(self.table.id, Call) # actually a check
+        while self.table.game_underway():
+            user = self.find_user_with_pending_actions()
+            user.act_randomly(self.table.id)
+
+    def find_user_with_pending_actions(self):
+        for u in self.users:
+            if len(u.pending_actions) > 0:
+                return u
+        raise Exception("Unable to find a player with pending actions.")
 
 
 
 class TestUser(User):
 
     def prompt(self, table_id, serialized_actions):
-        """ 
-        Override the parents prompt method to prompt a dummy client
-        instead of a live one.
-        """
-        
+
         # TODO: refactor to list of pending actions per table
         self.pending_actions = []
         for a in serialized_actions:
@@ -111,9 +116,9 @@ class TestUser(User):
         params = []
         if isinstance(random_action, Raise):
             params.append(str(random_action.min_bet))
+        self.pending_actions = []
         self.server.process_action(self.table_views[table_id].table,
             self, r, params)
-        self.pending_actions = []
 
     def act(self, table_id, action_type, param=None):
         """
@@ -127,6 +132,7 @@ class TestUser(User):
         i = 0
         for a in self.pending_actions:
             if isinstance(a, action_type):
+                self.pending_actions = []
                 self.server.process_action(self.table_views[table_id].table,
                         self, i, param)
                 return

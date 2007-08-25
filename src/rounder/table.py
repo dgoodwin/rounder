@@ -241,6 +241,9 @@ class Table(object):
         """ Called by a game when it has finished. """
         logger.info("Table %s: Game over" % self.id)
 
+        self.game = None
+        self.gsm.reset()
+
         # Pass control up to the server if we were provided one.
         #if self.server != None:
         #    self.game_over_callback()
@@ -353,9 +356,6 @@ class Table(object):
         Actions can accept parameters, which are returned from the client
         as a list and passed to the actual action for validation and use.
         """
-        logger.info("Table %s: processing action: %s" % (self.id, 
-            action_index))
-
         if not self.seats.has_username(username):
             raise RounderException("Unable to find player %s at table %s" % 
                 (username, self.id))

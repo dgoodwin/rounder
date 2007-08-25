@@ -346,12 +346,12 @@ class TexasHoldemGame(Game):
         """
 
         self._check_if_finished()
-        logger.info("Collecting small blind of %s from %s", 
-            self.limit.small_blind, self.small_blind.name)
         self.add_to_pot(self.small_blind, self.limit.small_blind)
-        logger.info("Collecting big blind of %s from %s", 
-            self.limit.big_blind, self.big_blind.name)
+        logger.info("Table %s: %s posts the small blind: %s", 
+            self.__get_table_id(), self.small_blind.name, self.limit.small_blind)
         self.add_to_pot(self.big_blind, self.limit.big_blind)
+        logger.info("Table %s: %s posts the big blind: %s", 
+            self.__get_table_id(), self.big_blind.name, self.limit.big_blind)
         logger.info("Pot is now: %s", self.pot)
 
         self.__last_actor = self.big_blind
@@ -407,10 +407,16 @@ class TexasHoldemGame(Game):
         logger.debug("Betting round complete.")
         self.advance()
 
+    def __get_table_id(self):
+        if self.table != None:
+            return self.table.id
+        return "None"
+
     def flop(self):
         """
         Deal the flop and initiate the betting.
         """
+        logger.debug("Table %s: Dealing the flop." % self.__get_table_id)
         self._check_if_finished()
 
         self.big_blind_exception = None
@@ -446,9 +452,6 @@ class TexasHoldemGame(Game):
         else:
             self.__in_pot_this_betting_round[player] = \
                 self.__in_pot_this_betting_round[player] + amount
-
-        logger.debug("Adding " + str(amount) + " from " + str(player) + 
-            " to pot: " + str(self.pot))
 
     def prompt_player(self, player, actions_list):
         """ Prompt the player with a list of actions. """

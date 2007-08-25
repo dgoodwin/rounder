@@ -172,7 +172,6 @@ class User(pb.Avatar):
         Remote could be None in the case of testing, in which case we do
         nothing.
         """
-        # TODO: Should this be on the Table class?
         if self.remote != None:
             d = self.remote.callRemote("prompt", table_id, serialized_actions)
             d.addCallback(self.prompt_success_cb, self.prompt_failure_cb)
