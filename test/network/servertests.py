@@ -41,14 +41,16 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.server = RounderNetworkServer()
         self.table_name = "Test Table 1"
         self.table = self.server.create_table(self.table_name)
-        self.table_id = self.table.id
 
         self.user1 = TestUser("Test Player 1", self.server)
         self.user2 = TestUser("Test Player 2", self.server)
+        self.user1.perspective_open_table(self.table.id)
+        self.user2.perspective_open_table(self.table.id)
+        self.user1_table = self.user1.table_views[self.table.id]
+        self.user2_table = self.user1.table_views[self.table.id]
 
     def test_open_table(self):
-        self.user1.perspective_open_table(self.table_id)
-        self.assertTrue(isinstance(self.user1.table_views[self.table_id], 
+        self.assertTrue(isinstance(self.user1.table_views[self.table.id], 
             TableView))
 
     def test_list_tables(self):
@@ -58,20 +60,17 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.server.seat_player(self.user1, self.table, 0)
 
     def test_start_game(self):
-        self.user1.perspective_open_table(self.table_id)
-        self.user1.table_views[self.table_id].view_sit(self.user1, 0)
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
 
-        self.user2.perspective_open_table(self.table_id)
-        self.user2.table_views[self.table_id].view_sit(self.user2, 1)
-
-        self.user1.table_views[self.table_id].view_start_game(self.user1)
+        self.user1.table_views[self.table.id].view_start_game(self.user1)
         self.assertEquals(STATE_SMALL_BLIND, 
             self.table.gsm.get_current_state())
 
     def test_cannot_start_game_only_one_player(self):
-        self.user1.perspective_open_table(self.table_id)
-        self.user1.table_views[self.table_id].view_start_game(self.user1)
+        self.user1_table.view_start_game(self.user1)
         self.assertEquals(None, self.table.gsm.get_current_state())
+
 
 
 class TestUser(User):
