@@ -320,7 +320,6 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_TURN, self.turn)
         self.gsm.add_state(STATE_RIVER, self.river)
         self.gsm.add_state(STATE_GAMEOVER, self.game_over)
-        self.advance()
 
     def __reset_betting_round_state(self):
         """ 

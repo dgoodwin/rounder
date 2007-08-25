@@ -109,6 +109,12 @@ class RounderNetworkServer:
             serialized_actions.append(dumps(action))
         self.users[username].prompt(table.id, serialized_actions)
 
+    def process_action(self, table, user, action_index, params):
+        """ Process an incoming action from a player. """
+        logger.debug("Table %s: Received action index %s from %s." %
+            (table.id, action_index, user.name))
+        table.process_action(user.name, action_index, params)
+
 
 
 class RounderRealm:
@@ -138,6 +144,7 @@ class User(pb.Avatar):
         self.server = server
         self.server.users[self.name] = self
         self.remote = None
+        self.table_views = {}
 
     def attached(self, mind):
         self.remote = mind
@@ -154,7 +161,9 @@ class User(pb.Avatar):
 
     def perspective_open_table(self, table_id):
         """ Process a users request to view a table. """
-        return self.server.open_table(table_id, self)
+        tuple = self.server.open_table(table_id, self)
+        self.table_views[tuple[0].table.id] = tuple[0]
+        return tuple
 
     def prompt(self, table_id, serialized_actions):
         """ 
@@ -163,9 +172,9 @@ class User(pb.Avatar):
         Remote could be None in the case of testing, in which case we do
         nothing.
         """
+        # TODO: Should this be on the Table class?
         if self.remote != None:
             d = self.remote.callRemote("prompt", table_id, serialized_actions)
-            #self.remote.callRemote("print", "hello world")
             d.addCallback(self.prompt_success_cb, self.prompt_failure_cb)
 
     def prompt_success_cb(self, data, failure_cb):
@@ -216,13 +225,7 @@ class TableView(pb.Viewable):
         """
         Called by clients attempting to perform an action.
         """
-        logger.debug("Table %s: Received action index %s from %s." %
-            (self.table.id, action_index, from_user.name))
-        try:
-            self.table.process_action(from_user.name, action_index, params)
-        except Exception, e:
-            logger.error(e)
-            raise e
+        server.process_action(self.table, from_user, action_index, params)
          
 
 

@@ -177,6 +177,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.game = TexasHoldemGame(limit=limit, players=players_copy, 
             dealer_index=dealer_index, sb_index=sb_index, bb_index=bb_index,
             callback=self.game_over_callback)
+        self.game.advance()
 
         # Referenced in game over callback for determining that a game ended
         # as expected.

@@ -24,11 +24,14 @@ from logging import getLogger
 logger = getLogger("rounder.test.network.servertests")
 
 import unittest
+import random
 
 import settestpath
 
 from rounder.network.server import RounderNetworkServer, User, TableView
 from rounder.table import STATE_SMALL_BLIND
+from rounder.network.serialize import loads
+from rounder.action import Raise
 
 class RounderNetworkServerTests(unittest.TestCase):
 
@@ -40,12 +43,13 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.table = self.server.create_table(self.table_name)
         self.table_id = self.table.id
 
-        self.user1 = User("Test Player 1", self.server)
-        self.user2 = User("Test Player 2", self.server)
+        self.user1 = TestUser("Test Player 1", self.server)
+        self.user2 = TestUser("Test Player 2", self.server)
 
     def test_open_table(self):
-        tuple = self.server.open_table(self.table_id, self.user1)
-        self.assertTrue(isinstance(tuple[0], TableView))
+        self.user1.perspective_open_table(self.table_id)
+        self.assertTrue(isinstance(self.user1.table_views[self.table_id], 
+            TableView))
 
     def test_list_tables(self):
         table_list = self.server.list_tables()
@@ -54,24 +58,46 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.server.seat_player(self.user1, self.table, 0)
 
     def test_start_game(self):
-        tuple = self.server.open_table(self.table_id, self.user1)
-        user1_table_view = tuple[0]
-        user1_table_view.view_sit(self.user1, 0)
+        self.user1.perspective_open_table(self.table_id)
+        self.user1.table_views[self.table_id].view_sit(self.user1, 0)
 
-        tuple = self.server.open_table(self.table_id, self.user2)
-        user2_table_view = tuple[0]
-        user1_table_view.view_sit(self.user2, 1)
+        self.user2.perspective_open_table(self.table_id)
+        self.user2.table_views[self.table_id].view_sit(self.user2, 1)
 
-        user1_table_view.view_start_game(self.user1)
+        self.user1.table_views[self.table_id].view_start_game(self.user1)
         self.assertEquals(STATE_SMALL_BLIND, 
             self.table.gsm.get_current_state())
 
-    def test_start_game_only_one_player(self):
-        tuple = self.server.open_table(self.table_id, self.user1)
-        table_view = tuple[0]
-        table_view.view_start_game(self.user1)
+    def test_cannot_start_game_only_one_player(self):
+        self.user1.perspective_open_table(self.table_id)
+        self.user1.table_views[self.table_id].view_start_game(self.user1)
         self.assertEquals(None, self.table.gsm.get_current_state())
 
+
+class TestUser(User):
+
+    def prompt(self, table_id, serialized_actions):
+        """ 
+        Override the parents prompt method to prompt a dummy client
+        instead of a live one.
+        """
+        
+        self.pending_actions = []
+        for a in serialized_actions:
+            action = loads(a)
+            self.pending_actions.append(action)
+
+    def act_randomly(self):
+        if (len(self.pending_actions) == 0):
+            raise Exception("No pending actions.")
+
+        r = random.randint(0, len(self.pending_actions) - 1)
+        random_action = self.pending_actions[r]
+        params = []
+        if isinstance(random_action, Raise):
+            params.append(str(random_action.min_bet))
+        self.server.process_action(self.table_views[table_id].table,
+            self, r, params)
 
 
 

@@ -235,6 +235,7 @@ class Table(object):
             players=self.seats.active_players, dealer_index=dealer_index, 
             sb_index=sb_index, bb_index=bb_index,
             callback=self.game_over, table=self)
+        self.game.advance()
 
     def game_over(self):
         """ Called by a game when it has finished. """
@@ -298,7 +299,6 @@ class Table(object):
 
         if self.server != None:
             self.server.prompt_player(self, player.name, actions_list)
-
 
     def prompt_big_blind(self):
         """
@@ -366,7 +366,6 @@ class Table(object):
             raise RounderException("Invalid action index: %s" % action_index)
         action = p.pending_actions[action_index]
 
-        # TODO: verify the action coming back has valid params?
         action.validate(params)
         
         pending_actions_copy = []
