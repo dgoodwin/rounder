@@ -27,6 +27,7 @@ from rounder.action import PostBlind
 from rounder.core import RounderException
 from rounder.game import GameStateMachine, TexasHoldemGame
 from rounder.utils import find_action_in_list
+from rounder.event import PlayerJoinedGame
 
 STATE_SMALL_BLIND = "small_blind"
 STATE_BIG_BLIND = "big_blind"
@@ -279,6 +280,8 @@ class Table(object):
         player.table = self
         logger.debug("Table %s: %s took seat %s" % (self.id, player.name,
             seat_num))
+        event = PlayerJoinedGame(player.name, seat_num)
+        self.notify_all(event)
 
     def prompt_small_blind(self):
         """
@@ -372,7 +375,6 @@ class Table(object):
         pending_actions_copy.extend(p.pending_actions)
         p.clear_pending_actions()
 
-        # TODO: Clean this up:
         if isinstance(action, PostBlind):
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 self.small_blind = p
@@ -403,10 +405,21 @@ class Table(object):
         return self.seats.dealer
     dealer = property(__get_dealer, None)
 
-    def notify_player_seated(self):
+    def add_observer(self, username):
+        """ Add a username to the list of observers. """
+        # Sanity check: make sure this user isn't already observing:
+        if username in self.observers:
+            raise RounderException("%s already observing table %s" % 
+                (username, self.id))
+        self.observers.append(username)
+
+    def notify_all(self, event):
         """ Notify observers of this table that a player was seated. """
         for o in self.observers:
-            o.notify_player_seated
+            logger.debug("Table %s: Notifying %s: %s" % (self.id, o,
+                event))
+            if self.server != None:
+                self.server.notify(self.id, o, event)
 
     def game_underway(self):
         """ Return True if there's currently a game underway at this table. """

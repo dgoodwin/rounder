@@ -142,6 +142,14 @@ class RounderNetworkClient(pb.Referenceable):
             logger.error(e)
             raise e
 
+    def remote_notify(self, table_id, event):
+        """
+        Display an incoming event to the user.
+        """
+        deserialized_event = dumps(event)
+        logger.debug("Table %s: received event: %s" % deserialized_event)
+        # TODO
+
     def act(self, table_id, action_index, params):
         """
         Server prompts clients with a list of actions. To ensure the client

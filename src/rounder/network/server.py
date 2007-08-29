@@ -81,7 +81,7 @@ class RounderNetworkServer:
         logger.debug("Opening table %s for user %s" % (table_id, user.name))
         # TODO: check if user should be allowed to observe this table.
         table = self.table_views[table_id].table
-        table.observers.append(user)
+        table.add_observer(user.name)
         state = TableState(table)
         return (self.table_views[table_id], dumps(state))
 
@@ -108,6 +108,10 @@ class RounderNetworkServer:
             logger.debug("   %s" % action)
             serialized_actions.append(dumps(action))
         self.users[username].prompt(table.id, serialized_actions)
+
+    def notify(self, table_id, username, event):
+        serialized_event = dumps(event)
+        self.users[username].notify(table_id, serialized_event)
 
     def process_action(self, table, user, action_index, params):
         """ Process an incoming action from a player. """
@@ -183,6 +187,22 @@ class User(pb.Avatar):
     def prompt_failure_cb(self, data):
         """ Failed prompt callback. """
         logger.debug("Prompt failed.")
+
+    def notify(self, table_id, serialized_event):
+        """
+        Pass an event along to the client.
+        """
+        if self.remote != None:
+            d = self.remote.callRemote("notify", serialized_event)
+            d.addCallback(self.notify_success_cb, self.notify_failure_cb)
+
+    def notify_success_cb(self, data, failure_cb):
+        """ Successful notify callback. """
+        pass
+
+    def notify_failure_cb(self, data):
+        """ Failed notify callback. """
+        logger.debug("Notify failed.")
 
 
 

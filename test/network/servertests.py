@@ -51,6 +51,12 @@ class RounderNetworkServerTests(unittest.TestCase):
 
         self.users = [self.user1, self.user2]
 
+    def find_user_with_pending_actions(self):
+        for u in self.users:
+            if len(u.pending_actions) > 0:
+                return u
+        raise Exception("Unable to find a player with pending actions.")
+
     def test_open_table(self):
         self.assertTrue(isinstance(self.user1.table_views[self.table.id], 
             TableView))
@@ -86,15 +92,22 @@ class RounderNetworkServerTests(unittest.TestCase):
             user = self.find_user_with_pending_actions()
             user.act_randomly(self.table.id)
 
-    def find_user_with_pending_actions(self):
-        for u in self.users:
-            if len(u.pending_actions) > 0:
-                return u
-        raise Exception("Unable to find a player with pending actions.")
+    def test_player_joined_events_are_sent(self):
+        self.assertEquals(0, len(self.user1.events))
+        self.assertEquals(0, len(self.user2.events))
+        self.user1_table.view_sit(self.user1, 0)
+        self.assertEquals(1, len(self.user1.events))
+        self.assertEquals(1, len(self.user2.events))
 
 
 
 class TestUser(User):
+
+    def __init__(self, name, server):
+        User.__init__(self, name, server)
+
+        # Queue of all events received.
+        self.events = []
 
     def prompt(self, table_id, serialized_actions):
 
@@ -119,6 +132,14 @@ class TestUser(User):
         self.pending_actions = []
         self.server.process_action(self.table_views[table_id].table,
             self, r, params)
+
+    def notify(self, table_id, serialized_event):
+        """
+        Override the parent to track events sent.
+        """
+        User.notify(self, table_id, serialized_event)
+        self.events.append(loads(serialized_event))
+
 
     def act(self, table_id, action_type, param=None):
         """

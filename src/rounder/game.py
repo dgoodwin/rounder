@@ -342,7 +342,7 @@ class TexasHoldemGame(Game):
     def __collect_blinds(self):
         """ 
         Collect blinds from the players who agreed to post them. (normally handled
-        by the table.
+        by the table)
         """
 
         self._check_if_finished()
@@ -408,6 +408,7 @@ class TexasHoldemGame(Game):
         self.advance()
 
     def __get_table_id(self):
+        """ Handy for logger statements."""
         if self.table != None:
             return self.table.id
         return "None"
