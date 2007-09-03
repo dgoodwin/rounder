@@ -33,9 +33,9 @@ from rounder.table import STATE_SMALL_BLIND
 from rounder.network.serialize import loads
 from rounder.action import Raise, Call, Fold
 
-class RounderNetworkServerTests(unittest.TestCase):
+class BaseServerFixture(unittest.TestCase):
 
-    """ Tests exercising the server network controller. """
+    """ Base class for tests that require a server object. """
 
     def setUp(self):
         self.server = RounderNetworkServer()
@@ -50,6 +50,13 @@ class RounderNetworkServerTests(unittest.TestCase):
         self.user2_table = self.user1.table_views[self.table.id]
 
         self.users = [self.user1, self.user2]
+
+class RounderNetworkServerTests(BaseServerFixture):
+
+    """ Tests exercising the server network controller. """
+
+    def setUp(self):
+        BaseServerFixture.setUp(self)
 
     def find_user_with_pending_actions(self):
         for u in self.users:
@@ -91,13 +98,6 @@ class RounderNetworkServerTests(unittest.TestCase):
         while self.table.game_underway():
             user = self.find_user_with_pending_actions()
             user.act_randomly(self.table.id)
-
-    def test_player_joined_events_are_sent(self):
-        self.assertEquals(0, len(self.user1.events))
-        self.assertEquals(0, len(self.user2.events))
-        self.user1_table.view_sit(self.user1, 0)
-        self.assertEquals(1, len(self.user1.events))
-        self.assertEquals(1, len(self.user2.events))
 
 
 

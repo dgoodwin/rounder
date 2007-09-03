@@ -58,6 +58,7 @@ import pypokerevaltests
 import serializetests
 import server.servertests
 import server.clienttests
+import server.eventtests
 
 from unittest import TestSuite
 
@@ -76,6 +77,7 @@ def suite():
         serializetests.suite(),
         server.servertests.suite(),
         server.clienttests.suite(),
+        server.eventtests.suite(),
    ))
 
 if __name__ == "__main__":
