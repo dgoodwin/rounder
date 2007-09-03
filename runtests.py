@@ -56,8 +56,8 @@ import limittests
 import actiontests
 import pypokerevaltests
 import serializetests
-import network.servertests
-import network.clienttests
+import server.servertests
+import server.clienttests
 
 from unittest import TestSuite
 
@@ -74,8 +74,8 @@ def suite():
         actiontests.suite(),
         pypokerevaltests.suite(),
         serializetests.suite(),
-        network.servertests.suite(),
-        network.clienttests.suite(),
+        server.servertests.suite(),
+        server.clienttests.suite(),
    ))
 
 if __name__ == "__main__":

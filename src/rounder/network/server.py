@@ -190,7 +190,7 @@ class User(pb.Avatar):
 
     def notify(self, table_id, serialized_event):
         """
-        Pass an event along to the client.
+        Pass an Event along to the client.
         """
         if self.remote != None:
             d = self.remote.callRemote("notify", serialized_event)

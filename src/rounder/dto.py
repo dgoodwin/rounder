@@ -21,7 +21,11 @@
 """ 
 Rounder Data Transfer Objects
 
-Various objects used to safely transmit game state or activity to clients.
+Various objects used to safely transmit game state or activity to clients. 
+In cases where an engine object is considered safe to transmit to a client,
+a DTO should still be created as child class of the engine object. Even if
+initially empty it provides a hook for us to change the DTO should the
+engine object later grow to contain sensitive information.
 """
 
 class TableState:
