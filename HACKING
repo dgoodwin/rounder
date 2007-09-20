@@ -7,6 +7,8 @@ From the root of the source directory:
     ./runtests.py               Runs all the pure unit tests. (very fast)
 
 To test the network using dummy clients that just randomly choose an action:
+NOTE: this is somewhat outdated and may no longer work. Most of this is now
+tested in the standard unit tests.
 
     ./rounder-server
     ./rounder-testclient -u player0 -p password
