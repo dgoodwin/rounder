@@ -280,7 +280,7 @@ class Table(object):
         player.table = self
         logger.debug("Table %s: %s took seat %s" % (self.id, player.name,
             seat_num))
-        event = PlayerJoinedGame(player.name, seat_num)
+        event = PlayerJoinedGame(self, player.name, seat_num)
         self.notify_all(event)
 
     def prompt_small_blind(self):

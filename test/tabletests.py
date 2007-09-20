@@ -24,15 +24,16 @@ import unittest
 
 import settestpath
 
-from rounder.table import Table, Seats
+from rounder.table import Seats
 from rounder.player import Player
 from rounder.core import RounderException
 from rounder.currency import Currency
 from rounder.table import STATE_SMALL_BLIND, STATE_BIG_BLIND, HAND_UNDERWAY
-from rounder.limit import FixedLimit
 from rounder.action import PostBlind
 
 from rounder.utils import find_action_in_list
+
+from utils import create_table
 
 CHIPS = 1000
 
@@ -109,18 +110,6 @@ class SeatsTests(unittest.TestCase):
         self.seats.dealer = self.player7
         self.seats.new_dealer()
         self.assertEquals(self.player1, self.seats.dealer)
-
-def create_table(num_players, dealer_index):
-    limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
-    table = Table(name="Test Table", limit=limit, seats=10)
-
-    players = []
-    for i in range(num_players):
-        new_player = Player('player' + str(i), Currency(CHIPS))
-        table.seat_player(new_player, i)
-        players.append(new_player)
-
-    return (limit, table, players)
 
 
 

@@ -51,6 +51,14 @@ class BaseServerFixture(unittest.TestCase):
 
         self.users = [self.user1, self.user2]
 
+    def clear_player_events(self):
+        """ 
+        Clears the stored events for each player. Used in a test 
+        immediately before doing something we expect to trigger events.
+        """
+        for user in self.users:
+            user.events = []
+
 class RounderNetworkServerTests(BaseServerFixture):
 
     """ Tests exercising the server network controller. """

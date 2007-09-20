@@ -39,6 +39,7 @@ class TableState:
     def __init__(self, table):
         self.id = table.id
         self.name = table.name
+        self.limit = table.limit
         # TODO: board cards
         # TODO: player states
 

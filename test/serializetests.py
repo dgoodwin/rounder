@@ -29,7 +29,7 @@ import settestpath
 from rounder.network.serialize import dumps, loads, register_message_classes
 from rounder.dto import TableState
 
-from tabletests import create_table
+from utils import create_table
 
 register_message_classes()
 

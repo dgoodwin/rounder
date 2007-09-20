@@ -30,6 +30,7 @@ import settestpath
 from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
+from rounder.table import Table
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act, \
     split_pot
 from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \
@@ -37,7 +38,7 @@ from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 
-from utils import create_players_list
+from utils import create_players_list, create_table
 
 CHIPS = 1000
 
@@ -166,8 +167,11 @@ class TexasHoldemTests(unittest.TestCase):
         self.game_over = True
 
     def __create_game(self, num_players, dealer_index, sb_index, bb_index):
-        self.players = create_players_list(num_players, CHIPS)
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+
+        temp_tuple = create_table(num_players, dealer_index)
+        table = temp_tuple[1]
+        self.players = temp_tuple[2]
 
         # Copy the players list, the game can modify it's own list and we
         # need to maintain the references to the original players:
@@ -176,7 +180,7 @@ class TexasHoldemTests(unittest.TestCase):
 
         self.game = TexasHoldemGame(limit=limit, players=players_copy, 
             dealer_index=dealer_index, sb_index=sb_index, bb_index=bb_index,
-            callback=self.game_over_callback)
+            callback=self.game_over_callback, table=table)
         self.game.advance()
 
         # Referenced in game over callback for determining that a game ended

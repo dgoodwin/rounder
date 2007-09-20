@@ -193,7 +193,7 @@ class User(pb.Avatar):
         Pass an Event along to the client.
         """
         if self.remote != None:
-            d = self.remote.callRemote("notify", serialized_event)
+            d = self.remote.callRemote("notify", table_id, serialized_event)
             d.addCallback(self.notify_success_cb, self.notify_failure_cb)
 
     def notify_success_cb(self, data, failure_cb):

@@ -27,7 +27,17 @@ just contain data.
 
 Clients generally must type check incoming events to determine how to extract
 the data and what to do with it.
+
+Events should define a repr method which can be used for logging purposes.
+It should not include the table name or ID as this will be a prefix when
+the actual logging or display takes place.
+
+Likewise the events do not need an actual reference to the table as this is
+handled by the networking code.
 """
+
+
+from rounder.dto import TableState
 
 class Event:
 
@@ -36,8 +46,8 @@ class Event:
     players need to be notified of.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, table):
+        self.table_state = TableState(table)
 
 
 
@@ -47,8 +57,8 @@ class PlayerJoinedGame(Event):
     Player joined the game.
     """
 
-    def __init__(self, player_name, seat_num):
-        Event.__init__(self)
+    def __init__(self, table, player_name, seat_num):
+        Event.__init__(self, table)
         self.player_name = player_name
         self.seat_num = seat_num
 
@@ -58,8 +68,38 @@ class PlayerJoinedGame(Event):
 
 
 
+class NewHandStarting(Event):
+
+    """
+    Signals that a new hand is beginning.
+    """
+
+    def __init__(self, table):
+
+        Event.__init__(self, table)
+
+
+
+class PlayerPostedBlind(Event):
+
+    """
+    A player has agreed to post the blind.
+
+    While players agree to post blinds before a hand is actually underway,
+    this event is only sent when the hand begins and the blinds actually 
+    enter the pot.
+    """
+
+    def __init__(self, table, player_name, amount):
+        Event.__init__(self, table)
+        self.player_name = player_name
+        self.amount = amount
+
+
+
 ALL_EVENTS = [
     Event, 
     PlayerJoinedGame,
+    NewHandStarting,
 ]
 

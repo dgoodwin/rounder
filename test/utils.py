@@ -20,8 +20,12 @@
 
 """ Rounder Test Utilities """
 
+from rounder.table import Table
 from rounder.currency import Currency
 from rounder.player import Player
+from rounder.limit import FixedLimit
+
+CHIPS = 1000
 
 def create_players_list(size, chips):
     """
@@ -31,3 +35,16 @@ def create_players_list(size, chips):
     for i in range(size):
         l.append(Player(name='player' + str(i), seat=i, chips=Currency(chips)))
     return l
+
+def create_table(num_players, dealer_index):
+    limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+    table = Table(name="Test Table", limit=limit, seats=10)
+
+    players = []
+    for i in range(num_players):
+        new_player = Player(name='player' + str(i), chips=Currency(CHIPS))
+        table.seat_player(new_player, i)
+        players.append(new_player)
+
+    return (limit, table, players)
+

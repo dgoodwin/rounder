@@ -29,6 +29,7 @@ from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.deck import Deck
 from rounder.currency import Currency
+from rounder.event import *
 
 GAME_ID_COUNTER = 1
 
@@ -166,15 +167,16 @@ class Game(object):
 
     """ Parent class of all poker games. """
 
-    def __init__(self, players, callback, table=None):
+    def __init__(self, limit, players, callback, table=None):
         """
         Constructor expects the list of players to all be active, no one
-        sitting out.
+        sitting out. (TODO: add check for this)
         """
         # Every hand played needs a unique ID:
         self.id = ++GAME_ID_COUNTER
 
         self.table = table
+        self.limit = limit
 
         # A callback method we can call when this game is finished to return
         # control to the object that created us:
@@ -182,7 +184,7 @@ class Game(object):
 
         self.aborted = False
         self.finished = False
-        self.winners = None # Player who won this hand
+        self.winners = None # Players who won this hand
 
         # List of players passed in should have empty seats and players
         # sitting out filtered out:
@@ -200,10 +202,9 @@ class Game(object):
             
         self.pot = Currency(0.00)
 
-    def start(self):
-        """ Begin the hand. """
-        # Shouldn't be called on the base class.
-        raise NotImplementedError()
+        # Create a new hand starting event and send to each player:
+        new_hand_event = NewHandStarting(self.table)
+        self.table.notify_all(new_hand_event)
 
     def process_action(self, action):
         """ 
@@ -270,9 +271,8 @@ class TexasHoldemGame(Game):
         All the game cares about is where they sit in relation to one another.
         """
 
-        Game.__init__(self, players, callback, table)
+        Game.__init__(self, limit, players, callback, table)
 
-        self.limit = limit
         self.dealer = self.players[dealer_index]
         self.small_blind = self.players[sb_index]
         self.big_blind = self.players[bb_index]

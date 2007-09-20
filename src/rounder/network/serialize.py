@@ -28,6 +28,7 @@ from rounder.dto import TableState, PlayerState
 from rounder.card import Card
 from rounder.currency import Currency
 from rounder.action import PostBlind, Call, Raise, Fold
+from rounder.limit import Limit, FixedLimit
 from rounder.event import ALL_EVENTS
 
 def register_message_classes():
@@ -41,6 +42,9 @@ def register_message_classes():
         Call,
         Raise,
         Fold,
+
+        Limit, 
+        FixedLimit,
     ]
     l.extend(ALL_EVENTS)
 
