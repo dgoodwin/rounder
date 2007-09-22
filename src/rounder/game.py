@@ -203,7 +203,7 @@ class Game(object):
         self.pot = Currency(0.00)
 
         # Create a new hand starting event and send to each player:
-        new_hand_event = NewHandStarting(self.table)
+        new_hand_event = NewHandStarted(self.table)
         self.table.notify_all(new_hand_event)
 
     def process_action(self, action):
@@ -349,9 +349,17 @@ class TexasHoldemGame(Game):
         self.add_to_pot(self.small_blind, self.limit.small_blind)
         logger.info("Table %s: %s posts the small blind: %s", 
             self.__get_table_id(), self.small_blind.name, self.limit.small_blind)
+        blind_event = PlayerPostedBlind(self.table, self.small_blind.name, 
+            self.limit.small_blind)
+        self.table.notify_all(blind_event)
+
         self.add_to_pot(self.big_blind, self.limit.big_blind)
         logger.info("Table %s: %s posts the big blind: %s", 
             self.__get_table_id(), self.big_blind.name, self.limit.big_blind)
+        blind_event = PlayerPostedBlind(self.table, self.big_blind.name, 
+            self.limit.big_blind)
+        self.table.notify_all(blind_event)
+
         logger.info("Pot is now: %s", self.pot)
 
         self.__last_actor = self.big_blind
@@ -476,10 +484,6 @@ class TexasHoldemGame(Game):
         logger.info("Incoming action: " + str(action))
         self._check_if_finished()
 
-        # TODO: verify the action coming back has valid params?
-        # TODO: asserting the player responding to the action actually was
-        #   given the option, perhaps at another layer (server?)
-        
         if isinstance(action, Call):
             self.add_to_pot(player, action.amount)
 

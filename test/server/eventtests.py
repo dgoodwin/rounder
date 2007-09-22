@@ -44,7 +44,7 @@ class EventTests(BaseServerFixture):
         self.assertTrue(isinstance(self.user2.events[0], 
             PlayerJoinedGame))
 
-    def test_blind_posted(self):
+    def test_new_hand_started(self):
         # TODO: Why does the user perspective still need a ref to the user?
         self.user1_table.view_sit(self.user1, 0)
         self.user2_table.view_sit(self.user2, 1)
@@ -62,11 +62,25 @@ class EventTests(BaseServerFixture):
 
         # Post big blind, now we should see our event:
         self.user2.act_randomly(self.table.id)
-        self.assertEquals(1, len(self.user1.events))
-        self.assertEquals(1, len(self.user2.events))
-        self.assertTrue(isinstance(self.user1.events[0], NewHandStarting))
-        self.assertTrue(isinstance(self.user2.events[0], NewHandStarting))
+        self.assertEquals(3, len(self.user1.events))
+        self.assertEquals(3, len(self.user2.events))
+        self.assertTrue(isinstance(self.user1.events[0], NewHandStarted))
+        self.assertTrue(isinstance(self.user2.events[0], NewHandStarted))
 
+    def test_player_posted_blind(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+        self.user1.act_randomly(self.table.id)
+        self.clear_player_events()
+        self.user2.act_randomly(self.table.id)
+
+        self.assertEquals(3, len(self.user1.events))
+        self.assertEquals(3, len(self.user2.events))
+        self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
+        self.assertTrue(isinstance(self.user1.events[2], PlayerPostedBlind))
+        self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
+        self.assertTrue(isinstance(self.user2.events[2], PlayerPostedBlind))
 
     def test_player_sits_out(self):
         pass

@@ -68,7 +68,7 @@ class PlayerJoinedGame(Event):
 
 
 
-class NewHandStarting(Event):
+class NewHandStarted(Event):
 
     """
     Signals that a new hand is beginning.
@@ -100,6 +100,7 @@ class PlayerPostedBlind(Event):
 ALL_EVENTS = [
     Event, 
     PlayerJoinedGame,
-    NewHandStarting,
+    NewHandStarted,
+    PlayerPostedBlind,
 ]
 
