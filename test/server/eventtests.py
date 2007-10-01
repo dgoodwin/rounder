@@ -62,8 +62,8 @@ class EventTests(BaseServerFixture):
 
         # Post big blind, now we should see our event:
         self.user2.act_randomly(self.table.id)
-        self.assertEquals(3, len(self.user1.events))
-        self.assertEquals(3, len(self.user2.events))
+        self.assertEquals(5, len(self.user1.events))
+        self.assertEquals(5, len(self.user2.events))
         self.assertTrue(isinstance(self.user1.events[0], NewHandStarted))
         self.assertTrue(isinstance(self.user2.events[0], NewHandStarted))
 
@@ -75,20 +75,39 @@ class EventTests(BaseServerFixture):
         self.clear_player_events()
         self.user2.act_randomly(self.table.id)
 
-        self.assertEquals(3, len(self.user1.events))
-        self.assertEquals(3, len(self.user2.events))
+        self.assertEquals(5, len(self.user1.events))
+        self.assertEquals(5, len(self.user2.events))
         self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
         self.assertTrue(isinstance(self.user1.events[2], PlayerPostedBlind))
         self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
         self.assertTrue(isinstance(self.user2.events[2], PlayerPostedBlind))
 
-    def test_player_sits_out(self):
-        pass
+    def test_hole_cards_dealt(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+        self.user1.act_randomly(self.table.id)
+        self.clear_player_events()
+        self.user2.act_randomly(self.table.id)
 
-    def test_start_game_(self):
-        pass
+        user1_events = filter_event_type(self.user1, HoleCardDealt)
+        self.assertEquals(2, len(user1_events))
+
+        user2_events = filter_event_type(self.user2, HoleCardDealt)
+        self.assertEquals(2, len(user2_events))
 
 
+
+def filter_event_type(user, event_type):
+    """ 
+    Filter the users list of received events and return only those that 
+    match the given type.
+    """
+    events_of_type = []
+    for e in user.events:
+        if isinstance(e, event_type):
+            events_of_type.append(e)
+    return events_of_type
 
 def suite():
     suite = unittest.TestSuite()

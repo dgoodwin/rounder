@@ -421,6 +421,15 @@ class Table(object):
             if self.server != None:
                 self.server.notify(self.id, o, event)
 
+    def notify(self, player, event):
+        """
+        Notify a specific player of an event intended for their eyes only.
+        """
+        logger.debug("Table %s: Notifying %s: %s" % (self.id, player,
+            event))
+        if self.server != None:
+            self.server.notify(self.id, player, event)
+
     def game_underway(self):
         """ Return True if there's currently a game underway at this table. """
         if self.gsm.get_current_state() == HAND_UNDERWAY:

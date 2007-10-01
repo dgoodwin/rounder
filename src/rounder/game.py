@@ -368,10 +368,16 @@ class TexasHoldemGame(Game):
     def __deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
         self._check_if_finished()
-        for p in self.players:
-            p.cards.append(self.__deck.draw_card())
-        for p in self.players:
-            p.cards.append(self.__deck.draw_card())
+        for i in range(2): # execute loop twice
+            for p in self.players:
+                card = self.__deck.draw_card()
+                p.cards.append(card)
+                hole_card_event = HoleCardDealt(self.table, card)
+                self.table.notify(p.name, hole_card_event)
+
+                # BIG FREAKING TODO: REMOVE THIS LOGGER STATEMENT
+                logger.debug("Table %s: Dealt hole card to %s: %s" % 
+                    (self.table.id, p.name, card))
 
     def __continue_betting_round(self):
         """
