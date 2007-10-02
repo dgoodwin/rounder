@@ -141,6 +141,17 @@ class TestUser(User):
         self.server.process_action(self.table_views[table_id].table,
             self, r, params)
 
+    def act(self, table_id, action_type):
+        i = 0
+        for action in self.pending_actions:
+            if isinstance(action, action_type):
+                self.pending_actions = []
+                self.server.process_action(self.table_views[table_id].table,
+                    self, i, [])
+            i += 1
+
+        raise Exception("Unable to find action of type %s" % action_type)
+
     def notify(self, table_id, serialized_event):
         """
         Override the parent to track events sent.

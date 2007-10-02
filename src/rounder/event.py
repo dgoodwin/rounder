@@ -112,11 +112,25 @@ class HoleCardDealt(Event):
 
 
 
+class CommunityCardsDealt(Event):
+
+    """
+    One or more community cards have been dealt.
+    """
+
+    def __init__(self, table, cards):
+
+        Event.__init__(self, table)
+        self.cards = cards
+
+
+
 ALL_EVENTS = [
     Event, 
     PlayerJoinedGame,
     NewHandStarted,
     PlayerPostedBlind,
     HoleCardDealt,
+    CommunityCardsDealt,
 ]
 

@@ -27,6 +27,7 @@ import unittest
 
 from server.servertests import BaseServerFixture
 from rounder.event import *
+from rounder.action import *
 
 class EventTests(BaseServerFixture):
 
@@ -95,6 +96,26 @@ class EventTests(BaseServerFixture):
 
         user2_events = filter_event_type(self.user2, HoleCardDealt)
         self.assertEquals(2, len(user2_events))
+
+    def test_community_cards_dealt(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+
+        # Post blinds:
+        self.user1.act_randomly(self.table.id)
+        self.user2.act_randomly(self.table.id)
+
+        # Preflop action:
+        self.user1.act(self.table.id, Call)
+        self.clear_player_events()
+        self.user2.act(self.table.id, Call)
+
+        user1_events = filter_event_type(self.user1, CommunityCardsDealt)
+        self.assertEquals(1, len(user1_events))
+
+        user2_events = filter_event_type(self.user2, CommunityCardsDealt)
+        self.assertEquals(1, len(user2_events))
 
 
 

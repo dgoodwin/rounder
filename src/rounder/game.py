@@ -348,7 +348,8 @@ class TexasHoldemGame(Game):
         self._check_if_finished()
         self.add_to_pot(self.small_blind, self.limit.small_blind)
         logger.info("Table %s: %s posts the small blind: %s", 
-            self.__get_table_id(), self.small_blind.name, self.limit.small_blind)
+            self.__get_table_id(), self.small_blind.name, 
+            self.limit.small_blind)
         blind_event = PlayerPostedBlind(self.table, self.small_blind.name, 
             self.limit.small_blind)
         self.table.notify_all(blind_event)
@@ -438,6 +439,8 @@ class TexasHoldemGame(Game):
         for i in range(3):
             self.community_cards.append(self.__deck.draw_card())
 
+        event = CommunityCardsDealt(self.table, self.community_cards)
+        self.table.notify_all(event)
         self.__continue_betting_round()
 
     def turn(self):
