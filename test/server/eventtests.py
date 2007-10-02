@@ -63,10 +63,10 @@ class EventTests(BaseServerFixture):
 
         # Post big blind, now we should see our event:
         self.user2.act_randomly(self.table.id)
-        self.assertEquals(4, len(self.user1.events))
-        self.assertEquals(4, len(self.user2.events))
-        self.assertTrue(isinstance(self.user1.events[0], NewHandStarted))
-        self.assertTrue(isinstance(self.user2.events[0], NewHandStarted))
+        user1_events = filter_event_type(self.user1, NewHandStarted)
+        self.assertEquals(1, len(user1_events))
+        user2_events = filter_event_type(self.user1, NewHandStarted)
+        self.assertEquals(1, len(user2_events))
 
     def test_player_posted_blind(self):
         self.user1_table.view_sit(self.user1, 0)
@@ -76,12 +76,10 @@ class EventTests(BaseServerFixture):
         self.clear_player_events()
         self.user2.act_randomly(self.table.id)
 
-        self.assertEquals(4, len(self.user1.events))
-        self.assertEquals(4, len(self.user2.events))
-        self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
-        self.assertTrue(isinstance(self.user1.events[2], PlayerPostedBlind))
-        self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
-        self.assertTrue(isinstance(self.user2.events[2], PlayerPostedBlind))
+        user1_events = filter_event_type(self.user1, PlayerPostedBlind)
+        self.assertEquals(2, len(user1_events))
+        user2_events = filter_event_type(self.user1, PlayerPostedBlind)
+        self.assertEquals(2, len(user2_events))
 
     def test_hole_cards_dealt(self):
         self.user1_table.view_sit(self.user1, 0)
