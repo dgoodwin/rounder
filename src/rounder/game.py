@@ -373,12 +373,16 @@ class TexasHoldemGame(Game):
             for p in self.players:
                 card = self.__deck.draw_card()
                 p.cards.append(card)
-                hole_card_event = HoleCardDealt(self.table, card)
-                self.table.notify(p.name, hole_card_event)
 
                 # BIG FREAKING TODO: REMOVE THIS LOGGER STATEMENT
                 logger.debug("Table %s: Dealt hole card to %s: %s" % 
                     (self.table.id, p.name, card))
+
+        # Send out notifications, done separately so we only have to
+        # send one event containing both cards:
+        for p in self.players:
+            hole_card_event = HoleCardsDealt(self.table, p.cards)
+            self.table.notify(p.name, hole_card_event)
 
     def __continue_betting_round(self):
         """

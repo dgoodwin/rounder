@@ -63,8 +63,8 @@ class EventTests(BaseServerFixture):
 
         # Post big blind, now we should see our event:
         self.user2.act_randomly(self.table.id)
-        self.assertEquals(5, len(self.user1.events))
-        self.assertEquals(5, len(self.user2.events))
+        self.assertEquals(4, len(self.user1.events))
+        self.assertEquals(4, len(self.user2.events))
         self.assertTrue(isinstance(self.user1.events[0], NewHandStarted))
         self.assertTrue(isinstance(self.user2.events[0], NewHandStarted))
 
@@ -76,8 +76,8 @@ class EventTests(BaseServerFixture):
         self.clear_player_events()
         self.user2.act_randomly(self.table.id)
 
-        self.assertEquals(5, len(self.user1.events))
-        self.assertEquals(5, len(self.user2.events))
+        self.assertEquals(4, len(self.user1.events))
+        self.assertEquals(4, len(self.user2.events))
         self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
         self.assertTrue(isinstance(self.user1.events[2], PlayerPostedBlind))
         self.assertTrue(isinstance(self.user1.events[1], PlayerPostedBlind))
@@ -91,11 +91,13 @@ class EventTests(BaseServerFixture):
         self.clear_player_events()
         self.user2.act_randomly(self.table.id)
 
-        user1_events = filter_event_type(self.user1, HoleCardDealt)
-        self.assertEquals(2, len(user1_events))
+        user1_events = filter_event_type(self.user1, HoleCardsDealt)
+        self.assertEquals(1, len(user1_events))
+        self.assertEquals(2, len(user1_events[0].cards))
 
-        user2_events = filter_event_type(self.user2, HoleCardDealt)
-        self.assertEquals(2, len(user2_events))
+        user2_events = filter_event_type(self.user2, HoleCardsDealt)
+        self.assertEquals(1, len(user2_events))
+        self.assertEquals(2, len(user1_events[0].cards))
 
     def test_community_cards_dealt(self):
         self.user1_table.view_sit(self.user1, 0)
@@ -113,9 +115,11 @@ class EventTests(BaseServerFixture):
 
         user1_events = filter_event_type(self.user1, CommunityCardsDealt)
         self.assertEquals(1, len(user1_events))
+        self.assertEquals(3, len(user1_events[0].cards))
 
         user2_events = filter_event_type(self.user2, CommunityCardsDealt)
         self.assertEquals(1, len(user2_events))
+        self.assertEquals(3, len(user2_events[0].cards))
 
 
 

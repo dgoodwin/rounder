@@ -97,18 +97,18 @@ class PlayerPostedBlind(Event):
 
 
 
-class HoleCardDealt(Event):
+class HoleCardsDealt(Event):
 
     """
-    A hole card has been dealt to the player receiving the event. 
+    Hole cards have been dealt to the player receiving the event. 
     (Player clients recieve no notification about hole cards being
     dealt to other players.)
     """
 
-    def __init__(self, table, card):
+    def __init__(self, table, cards):
 
         Event.__init__(self, table)
-        self.card = card
+        self.cards = cards
 
 
 
@@ -130,7 +130,7 @@ ALL_EVENTS = [
     PlayerJoinedGame,
     NewHandStarted,
     PlayerPostedBlind,
-    HoleCardDealt,
+    HoleCardsDealt,
     CommunityCardsDealt,
 ]
 
