@@ -370,13 +370,27 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[0], 2, CHIPS - 2)
 
         self.assertTrue(self.game.pending_actions.has_key(self.players[1]))
-        self.players[0].sit_out() # table does this normally
+        self.players[1].sit_out() # table does this normally
         self.game.sit_out(self.players[1])
         self.assertFalse(self.game.pending_actions.has_key(self.players[1]))
         self.assertTrue(self.players[1].folded)
 
         # Action should have moved on to the next player:
         self.assertTrue(self.game.pending_actions.has_key(self.players[2]))
+
+    def test_non_pending_player_sits_out(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__raise(self.players[3], 2, CHIPS - 4)
+        self.__call(self.players[0], 4, CHIPS - 4)
+
+        # Player 2 sits out when we're waiting for player 1 to act:
+        self.players[2].sit_out() # table does this normally
+        self.game.sit_out(self.players[2])
+        self.assertFalse(self.players[2].folded)
+
+        # Now player 1 calls, player 2 should immediately fold:
+        self.__call(self.players[1], 3, CHIPS - 4)
+        self.assertTrue(self.players[2].folded)
 
 
 

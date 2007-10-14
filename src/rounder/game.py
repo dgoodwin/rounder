@@ -483,13 +483,21 @@ class TexasHoldemGame(Game):
             logger.error("   Pre-existing pending actions: " +
                 str(self.pending_actions[player]))
             raise RounderException("Pending actions already exist")
-        logger.debug("Prompting %s with actions: %s" % (player.name,
-            actions_list))
+
         self.pending_actions[player] = actions_list
 
-        player.prompt(actions_list)
-        if self.table != None:
-            self.table.prompt_player(player, actions_list)
+        # If player has sat out, simulate a fold here:
+        if player.sitting_out:
+            logger.debug("   player is sitting out, simulating fold.")
+            fold = find_action_in_list(Fold, actions_list)
+            self.process_action(player, fold)
+        else:
+            logger.debug("Prompting %s with actions: %s" % (player.name,
+                actions_list))
+            # TODO: Two prompt calls here, should probably be one:
+            player.prompt(actions_list)
+            if self.table != None:
+                self.table.prompt_player(player, actions_list)
 
     def sit_out(self, player):
         """ 
