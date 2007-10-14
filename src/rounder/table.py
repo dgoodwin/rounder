@@ -180,6 +180,7 @@ class Table(object):
         logger.info("Created table: %s" % self)
 
         self.observers = []
+        self.game_over_event_queue = []
         self.game = None
 
         # Optional server object represents a parent object that creates tables.
@@ -244,6 +245,10 @@ class Table(object):
 
         self.game = None
         self.gsm.reset()
+
+        for event in self.game_over_event_queue:
+            self.notify_all(event)
+        self.game_over_event_queue = []
 
         # Pass control up to the server if we were provided one.
         #if self.server != None:
@@ -328,11 +333,12 @@ class Table(object):
         pending_actions_copy.extend(player.pending_actions)
         player.sit_out()
 
+        event = PlayerSatOut(self, player.name)
         if self.hand_underway():
+            self.game_over_event_queue.append(event)
             self.game.sit_out(player)
         else:
             
-            event = PlayerSatOut(self, player.name)
             self.notify_all(event)
 
             if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:

@@ -134,6 +134,28 @@ class EventTests(BaseServerFixture):
         self.assertTrue(isinstance(self.user2.events[0], 
             PlayerSatOut))
 
+    def test_player_sits_out_during_hand(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+
+        # Post blinds:
+        self.user1.act_randomly(self.table.id)
+        self.user2.act_randomly(self.table.id)
+
+        # User 2 sits out, but the hand is already underway and they're 
+        # second to act, therefore the PlayerSatOut event shouldn't be
+        # sent until after the hand is completed:
+        self.user2_table.view_sit_out(self.user2)
+
+        self.assertEquals(0, len(filter_event_type(self.user1, PlayerSatOut)))
+        self.assertEquals(0, len(filter_event_type(self.user2, PlayerSatOut)))
+
+        self.user1.act(self.table.id, Fold)
+        # TODO: Check that user 2 wins once event is written:
+        self.assertEquals(1, len(filter_event_type(self.user1, PlayerSatOut)))
+        self.assertEquals(1, len(filter_event_type(self.user2, PlayerSatOut)))
+
 
 
 

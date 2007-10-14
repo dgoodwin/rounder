@@ -249,7 +249,7 @@ class Game(object):
     def __get_active_players(self):    
         active_players = []
         for p in self.players:
-            if not p.folded and not p.sitting_out:
+            if not p.folded:
                 active_players.append(p)
         return active_players
     active_players = property(__get_active_players, None)

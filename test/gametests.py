@@ -364,7 +364,6 @@ class TexasHoldemTests(unittest.TestCase):
         # TODO check that there was a winner and they received the pot?
         self.assertTrue(len(self.game.winners) > 0)
 
-
     def test_player_to_act_sits_out(self):
         self.__create_game(4, 0, 1, 2)
         self.__call(self.players[3], 2, CHIPS - 2)
