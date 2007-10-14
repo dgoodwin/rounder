@@ -119,6 +119,22 @@ class EventTests(BaseServerFixture):
         self.assertEquals(1, len(user2_events))
         self.assertEquals(3, len(user2_events[0].cards))
 
+    def test_player_sits_out_no_hand_underway(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.clear_player_events()
+
+        self.user1_table.view_sit_out(self.user1)
+
+        # Events should have gone out immediately:
+        self.assertEquals(1, len(self.user1.events))
+        self.assertEquals(1, len(self.user2.events))
+
+        self.assertTrue(isinstance(self.user1.events[0], 
+            PlayerSatOut))
+        self.assertTrue(isinstance(self.user2.events[0], 
+            PlayerSatOut))
+
+
 
 
 def filter_event_type(user, event_type):

@@ -154,7 +154,7 @@ class TableTests(unittest.TestCase):
         self.table.process_action(bb.name, 0, [])
         self.assertEquals(bb, self.table.big_blind)
         self.assertEquals(HAND_UNDERWAY, self.table.gsm.get_current_state())
-        self.assertTrue(self.table.game_underway())
+        self.assertTrue(self.table.hand_underway())
 
     def test_small_blind_sitout_three_handed(self):
         self.__create_table(3, 0)

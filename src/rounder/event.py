@@ -68,6 +68,21 @@ class PlayerJoinedGame(Event):
 
 
 
+class PlayerSatOut(Event):
+
+    """ 
+    Player sat out. (but did not leave the table)
+    """
+
+    def __init__(self, table, player_name):
+        Event.__init__(self, table)
+        self.player_name = player_name
+
+    def __repr__(self):
+        return "PlayerSatOut: %s" % (self.player_name)
+
+
+
 class NewHandStarted(Event):
 
     """
@@ -128,6 +143,7 @@ class CommunityCardsDealt(Event):
 ALL_EVENTS = [
     Event, 
     PlayerJoinedGame,
+    PlayerSatOut,
     NewHandStarted,
     PlayerPostedBlind,
     HoleCardsDealt,

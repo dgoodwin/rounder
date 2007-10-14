@@ -95,6 +95,11 @@ class RounderNetworkServer:
             raise e
         return (table.id, seat_num)
 
+    def sit_out_player(self, table, user):
+        """ Sit out a player. """
+        player = table.seats.players_by_username[user.name]
+        table.sit_out(player)
+
     def game_over(self, table):
         """ Called by a table whenever a game ends. """
         logger.debug("Table %s: game over")
@@ -226,6 +231,9 @@ class TableView(pb.Viewable):
 
     def view_sit(self, from_user, seat):
         return self.server.seat_player(from_user, self.table, seat)
+
+    def view_sit_out(self, from_user):
+        self.server.sit_out_player(self.table, from_user)
 
     def view_start_game(self, from_user):
         """ 

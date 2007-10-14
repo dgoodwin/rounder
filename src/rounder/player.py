@@ -74,6 +74,7 @@ class Player:
 
     def sit_out(self):
         """ Sit player out of the game. """
+        self.clear_pending_actions()
         self.sitting_out = True
 
     def sit_in(self):

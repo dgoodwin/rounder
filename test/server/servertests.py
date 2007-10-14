@@ -103,7 +103,7 @@ class RounderNetworkServerTests(BaseServerFixture):
         self.user1.act_randomly(self.table.id)
         self.user2.act_randomly(self.table.id)
 
-        while self.table.game_underway():
+        while self.table.hand_underway():
             user = self.find_user_with_pending_actions()
             user.act_randomly(self.table.id)
 

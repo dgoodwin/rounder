@@ -30,6 +30,7 @@ from rounder.core import RounderException
 from rounder.deck import Deck
 from rounder.currency import Currency
 from rounder.event import *
+from rounder.utils import find_action_in_list
 
 GAME_ID_COUNTER = 1
 
@@ -248,7 +249,7 @@ class Game(object):
     def __get_active_players(self):    
         active_players = []
         for p in self.players:
-            if not p.folded:
+            if not p.folded and not p.sitting_out:
                 active_players.append(p)
         return active_players
     active_players = property(__get_active_players, None)
@@ -266,9 +267,10 @@ class TexasHoldemGame(Game):
         Blind indicies indicate players who have agreed to post the blinds for
         this hand, thus we can immediately retrieve them and get underway.
 
-        Players list represents only those players who were actively at the table
-        AND sitting in when the hand began. Positions in the list are not relative.
-        All the game cares about is where they sit in relation to one another.
+        Players list represents only those players who were actively at the 
+        table AND sitting in when the hand began. Positions in the list are 
+        not relative. All the game cares about is where they sit in relation
+        to one another.
         """
 
         Game.__init__(self, limit, players, callback, table)
@@ -341,8 +343,8 @@ class TexasHoldemGame(Game):
 
     def __collect_blinds(self):
         """ 
-        Collect blinds from the players who agreed to post them. (normally handled
-        by the table)
+        Collect blinds from the players who agreed to post them. 
+        (normally handled by the table)
         """
 
         self._check_if_finished()
@@ -373,10 +375,6 @@ class TexasHoldemGame(Game):
             for p in self.players:
                 card = self.__deck.draw_card()
                 p.cards.append(card)
-
-                # BIG FREAKING TODO: REMOVE THIS LOGGER STATEMENT
-                logger.debug("Table %s: Dealt hole card to %s: %s" % 
-                    (self.table.id, p.name, card))
 
         # Send out notifications, done separately so we only have to
         # send one event containing both cards:
@@ -492,6 +490,23 @@ class TexasHoldemGame(Game):
         player.prompt(actions_list)
         if self.table != None:
             self.table.prompt_player(player, actions_list)
+
+    def sit_out(self, player):
+        """ 
+        Handle a player sitting out.
+
+        Note this method is called by the table object which has
+        already actually marked the player object as sitting out. Here we
+        just deal with any mess related to ongoing action that may have
+        involved the player.
+        """
+        # If the player sitting out is the one we were currently awaiting a
+        # response from, simulate a fold:
+        logger.debug("Player sitting out: %s" % player.name)
+        if self.pending_actions.has_key(player):
+            logger.debug("   player had pending actions, simulating fold.")
+            fold = find_action_in_list(Fold, self.pending_actions[player])
+            self.process_action(player, fold)
 
     def process_action(self, player, action):
         logger.info("Incoming action: " + str(action))

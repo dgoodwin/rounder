@@ -27,7 +27,7 @@ from rounder.action import PostBlind
 from rounder.core import RounderException
 from rounder.game import GameStateMachine, TexasHoldemGame
 from rounder.utils import find_action_in_list
-from rounder.event import PlayerJoinedGame
+from rounder.event import PlayerJoinedGame, PlayerSatOut
 
 STATE_SMALL_BLIND = "small_blind"
 STATE_BIG_BLIND = "big_blind"
@@ -326,27 +326,32 @@ class Table(object):
         logger.info("Table %s: Sitting player out: %s" % (self.id, player))
         pending_actions_copy = []
         pending_actions_copy.extend(player.pending_actions)
-        player.clear_pending_actions()
         player.sit_out()
 
-        if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
-            # TODO: make sure this doesn't interfere with hands underway
-            logger.debug("Table %s: Not enough players for a new hand." %
-                (self.id))
-            self.wait()
+        if self.hand_underway():
+            self.game.sit_out(player)
+        else:
+            
+            event = PlayerSatOut(self, player.name)
+            self.notify_all(event)
 
-        if find_action_in_list(PostBlind, pending_actions_copy) != None \
-            and self.gsm.get_current_state() == STATE_SMALL_BLIND:
-            player.sit_out()
-            self.prompt_small_blind()
+            if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
+                logger.debug("Table %s: Not enough players for a new hand." %
+                    (self.id))
+                self.wait()
 
-        if find_action_in_list(PostBlind, pending_actions_copy) != None \
-            and self.gsm.get_current_state() == STATE_BIG_BLIND:
-            player.sit_out()
-            if len(self.seats.active_players) == 2:
-                # if down to heads up, we need a different small blind:
-                self.__restart()
-            self.prompt_big_blind()
+            if find_action_in_list(PostBlind, pending_actions_copy) != None \
+                and self.gsm.get_current_state() == STATE_SMALL_BLIND:
+                player.sit_out()
+                self.prompt_small_blind()
+
+            if find_action_in_list(PostBlind, pending_actions_copy) != None \
+                and self.gsm.get_current_state() == STATE_BIG_BLIND:
+                player.sit_out()
+                if len(self.seats.active_players) == 2:
+                    # if down to heads up, we need a different small blind:
+                    self.__restart()
+                self.prompt_big_blind()
 
     def process_action(self, username, action_index, params):
         """
@@ -358,6 +363,9 @@ class Table(object):
 
         Actions can accept parameters, which are returned from the client
         as a list and passed to the actual action for validation and use.
+
+        This method *must* do nothing but locate the correct action and apply
+        it's parameters. The game will handle the action.
         """
         if not self.seats.has_username(username):
             raise RounderException("Unable to find player %s at table %s" % 
@@ -430,12 +438,6 @@ class Table(object):
         if self.server != None:
             self.server.notify(self.id, player, event)
 
-    def game_underway(self):
-        """ Return True if there's currently a game underway at this table. """
-        if self.gsm.get_current_state() == HAND_UNDERWAY:
-            return True
-        return False
-
     def hand_underway(self):
         """ Return True if a hand is currently underway. """
-        return self.gsm.current == None
+        return self.gsm.get_current_state() == HAND_UNDERWAY

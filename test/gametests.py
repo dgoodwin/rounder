@@ -365,6 +365,21 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertTrue(len(self.game.winners) > 0)
 
 
+    def test_player_to_act_sits_out(self):
+        self.__create_game(4, 0, 1, 2)
+        self.__call(self.players[3], 2, CHIPS - 2)
+        self.__call(self.players[0], 2, CHIPS - 2)
+
+        self.assertTrue(self.game.pending_actions.has_key(self.players[1]))
+        self.players[0].sit_out() # table does this normally
+        self.game.sit_out(self.players[1])
+        self.assertFalse(self.game.pending_actions.has_key(self.players[1]))
+        self.assertTrue(self.players[1].folded)
+
+        # Action should have moved on to the next player:
+        self.assertTrue(self.game.pending_actions.has_key(self.players[2]))
+
+
 
 class SplitPotTests(unittest.TestCase):
 
