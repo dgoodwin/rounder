@@ -26,7 +26,6 @@ logger = getLogger("rounder.limit")
 from rounder.action import Call, Raise, Fold
 from rounder.currency import Currency
 
-
 class Limit:
 
     """ Parent class of all poker limits. """
@@ -34,7 +33,7 @@ class Limit:
     def __init__(self):
         pass
 
-    def create_actions(self, table, player, in_pot, current_bet, bet_level):
+    def create_actions(self, player, in_pot, current_bet, bet_level):
         """ 
         Create the appropriate actions for this limit, the given player,
         and the current bet.
@@ -84,10 +83,14 @@ class FixedLimit(Limit):
         if in_pot is None:
             in_pot = Currency(0)
         call_action = Call(current_bet - in_pot)
+
+        raise_amount = self.big_bet
         if bet_level == 1:
-            raise_action = Raise(self.small_bet, self.small_bet)
-        else:
-            raise_action = Raise(self.big_bet, self.big_bet)
+            raise_amount = self.small_bet
+        if raise_amount + current_bet > player.chips:
+            raise_amount = player.chips - current_bet # all-in!
+        raise_action = Raise(raise_amount, raise_amount)
+
         fold_action = Fold()
         return [call_action, raise_action, fold_action]
 

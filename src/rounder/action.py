@@ -108,7 +108,10 @@ class Raise(Action):
 
     """ 
     Action a player can take to raise the current bet.
+    
+    The raise is specified by an amount over the current bet.
     """
+    # TODO: Add existing bet to the contructor?
 
     def __init__(self, max_bet, min_bet):
         Action.__init__(self)

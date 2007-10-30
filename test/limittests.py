@@ -26,6 +26,9 @@ import settestpath
 
 from rounder.limit import FixedLimit
 from rounder.currency import Currency
+from rounder.utils import find_action_in_list
+from rounder.player import Player
+from rounder.action import Call, Raise, Fold
 
 class FixedLimitTests(unittest.TestCase):
 
@@ -55,6 +58,35 @@ class FixedLimitTests(unittest.TestCase):
         self.assertEqual(Currency(0.10), limit.small_blind)
         self.assertEqual(Currency(0.25), limit.big_blind)
 
+    def test_actions(self):
+        two_four = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        p = Player('Some Player', chips=1000)
+        actions = two_four.create_actions(p, 0, 1, 1)
+        self.assertEquals(3, len(actions))
+
+        call = find_action_in_list(Call, actions)
+        self.assertTrue(call != None)
+        self.assertEquals(1, call.amount)
+
+        r = find_action_in_list(Raise, actions)
+        self.assertTrue(r != None)
+        self.assertEquals(2, r.min_bet)
+        self.assertEquals(2, r.max_bet)
+
+    def test_actions_raise_all_in(self):
+        two_four = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        p = Player('Some Player', chips=3.5)
+        actions = two_four.create_actions(p, 0, 2, 1)
+        self.assertEquals(3, len(actions))
+
+        # Should detect that we don't have enough to make the full raise and
+        # adjust the raise limits accordingly:
+        r = find_action_in_list(Raise, actions)
+        self.assertTrue(r != None)
+        self.assertEquals(1.5, r.min_bet)
+        self.assertEquals(1.5, r.max_bet)
+
+        
 
 
 def suite():
