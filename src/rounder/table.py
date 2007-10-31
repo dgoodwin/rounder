@@ -274,7 +274,7 @@ class Table(object):
         Parent will normally restart the action. Should never be called when
         a hand is already underway.
         """
-        logger.info("Table %s: Waiting for more players.")
+        logger.info("Table %s: Waiting for more players." % (self.id))
         self.gsm.reset()
         self.small_blind = None
         self.big_blind = None
