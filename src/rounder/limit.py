@@ -80,17 +80,25 @@ class FixedLimit(Limit):
         logger.debug("   in_pot: %s" % in_pot)
         logger.debug("   current_bet: %s" % current_bet)
         logger.debug("   bet_level: %s" % bet_level)
+
+        actions = []
+
         if in_pot is None:
             in_pot = Currency(0)
-        call_action = Call(current_bet - in_pot)
 
-        raise_amount = self.big_bet
-        if bet_level == 1:
-            raise_amount = self.small_bet
-        if raise_amount + current_bet > player.chips:
-            raise_amount = player.chips - current_bet # all-in!
-        raise_action = Raise(raise_amount, raise_amount)
+        call_amount = current_bet - in_pot
+        if call_amount >= player.chips:
+            call_amount = player.chips 
+        else:
+            raise_amount = self.big_bet
+            if bet_level == 1:
+                raise_amount = self.small_bet
+            if raise_amount + current_bet > player.chips:
+                raise_amount = player.chips - current_bet # all-in!
+            actions.append(Raise(raise_amount, raise_amount))
 
-        fold_action = Fold()
-        return [call_action, raise_action, fold_action]
+        actions.append(Call(call_amount))
+
+        actions.append(Fold())
+        return actions
 

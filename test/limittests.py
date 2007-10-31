@@ -86,6 +86,18 @@ class FixedLimitTests(unittest.TestCase):
         self.assertEquals(1.5, r.min_bet)
         self.assertEquals(1.5, r.max_bet)
 
+    def test_actions_call_all_in(self):
+        two_four = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        p = Player('Some Player', chips=1.5)
+        actions = two_four.create_actions(p, 0, 2, 1)
+        self.assertEquals(2, len(actions))
+
+        # Should detect that we don't have enough to call and
+        # adjust the call amount ccordingly:
+        c = find_action_in_list(Call, actions)
+        self.assertTrue(c != None)
+        self.assertEquals(1.5, c.amount)
+
         
 
 
