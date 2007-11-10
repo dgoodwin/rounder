@@ -90,11 +90,29 @@ class FixedLimit(Limit):
         if call_amount >= player.chips:
             call_amount = player.chips 
         else:
+            # Default to standard raise amounts:
             raise_amount = self.big_bet
             if bet_level == 1:
                 raise_amount = self.small_bet
+
+            # Check if the pot was raised all-in to an uneven figure:
+            # TODO: Lose this lousy if/else structure. I fear the only
+            # alternative is to pass in game objects which makes the
+            # limit substantially less isolated for testing.
+            if bet_level == 1:
+                if (current_bet % self.small_bet) != 0 and \
+                    (current_bet / self.small_bet >= 1):
+                    raise_amount = raise_amount - current_bet % \
+                        self.small_bet
+            elif bet_level == 2:
+                if current_bet % self.big_bet != 0:
+                    raise_amount = raise_amount - current_bet % \
+                        self.big_bet
+
+            # Check if a raise would put the player all-in:
             if raise_amount + current_bet > player.chips:
                 raise_amount = player.chips - current_bet # all-in!
+
             actions.append(Raise(raise_amount, raise_amount))
 
         actions.append(Call(call_amount))

@@ -93,11 +93,28 @@ class FixedLimitTests(unittest.TestCase):
         self.assertEquals(2, len(actions))
 
         # Should detect that we don't have enough to call and
-        # adjust the call amount ccordingly:
+        # adjust the call amount accordingly:
         c = find_action_in_list(Call, actions)
         self.assertTrue(c != None)
         self.assertEquals(1.5, c.amount)
 
+    def test_actions_previous_player_raised_all_in(self):
+        # Test that if a player raises all in, the following player will
+        # be able to call the exact amount raised, but a raise would complete
+        # the partial raise the all-in player couldn't.
+        two_four = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
+        p = Player('Some Player', chips=1000)
+        actions = two_four.create_actions(p, 0, 3.5, 1)
+        self.assertEquals(3, len(actions))
+
+        c = find_action_in_list(Call, actions)
+        self.assertTrue(c != None)
+        self.assertEquals(3.5, c.amount)
+
+        r = find_action_in_list(Raise, actions)
+        self.assertTrue(r != None)
+        self.assertEqual(0.5, r.max_bet)
+        self.assertEqual(0.5, r.min_bet)
         
 
 
