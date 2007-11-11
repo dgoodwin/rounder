@@ -31,12 +31,13 @@ from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.table import Table
-from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act, \
-    split_pot
+from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
+    
 from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \
     STATE_GAMEOVER
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
+from rounder.pot import Pot
 
 from utils import create_players_list, create_table
 
@@ -46,24 +47,22 @@ class NextToActTests(unittest.TestCase):
 
     def setUp(self):
         self.players = create_players_list(10, CHIPS)
-        self.bets = {}
-        for p in self.players:
-            self.bets[p] = Currency(0.00)
+        self.pot = Pot(self.players)
 
     def __set_bet(self, player, amount):
         """
         Adds the specified amount to the pot and subtracts from the players
         stack. 
         """
-        self.bets[player] += Currency(amount)
-        player.chips -= Currency(amount)
+        self.pot.add(player, amount)
 
     def test_after_blinds(self):
         self.__set_bet(self.players[1], 1)
         self.__set_bet(self.players[2], 2)
 
+        self.pot.bet_to_match = 2
         self.assertEquals(self.players[3], find_next_to_act(self.players, 2, 
-            self.bets, 2))
+            self.pot))
 
     def test_middle_table(self):
         self.__set_bet(self.players[1], 2)
@@ -71,19 +70,22 @@ class NextToActTests(unittest.TestCase):
         self.__set_bet(self.players[3], 2)
         self.__set_bet(self.players[4], 2)
 
+        self.pot.bet_to_match = 2
         self.assertEquals(self.players[5], find_next_to_act(self.players, 4, 
-            self.bets, 2))
+            self.pot))
 
     def test_wraparound(self):
         self.__set_bet(self.players[9], 2)
 
+        self.pot.bet_to_match = 2
         self.assertEquals(self.players[0], find_next_to_act(self.players, 9, 
-            self.bets, 2))
+            self.pot))
 
     def test_everybody_in(self):
         for p in self.players:
             self.__set_bet(p, 2)
-        self.assertEquals(None, find_next_to_act(self.players, 9, self.bets, 2))
+        self.pot.bet_to_match = 2
+        self.assertEquals(None, find_next_to_act(self.players, 9, self.pot))
 
     def test_everybody_in_or_folded(self):
         for p in self.players:
@@ -91,7 +93,8 @@ class NextToActTests(unittest.TestCase):
                 self.__set_bet(p, 2)
             else:
                 p.folded = True
-        self.assertEquals(None, find_next_to_act(self.players, 4, self.bets, 2))
+        self.pot.bet_to_match = 2
+        self.assertEquals(None, find_next_to_act(self.players, 4, self.pot))
 
     def test_late_raiser(self):
         for p in self.players:
@@ -99,8 +102,9 @@ class NextToActTests(unittest.TestCase):
                 self.__set_bet(p, 2)
             # seat 9 raises:
             self.__set_bet(self.players[9], 4)
+        self.pot.bet_to_match = 4
         self.assertEquals(self.players[0], find_next_to_act(self.players, 9,
-            self.bets, 4))
+            self.pot))
             
 
 
@@ -190,7 +194,7 @@ class TexasHoldemTests(unittest.TestCase):
     def test_collect_blinds(self):
         self.__create_game(10, 0, 1, 2)
         self.assertEquals(10, len(self.game.players))
-        self.assertEquals(3, self.game.pot)
+        self.assertEquals(3, self.game.pot.amount)
         self.assertEquals(CHIPS - 1, self.players[1].chips)
         self.assertEquals(CHIPS - 2, self.players[2].chips)
 
@@ -254,7 +258,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__fold(self.players[1], CHIPS - 1)
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
-        self.assertEquals(3, self.game.pot)
+        self.assertEquals(3, self.game.pot.amount)
         self.assertEquals(CHIPS + 1, self.players[2].chips)
 
     def test_flop_checked_around(self):
@@ -292,7 +296,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[1], 2, CHIPS - 10)
         self.__call(self.players[2], 2, CHIPS - 10)
 
-        self.assertEquals(40, self.game.pot)
+        self.assertEquals(40, self.game.pot.amount)
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
     def test_flop_betting_with_raises_and_folds(self):
@@ -309,7 +313,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__fold(self.players[3], CHIPS - 2)
         self.__call(self.players[0], 2, CHIPS - 4)
 
-        self.assertEquals(14, self.game.pot)
+        self.assertEquals(14, self.game.pot.amount)
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
     def test_hand_ends_on_flop(self):
@@ -327,7 +331,7 @@ class TexasHoldemTests(unittest.TestCase):
 
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
-        self.assertEquals(10, self.game.pot)
+        self.assertEquals(10, self.game.pot.amount)
         self.assertEquals(CHIPS + 6, self.players[1].chips)
 
     def test_full_hand_betting(self):
@@ -344,7 +348,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[3], 2, CHIPS - 4)
         self.__call(self.players[0], 2, CHIPS - 4)
 
-        self.assertEquals(16, self.game.pot)
+        self.assertEquals(16, self.game.pot.amount)
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
         self.__call(self.players[1], 0, CHIPS - 4)
@@ -359,7 +363,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[0], 0)
         self.assertEquals(STATE_GAMEOVER, self.game.gsm.get_current_state())
         self.assertTrue(self.game.finished)
-        self.assertEquals(16, self.game.pot)
+        self.assertEquals(16, self.game.pot.amount)
 
         # TODO check that there was a winner and they received the pot?
         self.assertTrue(len(self.game.winners) > 0)
@@ -394,36 +398,11 @@ class TexasHoldemTests(unittest.TestCase):
 
 
 
-class SplitPotTests(unittest.TestCase):
-
-    def test_simple_case(self):
-        self.players = create_players_list(4, 0)
-        pot = Currency(10)
-        split_pot(pot, [self.players[0]])
-        self.assertEquals(10, self.players[0].chips)
-
-    def test_even_split_case(self):
-        self.players = create_players_list(4, 0)
-        pot = Currency(10)
-        split_pot(pot, self.players[0:2])
-        self.assertEquals(5, self.players[0].chips)
-        self.assertEquals(5, self.players[1].chips)
-
-    def test_uneven_split_case(self):
-        self.players = create_players_list(4, 0)
-        pot = Currency(0.25)
-        split_pot(pot, self.players[0:2])
-        self.assertEquals(0.13, self.players[0].chips)
-        self.assertEquals(0.12, self.players[1].chips)
-
-
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(NextToActTests))
     suite.addTest(unittest.makeSuite(GameStateMachineTests))
     suite.addTest(unittest.makeSuite(TexasHoldemTests))
-    suite.addTest(unittest.makeSuite(SplitPotTests))
     return suite
 
 if __name__ == "__main__":
