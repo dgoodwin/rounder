@@ -25,6 +25,13 @@ logger = getLogger("rounder.pot")
 
 from rounder.currency import Currency
 
+class SidePot:
+    """ A single pot, used for both main and side pots. """
+    def __init__(self, players):
+        # Players eligible for this pot:
+        self.players = players
+        self.amount = Currency(0.00)
+
 class Pot:
     """
     Representation of a poker pot.
@@ -35,7 +42,10 @@ class Pot:
 
     def __init__(self, players):
         self.players = players
-        self.amount = Currency(0.00)
+
+        # List of all pots, intially just 1 but more to come if players
+        # start going all-in:
+        self.pots = [SidePot(self.players)]
 
         # A map of player to amount contributed to the pot, can be used both
         # as a definitive list of all players who were present when this game
@@ -48,14 +58,22 @@ class Pot:
 
         self.bet_to_match= Currency(0.00)
         self.in_pot_this_betting_round = {}
+
+    def total_value(self):
+        """ Returns the total value of ALL pots. """
+        total = Currency(0.00)
+        for pot in self.pots:
+            total += pot.amount
+        return total
             
     def refund_all(self):
         """ Refund each player's contribution. """
-        for p in self.players:
-            p.clear_pending_actions()
-            p.add_chips(self.in_pot[p])
-            self.amount = self.amount - self.in_pot[p]
-            self.in_pot[p] = Currency(0.00)
+        for pot in self.pots:
+            for player in pot.players:
+                player.clear_pending_actions()
+                player.add_chips(self.in_pot[player])
+                pot.amount = pot.amount - self.in_pot[player]
+                self.in_pot[player] = Currency(0.00)
 
     def reset_betting_round(self):
         """
@@ -69,7 +87,7 @@ class Pot:
     def add(self, player, amount):
         """ Add funds from player to the pot. """
         player.subtract_chips(amount)
-        self.amount = self.amount + amount
+        self.pots[0].amount = self.pots[0].amount + amount
         self.in_pot[player] = self.in_pot[player] + amount
 
         if not self.in_pot_this_betting_round.has_key(player):
@@ -84,9 +102,9 @@ class Pot:
 
         Potential remaining cent is given to first player in the list.
         """
-        logger.info("Splitting pot: " + str(self.amount))
-        per_player = self.amount / len(winners)
-        remainder = self.amount - (per_player * len(winners))
+        logger.info("Splitting pot: " + str(self.pots[0].amount))
+        per_player = self.pots[0].amount / len(winners)
+        remainder = self.pots[0].amount - (per_player * len(winners))
         logger.debug("remainder = " + str(remainder))
         
         for p in winners:

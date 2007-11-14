@@ -199,9 +199,9 @@ class Game(object):
         logger.warn("Aborting game:")
         self.aborted = True
         self.pot.refund_all()
-        if self.pot.amount > 0:
+        if self.total_value() > 0:
             logger.error("Funds left in pot after refuding all players: " + 
-                str(self.pot.amount))
+                str(self.pot.total_value()))
         self.callback()
 
     def _check_if_finished(self):
@@ -328,7 +328,7 @@ class TexasHoldemGame(Game):
             self.limit.big_blind)
         self.table.notify_all(blind_event)
 
-        logger.info("Pot is now: %s", self.pot.amount)
+        logger.info("Pot is now: %s", self.pot.total_value())
 
         self.__last_actor = self.big_blind
         self.pot.bet_to_match = self.limit.big_blind
@@ -365,11 +365,11 @@ class TexasHoldemGame(Game):
         last_actor_position = self.__positions[self.__last_actor]
         next_to_act = find_next_to_act(self.players, last_actor_position,
             self.pot, self.big_blind_exception)
+
         if next_to_act == self.big_blind_exception:
             self.big_blind_exception = None
-        if next_to_act is not None:
-            # Build the actions we'll present to the player:
 
+        if next_to_act is not None:
             in_pot = Currency(0)
             if self.pot.in_pot_this_betting_round.has_key(next_to_act):
                 in_pot = self.pot.in_pot_this_betting_round[next_to_act]
@@ -552,7 +552,7 @@ class TexasHoldemGame(Game):
 
         self.pot.split(self.winners)
         logger.info("Winner: %s" % self.winners[0].name)
-        logger.info("   pot: %s" % self.pot.amount)
+        logger.info("   pot: %s" % self.pot.total_value())
         logger.info("   winners stack: %s" % self.winners[0].chips)
 
         for p in self.players:

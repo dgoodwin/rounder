@@ -194,7 +194,7 @@ class TexasHoldemTests(unittest.TestCase):
     def test_collect_blinds(self):
         self.__create_game(10, 0, 1, 2)
         self.assertEquals(10, len(self.game.players))
-        self.assertEquals(3, self.game.pot.amount)
+        self.assertEquals(3, self.game.pot.total_value())
         self.assertEquals(CHIPS - 1, self.players[1].chips)
         self.assertEquals(CHIPS - 2, self.players[2].chips)
 
@@ -258,7 +258,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__fold(self.players[1], CHIPS - 1)
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
-        self.assertEquals(3, self.game.pot.amount)
+        self.assertEquals(3, self.game.pot.total_value())
         self.assertEquals(CHIPS + 1, self.players[2].chips)
 
     def test_flop_checked_around(self):
@@ -296,7 +296,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[1], 2, CHIPS - 10)
         self.__call(self.players[2], 2, CHIPS - 10)
 
-        self.assertEquals(40, self.game.pot.amount)
+        self.assertEquals(40, self.game.pot.total_value())
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
     def test_flop_betting_with_raises_and_folds(self):
@@ -313,7 +313,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__fold(self.players[3], CHIPS - 2)
         self.__call(self.players[0], 2, CHIPS - 4)
 
-        self.assertEquals(14, self.game.pot.amount)
+        self.assertEquals(14, self.game.pot.total_value())
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
     def test_hand_ends_on_flop(self):
@@ -331,7 +331,7 @@ class TexasHoldemTests(unittest.TestCase):
 
         self.assertTrue(self.game.finished)
         self.assertTrue(self.game_over)
-        self.assertEquals(10, self.game.pot.amount)
+        self.assertEquals(10, self.game.pot.total_value())
         self.assertEquals(CHIPS + 6, self.players[1].chips)
 
     def test_full_hand_betting(self):
@@ -348,7 +348,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[3], 2, CHIPS - 4)
         self.__call(self.players[0], 2, CHIPS - 4)
 
-        self.assertEquals(16, self.game.pot.amount)
+        self.assertEquals(16, self.game.pot.total_value())
         self.assertEquals(STATE_TURN, self.game.gsm.get_current_state())
 
         self.__call(self.players[1], 0, CHIPS - 4)
@@ -363,7 +363,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[0], 0)
         self.assertEquals(STATE_GAMEOVER, self.game.gsm.get_current_state())
         self.assertTrue(self.game.finished)
-        self.assertEquals(16, self.game.pot.amount)
+        self.assertEquals(16, self.game.pot.total_value())
 
         # TODO check that there was a winner and they received the pot?
         self.assertTrue(len(self.game.winners) > 0)

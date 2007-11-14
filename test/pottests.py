@@ -43,14 +43,14 @@ class SplitPotTests(unittest.TestCase):
     def test_simple_case(self):
         self.players = create_players_list(4, 0)
         self.pot = Pot(players=self.players)
-        self.pot.amount = Currency(10)
+        self.pot.pots[0].amount = Currency(10)
         self.pot.split([self.players[0]])
         self.assertEquals(10, self.players[0].chips)
 
     def test_even_split_case(self):
         self.players = create_players_list(4, 0)
         self.pot = Pot(players=self.players)
-        self.pot.amount = Currency(10)
+        self.pot.pots[0].amount = Currency(10)
         self.pot.split(self.players[0:2])
         self.assertEquals(5, self.players[0].chips)
         self.assertEquals(5, self.players[1].chips)
@@ -58,7 +58,7 @@ class SplitPotTests(unittest.TestCase):
     def test_uneven_split_case(self):
         self.players = create_players_list(4, 0)
         self.pot = Pot(players=self.players)
-        self.pot.amount = Currency(0.25)
+        self.pot.pots[0].amount = Currency(0.25)
         self.pot.split(self.players[0:2])
         self.assertEquals(0.13, self.players[0].chips)
         self.assertEquals(0.12, self.players[1].chips)
