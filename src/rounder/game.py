@@ -370,23 +370,30 @@ class TexasHoldemGame(Game):
         if next_to_act is not None:
             # Build the actions we'll present to the player:
 
-            # Set the bet level to 1 on preflop and on the flop, 2 otherwise:
-            if self.gsm.get_current_state() == STATE_PREFLOP or \
-                self.gsm.get_current_state() == STATE_FLOP:
-                bet_level = 1
-            else:
-                bet_level = 2
-
             in_pot = Currency(0)
             if self.pot.in_pot_this_betting_round.has_key(next_to_act):
                 in_pot = self.pot.in_pot_this_betting_round[next_to_act]
             options = self.limit.create_actions(next_to_act, 
-                in_pot, self.pot.bet_to_match, bet_level)
+                in_pot, self.pot.bet_to_match, self.__get_bet_level())
             self.prompt_player(next_to_act, options)
             return
 
         logger.debug("Betting round complete.")
         self.advance()
+
+    def __get_bet_level(self):
+        """
+        Bet Level is somewhat of a hack to indicate to the code when
+        we're using the small bet or the big bet of the limit.
+        """
+        # Set the bet level to 1 on preflop and on the flop, 2 otherwise:
+        bet_level = 2
+        if self.gsm.get_current_state() == STATE_PREFLOP or \
+            self.gsm.get_current_state() == STATE_FLOP:
+            bet_level = 1
+        return bet_level
+
+
 
     def __get_table_id(self):
         """ Handy for logger statements."""
