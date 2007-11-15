@@ -59,18 +59,17 @@ def find_next_to_act(players, last_actor_position, pot, bb_exception=None):
     for i in range(len(players)):
         p = players[(last_actor_position + 1 + i) % len(players)]
         if not p.folded: 
-            if pot.bet_to_match == 0 and not \
-                pot.in_pot_this_betting_round.has_key(p):
+            if pot.bet_to_match == 0 and not pot.has_bet_this_round(p):
                 logger.debug("   1")
                 next_to_act = p
                 break
-            elif pot.in_pot_this_betting_round.has_key(p) and \
-                (pot.in_pot_this_betting_round[p] < pot.bet_to_match or
+            elif pot.has_bet_this_round(p) and \
+                (pot.bet_this_round(p) < pot.bet_to_match or \
                     p == bb_exception):
                 logger.debug("   2")
                 next_to_act = p
                 break
-            elif not pot.in_pot_this_betting_round.has_key(p):
+            elif not pot.has_bet_this_round(p):
                 logger.debug("   3")
                 next_to_act = p
                 break
@@ -370,9 +369,8 @@ class TexasHoldemGame(Game):
             self.big_blind_exception = None
 
         if next_to_act is not None:
-            in_pot = Currency(0)
-            if self.pot.in_pot_this_betting_round.has_key(next_to_act):
-                in_pot = self.pot.in_pot_this_betting_round[next_to_act]
+            in_pot = self.pot.bet_this_round(next_to_act)
+
             options = self.limit.create_actions(next_to_act, 
                 in_pot, self.pot.bet_to_match, self.__get_bet_level())
             self.prompt_player(next_to_act, options)
@@ -491,9 +489,7 @@ class TexasHoldemGame(Game):
                 self.big_blind_exception = None
 
             self.pot.bet_to_match += action.amount
-            amount = self.pot.bet_to_match
-            if self.pot.in_pot_this_betting_round.has_key(player):
-                amount -= self.pot.in_pot_this_betting_round[player]
+            amount = self.pot.amount_to_match(player)
             self.add_to_pot(player, amount)
 
         if isinstance(action, Fold):

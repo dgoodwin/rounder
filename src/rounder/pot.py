@@ -59,6 +59,28 @@ class Pot:
         self.bet_to_match= Currency(0.00)
         self.in_pot_this_betting_round = {}
 
+    def bet_this_round(self, player):
+        """ 
+        Returns players total bets this round.
+        """
+        # TODO: Make multi-pot aware:
+        if self.in_pot_this_betting_round.has_key(player):
+            return self.in_pot_this_betting_round[player]
+        return Currency(0.00)
+
+    def has_bet_this_round(self, player):
+        """ 
+        Return True if player has contributed to this round of betting. 
+        """
+        return self.in_pot_this_betting_round.has_key(player)
+
+    def amount_to_match(self, player):
+        """ Returns the amount this player must match to call the action. """
+        bet_to_match = self.bet_to_match
+        if self.in_pot_this_betting_round.has_key(player):
+            bet_to_match -= self.in_pot_this_betting_round[player]
+        return bet_to_match
+
     def total_value(self):
         """ Returns the total value of ALL pots. """
         total = Currency(0.00)
