@@ -133,8 +133,21 @@ class Pot:
             pot.bet_to_match = Currency(0.00)
             pot.round_bets = {}
 
+    def raise_stakes(self, amount):
+        """ Increase the bet to match. """
+        logger.debug("Raised stakes to: %s" % amount)
+        self.pots[0].bet_to_match = self.pots[0].bet_to_match + amount
+
     def add(self, player, amount):
         """ Add funds from player to the pot. """
+        assert (amount <= player.chips)
+
+        if amount == player.chips:
+            logger.debug("%s is all-in")
+            # TODO: Deal with side pots here. Remember two scenarios,
+            # players calling all-in, and players raising all-in:
+            #self.pots.append(SidePot(self.players))
+
         player.subtract_chips(amount)
         self.pots[0].amount = self.pots[0].amount + amount
         self.pots[0].hand_bets[player] = \
@@ -146,8 +159,8 @@ class Pot:
             self.pots[0].round_bets[player] = \
                 self.pots[0].round_bets[player] + amount
 
-        if amount + self.bet_this_round(player) > self.bet_to_match:
-            logger.debug("Detected a raise, setting bet to match.")
+
+
 
     def split(self, winners):
         """ 

@@ -37,13 +37,13 @@ class SidePotTests(unittest.TestCase):
 
     def test_side_pot_created(self):
         self.players = create_players_list(4, CHIPS)
-        self.players[0].chips = 400
-        self.players[0].chips = 500
+        self.players[0].chips = Currency(400)
+        self.players[1].chips = Currency(500)
         pot = Pot(self.players)
         self.assertEquals(1, len(pot.pots))
 
-        pot.add(self.players[0], 400)
-        pot.add(self.players[1], 500)
+        pot.add(self.players[0], Currency(400))
+        pot.add(self.players[1], Currency(500))
         self.assertEquals(2, len(pot.pots))
 
 

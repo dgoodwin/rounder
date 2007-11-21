@@ -487,7 +487,7 @@ class TexasHoldemGame(Game):
             if self.gsm.get_current_state() == STATE_PREFLOP:
                 self.big_blind_exception = None
 
-            self.pot.pots[0].bet_to_match += action.amount
+            self.pot.raise_stakes(action.amount)
             amount = self.pot.amount_to_match(player)
             self.add_to_pot(player, amount)
 
