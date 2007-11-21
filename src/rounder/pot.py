@@ -31,6 +31,18 @@ class SidePot:
         # Players eligible for this pot:
         self.players = players
         self.amount = Currency(0.00)
+        self.bet_to_match = Currency(0.00)
+
+        # A map of player to amount contributed to the pot, can be used both
+        # as a definitive list of all players who were present when this game
+        # started (as they're removed from the list when sitting out), as well
+        # as a record of how much to refund to each player in the event this
+        # game is aborted.
+        self.hand_bets = {}
+        for p in self.players:
+            self.hand_bets[p] = Currency(0.00)
+
+        self.round_bets = {}
 
 class Pot:
     """
@@ -47,41 +59,51 @@ class Pot:
         # start going all-in:
         self.pots = [SidePot(self.players)]
 
-        # A map of player to amount contributed to the pot, can be used both
-        # as a definitive list of all players who were present when this game
-        # started (as they're removed from the list when sitting out), as well
-        # as a record of how much to refund to each player in the event this
-        # game is aborted.
-        self.__in_pot = {}
-        for p in self.players:
-            self.__in_pot[p] = Currency(0.00)
+    def __get_bet_to_match(self):    
+        """ Getter for bet_to_match on all sub-pots. """
+        total_bet_to_match = Currency(0.00)
+        for pot in self.pots:
+            total_bet_to_match += pot.bet_to_match
+        return total_bet_to_match
 
-        self.bet_to_match= Currency(0.00)
-        self.__in_pot_this_betting_round = {}
+    def __set_bet_to_match(self, val):
+        """ Setter for bet_to_match on all sub-pots. """
+        # TODO: Get smart here...
+        self.pots[0].bet_to_match = val
+
+    bet_to_match = property(__get_bet_to_match, __set_bet_to_match)
 
     def bet_this_hand(self, player):
-        return self.__in_pot[player]
+        """ Return true if player has contributed to the pot this hand. """
+        bets = Currency(0.00)
+        for pot in self.pots:
+            bets += pot.hand_bets[player]
+        return bets
+
 
     def bet_this_round(self, player):
         """ 
         Returns players total bets this round.
         """
-        # TODO: Make multi-pot aware:
-        if self.__in_pot_this_betting_round.has_key(player):
-            return self.__in_pot_this_betting_round[player]
-        return Currency(0.00)
+        bets = Currency(0.00)
+        for pot in self.pots:
+            if pot.round_bets.has_key(player):
+                bets += pot.round_bets[player]
+        return bets
 
     def has_bet_this_round(self, player):
         """ 
         Return True if player has contributed to this round of betting. 
         """
-        return self.__in_pot_this_betting_round.has_key(player)
+        for pot in self.pots:
+            if pot.round_bets.has_key(player):
+                return True
+        return False
 
     def amount_to_match(self, player):
         """ Returns the amount this player must match to call the action. """
         bet_to_match = self.bet_to_match
-        if self.__in_pot_this_betting_round.has_key(player):
-            bet_to_match -= self.__in_pot_this_betting_round[player]
+        bet_to_match -= self.bet_this_round(player)
         return bet_to_match
 
     def total_value(self):
@@ -96,9 +118,10 @@ class Pot:
         for pot in self.pots:
             for player in pot.players:
                 player.clear_pending_actions()
-                player.add_chips(self.__in_pot[player])
-                pot.amount = pot.amount - self.__in_pot[player]
-                self.__in_pot[player] = Currency(0.00)
+                refund_amnt = self.bet_this_round(player)
+                player.add_chips(refund_amnt)
+                pot.amount = pot.amount - refund_amnt
+                pot.hand_bets[player] = Currency(0.00)
 
     def reset_betting_round(self):
         """
@@ -106,20 +129,25 @@ class Pot:
         be used both when starting a new game or moving on to the next round
         of betting within an existing game.
         """
-        self.bet_to_match = Currency(0.00)
-        self.__in_pot_this_betting_round = {}
+        for pot in self.pots:
+            pot.bet_to_match = Currency(0.00)
+            pot.round_bets = {}
 
     def add(self, player, amount):
         """ Add funds from player to the pot. """
         player.subtract_chips(amount)
         self.pots[0].amount = self.pots[0].amount + amount
-        self.__in_pot[player] = self.__in_pot[player] + amount
+        self.pots[0].hand_bets[player] = \
+            self.pots[0].hand_bets[player] + amount
 
-        if not self.__in_pot_this_betting_round.has_key(player):
-            self.__in_pot_this_betting_round[player] = amount
+        if not self.has_bet_this_round(player):
+            self.pots[0].round_bets[player] = amount
         else:
-            self.__in_pot_this_betting_round[player] = \
-                self.__in_pot_this_betting_round[player] + amount
+            self.pots[0].round_bets[player] = \
+                self.pots[0].round_bets[player] + amount
+
+        if amount + self.bet_this_round(player) > self.bet_to_match:
+            logger.debug("Detected a raise, setting bet to match.")
 
     def split(self, winners):
         """ 

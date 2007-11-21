@@ -59,6 +59,7 @@ def find_next_to_act(players, last_actor_position, pot, bb_exception=None):
     for i in range(len(players)):
         p = players[(last_actor_position + 1 + i) % len(players)]
         if not p.folded: 
+
             if pot.bet_to_match == 0 and not pot.has_bet_this_round(p):
                 logger.debug("   1")
                 next_to_act = p
@@ -330,7 +331,7 @@ class TexasHoldemGame(Game):
         logger.info("Pot is now: %s", self.pot.total_value())
 
         self.__last_actor = self.big_blind
-        self.pot.bet_to_match = self.limit.big_blind
+        self.pot.pots[0].bet_to_match = self.limit.big_blind
 
     def __deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
@@ -390,8 +391,6 @@ class TexasHoldemGame(Game):
             self.gsm.get_current_state() == STATE_FLOP:
             bet_level = 1
         return bet_level
-
-
 
     def __get_table_id(self):
         """ Handy for logger statements."""
@@ -488,7 +487,7 @@ class TexasHoldemGame(Game):
             if self.gsm.get_current_state() == STATE_PREFLOP:
                 self.big_blind_exception = None
 
-            self.pot.bet_to_match += action.amount
+            self.pot.pots[0].bet_to_match += action.amount
             amount = self.pot.amount_to_match(player)
             self.add_to_pot(player, amount)
 

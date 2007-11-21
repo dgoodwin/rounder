@@ -31,10 +31,20 @@ from rounder.currency import Currency
 from rounder.pot import Pot
 from utils import create_players_list
 
-class PotTests(unittest.TestCase):
+CHIPS = 1000
 
-    def test_something(self):
-        pass
+class SidePotTests(unittest.TestCase):
+
+    def test_side_pot_created(self):
+        self.players = create_players_list(4, CHIPS)
+        self.players[0].chips = 400
+        self.players[0].chips = 500
+        pot = Pot(self.players)
+        self.assertEquals(1, len(pot.pots))
+
+        pot.add(self.players[0], 400)
+        pot.add(self.players[1], 500)
+        self.assertEquals(2, len(pot.pots))
 
 
 
@@ -67,7 +77,7 @@ class SplitPotTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PotTests))
+    suite.addTest(unittest.makeSuite(SidePotTests))
     suite.addTest(unittest.makeSuite(SplitPotTests))
     return suite
 
