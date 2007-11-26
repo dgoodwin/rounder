@@ -25,7 +25,7 @@ logger = getLogger("rounder.pot")
 
 from rounder.currency import Currency
 
-class SidePot:
+class Pot:
     """ A single pot, used for both main and side pots. """
     def __init__(self, players):
         # Players eligible for this pot:
@@ -57,7 +57,7 @@ class PotManager:
 
         # List of all pots, intially just 1 but more to come if players
         # start going all-in:
-        self.pots = [SidePot(self.players)]
+        self.pots = [Pot(self.players)]
 
         # Set to true when we need to be on the lookout for a raise:
         self.__new_side_pot_on_raise = False
@@ -154,17 +154,14 @@ class PotManager:
 
             if self.__new_side_pot_on_raise:
                 logger.debug("Creating new side pot.")
-                self.pots.append(SidePot(self.players))
+                self.pots.append(Pot(self.players))
 
         if amount == player.chips:
             if raised:
                 logger.debug("%s has raised all-in" % player.name)
             else:
                 logger.debug("%s has called all-in" % player.name)
-            # TODO: Deal with side pots here. Remember two scenarios,
-            # players calling all-in, and players raising all-in:
             self.__new_side_pot_on_raise = True
-            #self.pots.append(SidePot(self.players))
 
         player.subtract_chips(amount)
         self.pots[0].amount = self.pots[0].amount + amount
