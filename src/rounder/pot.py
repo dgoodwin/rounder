@@ -44,7 +44,7 @@ class SidePot:
 
         self.round_bets = {}
 
-class Pot:
+class PotManager:
     """
     Representation of a poker pot.
 

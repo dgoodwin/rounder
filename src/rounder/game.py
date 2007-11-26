@@ -27,7 +27,7 @@ from pokereval import PokerEval
 
 from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
-from rounder.pot import Pot
+from rounder.pot import PotManager
 from rounder.deck import Deck
 from rounder.currency import Currency
 from rounder.event import *
@@ -41,14 +41,14 @@ STATE_TURN = "turn"
 STATE_RIVER = "river"
 STATE_GAMEOVER = "gameover"
 
-def find_next_to_act(players, last_actor_position, pot, bb_exception=None):
+def find_next_to_act(players, last_actor_position, pot_mgr, bb_exception=None):
     """
     Return the next player to act, or None if this round of betting
     is over.
 
     players = List of players.
     last_actor_position = List index of last player to act.
-    pot = The current pot.
+    pot_mgr = The PotManager.
     big_blind_exception = Player who we can assume is the next to act even if
         we process them and find they've already contributed the current bet to
         the pot. Used to handle the odd situation where the big blind can check
@@ -60,17 +60,17 @@ def find_next_to_act(players, last_actor_position, pot, bb_exception=None):
         p = players[(last_actor_position + 1 + i) % len(players)]
         if not p.folded: 
 
-            if pot.bet_to_match == 0 and not pot.has_bet_this_round(p):
+            if pot_mgr.bet_to_match == 0 and not pot_mgr.has_bet_this_round(p):
                 logger.debug("   1")
                 next_to_act = p
                 break
-            elif pot.has_bet_this_round(p) and \
-                (pot.bet_this_round(p) < pot.bet_to_match or \
+            elif pot_mgr.has_bet_this_round(p) and \
+                (pot_mgr.bet_this_round(p) < pot_mgr.bet_to_match or \
                     p == bb_exception):
                 logger.debug("   2")
                 next_to_act = p
                 break
-            elif not pot.has_bet_this_round(p):
+            elif not pot_mgr.has_bet_this_round(p):
                 logger.debug("   3")
                 next_to_act = p
                 break
@@ -171,7 +171,7 @@ class Game(object):
         # TODO: check for empty/sitting out spots:
         self.players = players
 
-        self.pot = Pot(self.players)
+        self.pot_mgr = PotManager(self.players)
 
         # Create a new hand starting event and send to each player:
         new_hand_event = NewHandStarted(self.table)
@@ -198,10 +198,10 @@ class Game(object):
         """
         logger.warn("Aborting game:")
         self.aborted = True
-        self.pot.refund_all()
+        self.pot_mgr.refund_all()
         if self.total_value() > 0:
             logger.error("Funds left in pot after refuding all players: " + 
-                str(self.pot.total_value()))
+                str(self.pot_mgr.total_value()))
         self.callback()
 
     def _check_if_finished(self):
@@ -297,7 +297,7 @@ class TexasHoldemGame(Game):
         """
         logger.debug("Resetting betting round state.")
         self.__last_actor = self.dealer # overridden in __collect_blinds
-        self.pot.reset_betting_round()
+        self.pot_mgr.reset_betting_round()
 
     def preflop(self):
         """ Initiate preflop game state. """
@@ -328,10 +328,11 @@ class TexasHoldemGame(Game):
             self.limit.big_blind)
         self.table.notify_all(blind_event)
 
-        logger.info("Pot is now: %s", self.pot.total_value())
+        logger.info("Pot is now: %s", self.pot_mgr.total_value())
 
         self.__last_actor = self.big_blind
-        self.pot.pots[0].bet_to_match = self.limit.big_blind
+        # TODO!!!!!!!!!!!!
+        self.pot_mgr.pots[0].bet_to_match = self.limit.big_blind
 
     def __deal_hole_cards(self):
         """ Deal 2 cards face down to each player. """
@@ -364,16 +365,16 @@ class TexasHoldemGame(Game):
 
         last_actor_position = self.__positions[self.__last_actor]
         next_to_act = find_next_to_act(self.players, last_actor_position,
-            self.pot, self.big_blind_exception)
+            self.pot_mgr, self.big_blind_exception)
 
         if next_to_act == self.big_blind_exception:
             self.big_blind_exception = None
 
         if next_to_act is not None:
-            in_pot = self.pot.bet_this_round(next_to_act)
+            in_pot = self.pot_mgr.bet_this_round(next_to_act)
 
             options = self.limit.create_actions(next_to_act, 
-                in_pot, self.pot.bet_to_match, self.__get_bet_level())
+                in_pot, self.pot_mgr.bet_to_match, self.__get_bet_level())
             self.prompt_player(next_to_act, options)
             return
 
@@ -431,7 +432,7 @@ class TexasHoldemGame(Game):
         stack as well as internal tracking of who has contributed what.
         """
         self._check_if_finished()
-        self.pot.add(player, amount)
+        self.pot_mgr.add(player, amount)
 
     def prompt_player(self, player, actions_list):
         """ Prompt the player with a list of actions. """
@@ -488,7 +489,7 @@ class TexasHoldemGame(Game):
                 self.big_blind_exception = None
 
             # TODO: Not real fond of this...
-            amount = self.pot.amount_to_match(player) + action.amount
+            amount = self.pot_mgr.amount_to_match(player) + action.amount
             self.add_to_pot(player, amount)
 
         if isinstance(action, Fold):
@@ -545,9 +546,9 @@ class TexasHoldemGame(Game):
         for index in result['hi']:
             self.winners.append(self.active_players[index])
 
-        self.pot.split(self.winners)
+        self.pot_mgr.split(self.winners)
         logger.info("Winner: %s" % self.winners[0].name)
-        logger.info("   pot: %s" % self.pot.total_value())
+        logger.info("   pot: %s" % self.pot_mgr.total_value())
         logger.info("   winners stack: %s" % self.winners[0].chips)
 
         for p in self.players:

@@ -28,18 +28,18 @@ import unittest
 import settestpath
 
 from rounder.currency import Currency
-from rounder.pot import Pot
+from rounder.pot import PotManager
 from utils import create_players_list
 
 CHIPS = 1000
 
-class SidePotTests(unittest.TestCase):
+class PotTests(unittest.TestCase):
 
     def test_side_pot_created_all_in_raise(self):
         self.players = create_players_list(4, CHIPS)
         self.players[0].chips = Currency(400)
         self.players[1].chips = Currency(500)
-        pot = Pot(self.players)
+        pot = PotManager(self.players)
         self.assertEquals(1, len(pot.pots))
 
         pot.add(self.players[0], Currency(400))
@@ -55,14 +55,14 @@ class SplitPotTests(unittest.TestCase):
 
     def test_simple_case(self):
         self.players = create_players_list(4, 0)
-        self.pot = Pot(players=self.players)
+        self.pot = PotManager(players=self.players)
         self.pot.pots[0].amount = Currency(10)
         self.pot.split([self.players[0]])
         self.assertEquals(10, self.players[0].chips)
 
     def test_even_split_case(self):
         self.players = create_players_list(4, 0)
-        self.pot = Pot(players=self.players)
+        self.pot = PotManager(players=self.players)
         self.pot.pots[0].amount = Currency(10)
         self.pot.split(self.players[0:2])
         self.assertEquals(5, self.players[0].chips)
@@ -70,7 +70,7 @@ class SplitPotTests(unittest.TestCase):
 
     def test_uneven_split_case(self):
         self.players = create_players_list(4, 0)
-        self.pot = Pot(players=self.players)
+        self.pot = PotManager(players=self.players)
         self.pot.pots[0].amount = Currency(0.25)
         self.pot.split(self.players[0:2])
         self.assertEquals(0.13, self.players[0].chips)
@@ -80,7 +80,7 @@ class SplitPotTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(SidePotTests))
+    suite.addTest(unittest.makeSuite(PotTests))
     suite.addTest(unittest.makeSuite(SplitPotTests))
     return suite
 
