@@ -35,7 +35,7 @@ CHIPS = 1000
 
 class SidePotTests(unittest.TestCase):
 
-    def test_side_pot_created(self):
+    def test_side_pot_created_all_in_raise(self):
         self.players = create_players_list(4, CHIPS)
         self.players[0].chips = Currency(400)
         self.players[1].chips = Currency(500)
@@ -45,6 +45,9 @@ class SidePotTests(unittest.TestCase):
         pot.add(self.players[0], Currency(400))
         pot.add(self.players[1], Currency(500))
         self.assertEquals(2, len(pot.pots))
+
+    def test_side_pot_created_all_in_call(self):
+        pass
 
 
 

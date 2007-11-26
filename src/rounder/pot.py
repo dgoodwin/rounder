@@ -59,6 +59,9 @@ class Pot:
         # start going all-in:
         self.pots = [SidePot(self.players)]
 
+        # Set to true when we need to be on the lookout for a raise:
+        self.__new_side_pot_on_raise = False
+
     def __get_bet_to_match(self):    
         """ Getter for bet_to_match on all sub-pots. """
         total_bet_to_match = Currency(0.00)
@@ -142,10 +145,25 @@ class Pot:
         """ Add funds from player to the pot. """
         assert (amount <= player.chips)
 
+        raised = False
+        if amount + self.bet_this_round(player) > self.pots[0].bet_to_match:
+            logger.debug("Detected a raise, setting new amount to match: %s",
+                amount + self.bet_this_round(player))
+            self.pots[0].bet_to_match = amount + self.bet_this_round(player)
+            raised = True
+
+            if self.__new_side_pot_on_raise:
+                logger.debug("Creating new side pot.")
+                self.pots.append(SidePot(self.players))
+
         if amount == player.chips:
-            logger.debug("%s is all-in")
+            if raised:
+                logger.debug("%s has raised all-in" % player.name)
+            else:
+                logger.debug("%s has called all-in" % player.name)
             # TODO: Deal with side pots here. Remember two scenarios,
             # players calling all-in, and players raising all-in:
+            self.__new_side_pot_on_raise = True
             #self.pots.append(SidePot(self.players))
 
         player.subtract_chips(amount)
@@ -158,7 +176,6 @@ class Pot:
         else:
             self.pots[0].round_bets[player] = \
                 self.pots[0].round_bets[player] + amount
-
 
 
 
