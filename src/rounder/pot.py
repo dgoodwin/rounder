@@ -44,6 +44,20 @@ class Pot:
 
         self.round_bets = {}
 
+    def get_amount_owing(self, player):
+        """ 
+        Return the amount this player must contribute to this pot. 
+        If the player doesn't have the chips required to match, we return their
+        chips instead.
+        """
+        owes = self.bet_to_match 
+        if self.round_bets.has_key(player):
+            owes = owes - self.round_bets[player]
+        if owes >= player.chips:
+            return player.chips
+        else: 
+            return owes
+
 class PotManager:
     """
     Representation of a poker pot.
@@ -146,15 +160,22 @@ class PotManager:
         assert (amount <= player.chips)
 
         raised = False
-        if amount + self.bet_this_round(player) > self.pots[0].bet_to_match:
-            logger.debug("Detected a raise, setting new amount to match: %s",
+        total_amnt = amount + self.bet_this_round(player)
+        if total_amnt > self.pots[0].bet_to_match:
+            logger.debug("Detected a raise, setting new bet to match: %s",
                 amount + self.bet_this_round(player))
-            self.pots[0].bet_to_match = amount + self.bet_this_round(player)
             raised = True
 
             if self.__new_side_pot_on_raise:
                 logger.debug("Creating new side pot.")
+                self.__new_side_pot_on_raise = False
                 self.pots.append(Pot(self.players))
+                # Calculate the bet_to_match for the new pot:
+                new_bet_to_match = total_amnt - self.bet_to_match
+                logger.debug("New pot bet to match: %s" % new_bet_to_match)
+                self.pots[-1].bet_to_match = new_bet_to_match
+            else:
+                self.pots[-1].bet_to_match = total_amnt
 
         if amount == player.chips:
             if raised:
@@ -163,18 +184,38 @@ class PotManager:
                 logger.debug("%s has called all-in" % player.name)
             self.__new_side_pot_on_raise = True
 
+        self.__delegate_amount_to_side_pots(player, amount)
+
+    def __delegate_amount_to_side_pots(self, player, amount):
+        """
+        Split the incoming bet amount from the given player up amongst all
+        available pots in the correct order.
+        """
+
+        logger.debug("__delegate_amount_to_side_pots")
+        logger.debug("player = %s" % player.name)
+        amount_copy = amount
+        for pot in self.pots:
+            owes_this_pot = pot.get_amount_owing(player)
+            logger.debug("bet_to_match = %s" % pot.bet_to_match)
+            logger.debug("%s owes_this_pot = %s" % (player.name, owes_this_pot))
+            if not pot.round_bets.has_key(player):
+                pot.round_bets[player] = owes_this_pot
+            else:
+                pot.round_bets[player] = \
+                    pot.round_bets[player] + owes_this_pot
+
+            if owes_this_pot > 0:
+                amount_copy = amount_copy - owes_this_pot
+                pot.amount = pot.amount + owes_this_pot
+                pot.hand_bets[player] = pot.hand_bets[player] + owes_this_pot
+
+                logger.debug("amount_copy = %s" % amount_copy)
+                assert(amount_copy >= 0)
+                if amount_copy == 0:
+                    break
+
         player.subtract_chips(amount)
-        self.pots[0].amount = self.pots[0].amount + amount
-        self.pots[0].hand_bets[player] = \
-            self.pots[0].hand_bets[player] + amount
-
-        if not self.has_bet_this_round(player):
-            self.pots[0].round_bets[player] = amount
-        else:
-            self.pots[0].round_bets[player] = \
-                self.pots[0].round_bets[player] + amount
-
-
 
     def split(self, winners):
         """ 

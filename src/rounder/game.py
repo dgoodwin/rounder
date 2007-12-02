@@ -61,23 +61,25 @@ def find_next_to_act(players, last_actor_position, pot_mgr, bb_exception=None):
         if not p.folded: 
 
             if pot_mgr.bet_to_match == 0 and not pot_mgr.has_bet_this_round(p):
-                logger.debug("   1")
+                logger.debug("1")
                 next_to_act = p
                 break
             elif pot_mgr.has_bet_this_round(p) and \
                 (pot_mgr.bet_this_round(p) < pot_mgr.bet_to_match or \
                     p == bb_exception):
-                logger.debug("   2")
+                logger.debug("2")
                 next_to_act = p
                 break
             elif not pot_mgr.has_bet_this_round(p):
-                logger.debug("   3")
+                logger.debug("3")
                 next_to_act = p
                 break
             else:
-                logger.debug("   skipping %s" % p)
+                #logger.debug("   skipping %s" % p)
+                pass
         else:
-            logger.debug("   skipping %s" % p)
+            #logger.debug("   skipping %s" % p)
+            pass
 
     logger.debug("next to act: %s" % str(next_to_act))
 
@@ -301,6 +303,7 @@ class TexasHoldemGame(Game):
 
     def preflop(self):
         """ Initiate preflop game state. """
+        logger.info("Preflop")
         self._check_if_finished()
         self.__collect_blinds()
         self.__deal_hole_cards()
@@ -403,7 +406,7 @@ class TexasHoldemGame(Game):
         """
         Deal the flop and initiate the betting.
         """
-        logger.debug("Table %s: Dealing the flop." % self.__get_table_id)
+        logger.info("Table %s: Dealing the flop." % self.__get_table_id)
         self._check_if_finished()
 
         self.big_blind_exception = None
@@ -433,6 +436,7 @@ class TexasHoldemGame(Game):
         """
         self._check_if_finished()
         self.pot_mgr.add(player, amount)
+        logger.debug("Pot is now: $%s" % self.pot_mgr.total_value())
 
     def prompt_player(self, player, actions_list):
         """ Prompt the player with a list of actions. """
@@ -483,6 +487,8 @@ class TexasHoldemGame(Game):
 
         if isinstance(action, Call):
             self.add_to_pot(player, action.amount)
+            if action.amount == 0:
+                logger.debug("Table %s: %s checks" % (self.table.id, player.name))
 
         if isinstance(action, Raise):
             if self.gsm.get_current_state() == STATE_PREFLOP:

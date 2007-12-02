@@ -46,6 +46,12 @@ class PotTests(unittest.TestCase):
         pot.add(self.players[1], Currency(500))
         self.assertEquals(2, len(pot.pots))
 
+        self.assertEquals(400, pot.pots[0].bet_to_match)
+        self.assertEquals(800, pot.pots[0].amount)
+
+        self.assertEquals(100, pot.pots[1].bet_to_match)
+        self.assertEquals(100, pot.pots[1].amount)
+
     def test_side_pot_created_all_in_call(self):
         pass
 

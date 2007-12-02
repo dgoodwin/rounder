@@ -101,7 +101,7 @@ class NextToActTests(unittest.TestCase):
             if p.seat < 9:
                 self.__set_bet(p, 2)
             # seat 9 raises:
-            self.__set_bet(self.players[9], 4)
+        self.__set_bet(self.players[9], 4)
         self.pot_mgr.bet_to_match = 4
         self.assertEquals(self.players[0], find_next_to_act(self.players, 9,
             self.pot_mgr))
