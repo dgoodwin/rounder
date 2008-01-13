@@ -29,7 +29,7 @@ import settestpath
 
 from rounder.currency import Currency
 from rounder.pot import PotManager
-from utils import create_players_list
+from utils import create_players_list, create_players
 
 CHIPS = 1000
 
@@ -48,12 +48,48 @@ class PotTests(unittest.TestCase):
 
         self.assertEquals(400, pot.pots[0].bet_to_match)
         self.assertEquals(800, pot.pots[0].amount)
+        self.assertEquals(4, len(pot.pots[0].players))
 
         self.assertEquals(100, pot.pots[1].bet_to_match)
         self.assertEquals(100, pot.pots[1].amount)
+        self.assertEquals(3, len(pot.pots[1].players))
 
-    def test_side_pot_created_all_in_call(self):
-        pass
+    def test_third_side_pot_created(self):
+        self.players = create_players([400, 500, 500, 700])
+        pot = PotManager(self.players)
+        self.assertEquals(1, len(pot.pots))
+
+        pot.add(self.players[0], Currency(400))
+        pot.add(self.players[1], Currency(500))
+        self.assertEquals(2, len(pot.pots))
+
+        # Check the first pot:
+        self.assertEquals(400, pot.pots[0].bet_to_match)
+        self.assertEquals(800, pot.pots[0].amount)
+        self.assertEquals(4, len(pot.pots[0].players))
+
+        # Check the second pot:
+        self.assertEquals(100, pot.pots[1].bet_to_match)
+        self.assertEquals(100, pot.pots[1].amount)
+        self.assertEquals(3, len(pot.pots[1].players))
+
+    #def test_side_pot_created_all_in_call(self):
+    #    self.players = create_players([500, 300, 500])
+    #    pot = PotManager(self.players)
+    #    self.assertEquals(1, len(pot.pots))
+
+    #    pot.add(self.players[0], Currency(400))
+    #    pot.add(self.players[1], Currency(300))
+    #    self.assertEquals(2, len(pot.pots))
+
+    #    self.assertEquals(300, pot.pots[0].bet_to_match)
+    #    self.assertEquals(600, pot.pots[0].amount)
+
+    #    self.assertEquals(100, pot.pots[1].bet_to_match)
+    #    self.assertEquals(100, pot.pots[1].amount)
+
+    #def test_nightmare_scenario(self):
+    #    self.players = create_players([1000, 300, 1000, 500, 100, 1000])
 
 
 

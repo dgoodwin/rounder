@@ -36,6 +36,18 @@ def create_players_list(size, chips):
         l.append(Player(name='player' + str(i), seat=i, chips=Currency(chips)))
     return l
 
+def create_players(chip_counts):
+    """
+    Create a list of players with chip counts corresponding to the
+    incoming list.
+    """
+    l = []
+    i = 0
+    for c in chip_counts:
+        l.append(Player(name='player' + str(i), seat=i, chips=c))
+        i = i + 1
+    return l
+
 def create_table(num_players, dealer_index):
     limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
     table = Table(name="Test Table", limit=limit, seats=10)

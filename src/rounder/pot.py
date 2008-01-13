@@ -26,7 +26,11 @@ logger = getLogger("rounder.pot")
 from rounder.currency import Currency
 
 class Pot:
-    """ A single pot, used for both main and side pots. """
+    """ 
+    A single pot, used for both main and side pots. 
+    
+    NOTE: Do not try to smoke!
+    """
     def __init__(self, players):
         # Players eligible for this pot:
         self.players = players
@@ -155,6 +159,27 @@ class PotManager:
         logger.debug("Raised stakes to: %s" % amount)
         self.pots[0].bet_to_match = self.pots[0].bet_to_match + amount
 
+    def get_eligible_players(self):
+        """
+        Returns a list of players eligible for a new pot.
+        """
+        l = []
+        for p in self.players:
+            if p.chips > 0 and p.sitting_out == False and p.folded == False:
+                l.append(p)
+        return l
+
+    def create_new_pot(self, total_bet):
+        logger.debug("Creating new side pot.")
+        self.__new_side_pot_on_raise = False
+
+        new_pot = Pot(self.get_eligible_players())
+        # Calculate the bet_to_match for the new pot:
+        new_bet_to_match = total_bet - self.bet_to_match
+        logger.debug("New pot bet to match: %s" % new_bet_to_match)
+        new_pot.bet_to_match = new_bet_to_match
+        self.pots.append(new_pot)
+
     def add(self, player, amount):
         """ Add funds from player to the pot. """
         assert (amount <= player.chips)
@@ -167,22 +192,30 @@ class PotManager:
             raised = True
 
             if self.__new_side_pot_on_raise:
-                logger.debug("Creating new side pot.")
-                self.__new_side_pot_on_raise = False
-                self.pots.append(Pot(self.players))
-                # Calculate the bet_to_match for the new pot:
-                new_bet_to_match = total_amnt - self.bet_to_match
-                logger.debug("New pot bet to match: %s" % new_bet_to_match)
-                self.pots[-1].bet_to_match = new_bet_to_match
+                self.create_new_pot(total_amnt)
             else:
                 self.pots[-1].bet_to_match = total_amnt
 
         if amount == player.chips:
             if raised:
                 logger.debug("%s has raised all-in" % player.name)
+                self.__new_side_pot_on_raise = True
             else:
                 logger.debug("%s has called all-in" % player.name)
-            self.__new_side_pot_on_raise = True
+                if total_amnt <= self.pots[-1].bet_to_match:
+                    self.__new_side_pot_on_raise = True
+                else:
+                    # Player called all-in and couldn't match the current bet.
+                    # Bad scenario for us, we need to block off the pot at 
+                    # this amount and move existing bets beyond what this
+                    # player could cover to the newly created pot, all while
+                    # managing who's contributed what, where, and is eligible
+                    # to win it...
+                    
+                    eligible_players = []
+                    for p in self.pots[0].players:
+                        if p != player:
+                            eligible_players.append(p)
 
         self.__delegate_amount_to_side_pots(player, amount)
 
