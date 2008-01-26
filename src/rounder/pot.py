@@ -62,6 +62,14 @@ class Pot:
         else: 
             return owes
 
+    def is_player_eligible(self, player):
+        """
+        True if player is eligible to win this pot, False otherwise.
+        """
+        return player in self.players
+
+
+
 class PotManager:
     """
     Representation of a poker pot.
@@ -180,6 +188,63 @@ class PotManager:
         new_pot.bet_to_match = new_bet_to_match
         self.pots.append(new_pot)
 
+    def __handle_all_in_call(self, player, amount):
+        """
+        Handle the worst possible scenario when a player calls all-in.
+
+        Must adjust all existing pots and spawn new ones, move excess
+        contributions to the new, etc.
+        """
+        logger.debug("%s calls all-in for $%s." % (player.name, amount))
+        for pot in self.pots:
+            if pot.is_player_eligible(player):
+                owing = pot.get_amount_owing(player)
+                if owing < player.chips:
+                    # Contribute to this pot normally and keep looking for the
+                    # one that'll put this player all-in:
+                    pass
+                if owing == player.chips:
+                    # Found pot that puts player all-in:
+
+                    # Adjust the bet to match:
+                    old_bet_to_match - pot.bet_to_match
+                    pot.bet_to_match = pot.hand_bets[player] + owing
+                    logger.debug("Adjusted pot %s to %s" %
+                        (self.pots.index(pot), pot.bet_to_match))
+
+                    # Create the new pots list of eligible players:
+                    new_players = []
+                    for pl in pot.players:
+                        if pot.hand_bets[pl] + pl.chips > pot.bet_to_match:
+                            # Player is eligible to play for the new pot.
+                            new_players.append(pl)
+
+                    # Create the new pot:
+                    new_pot = Pot(new_players)
+                    new_pot.bet_to_match = old_bet_to_match - pot.bet_to_match
+                    
+                    # Copy any excess bets from players into the new pot:
+                    for pl in pot.players:
+                        if pot.hand_bets[pl] > pot.bet_to_match:
+                            overflow = pot.hand_bets[pl] - \
+                                pot.bet_to_match
+                            new_pot.hand_bets[pl] =  overflow
+                            new_pot.amount = new_pot.amount + overflow
+                            pot.hand_bets[pl] = pot.bet_to_match
+
+                            new_pot.round_bets[pl] = pot.round_bets[pl] - \
+                                pot.bet_to_match
+                            pot.round_bets[pl] = pot.bet_to_match
+
+                    self.pots.append(new_pot)
+
+                    # Stop looking at pots.
+                    # NOTE: Makes assumption that pots cannot be created such
+                    # that a player goes all in on one but is still eligible for
+                    # others created later on. I think this is accurate but 
+                    # we'll see how this thing works down the road.
+                    break
+
     def add(self, player, amount):
         """ Add funds from player to the pot. """
         assert (amount <= player.chips)
@@ -211,11 +276,8 @@ class PotManager:
                     # player could cover to the newly created pot, all while
                     # managing who's contributed what, where, and is eligible
                     # to win it...
-                    
-                    eligible_players = []
-                    for p in self.pots[0].players:
-                        if p != player:
-                            eligible_players.append(p)
+                    self.__handle_all_in_call(player)
+
 
         self.__delegate_amount_to_side_pots(player, amount)
 
@@ -229,9 +291,14 @@ class PotManager:
         logger.debug("player = %s" % player.name)
         amount_copy = amount
         for pot in self.pots:
+
             owes_this_pot = pot.get_amount_owing(player)
             logger.debug("bet_to_match = %s" % pot.bet_to_match)
             logger.debug("%s owes_this_pot = %s" % (player.name, owes_this_pot))
+
+            # Looks strange here, but remember owes_this_pot is either
+            # the amount the player must call, or all the chips they have,
+            # thus their funds are taken into account:
             if not pot.round_bets.has_key(player):
                 pot.round_bets[player] = owes_this_pot
             else:
@@ -246,6 +313,7 @@ class PotManager:
                 logger.debug("amount_copy = %s" % amount_copy)
                 assert(amount_copy >= 0)
                 if amount_copy == 0:
+                    # Player has nothing left to contribute
                     break
 
         player.subtract_chips(amount)
