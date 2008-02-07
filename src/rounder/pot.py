@@ -197,6 +197,7 @@ class PotManager:
         """
         logger.debug("%s calls all-in for $%s." % (player.name, amount))
         for pot in self.pots:
+            print "$$$$$$$" + str(pot)
             if pot.is_player_eligible(player):
                 owing = pot.get_amount_owing(player)
                 if owing < player.chips:
@@ -207,7 +208,7 @@ class PotManager:
                     # Found pot that puts player all-in:
 
                     # Adjust the bet to match:
-                    old_bet_to_match - pot.bet_to_match
+                    old_bet_to_match = pot.bet_to_match
                     pot.bet_to_match = pot.hand_bets[player] + owing
                     logger.debug("Adjusted pot %s to %s" %
                         (self.pots.index(pot), pot.bet_to_match))
@@ -222,14 +223,21 @@ class PotManager:
                     # Create the new pot:
                     new_pot = Pot(new_players)
                     new_pot.bet_to_match = old_bet_to_match - pot.bet_to_match
+                    logger.debug("New pot: %s" % new_pot)
+                    logger.debug("   bet to match = " % new_pot.bet_to_match)
                     
                     # Copy any excess bets from players into the new pot:
+                    logger.debug("players = %s" % pot.players)
                     for pl in pot.players:
+                        logger.debug("%s hand bets = %s" % (pl.name, 
+                            pot.hand_bets[pl]))
                         if pot.hand_bets[pl] > pot.bet_to_match:
                             overflow = pot.hand_bets[pl] - \
                                 pot.bet_to_match
+                            logger.debug("%s overflow = %s" % (pl.name, overflow))
                             new_pot.hand_bets[pl] =  overflow
                             new_pot.amount = new_pot.amount + overflow
+                            pot.amount = pot.amount - overflow
                             pot.hand_bets[pl] = pot.bet_to_match
 
                             new_pot.round_bets[pl] = pot.round_bets[pl] - \
@@ -248,9 +256,11 @@ class PotManager:
     def add(self, player, amount):
         """ Add funds from player to the pot. """
         assert (amount <= player.chips)
+        logger.debug("%s adding %s to the pot." % (player.name, amount))
 
         raised = False
         total_amnt = amount + self.bet_this_round(player)
+        logger.debug("total_amount = %s" % total_amnt)
         if total_amnt > self.pots[0].bet_to_match:
             logger.debug("Detected a raise, setting new bet to match: %s",
                 amount + self.bet_this_round(player))
@@ -267,7 +277,9 @@ class PotManager:
                 self.__new_side_pot_on_raise = True
             else:
                 logger.debug("%s has called all-in" % player.name)
-                if total_amnt <= self.pots[-1].bet_to_match:
+                # TODO: Shouldn't use pot index here, what if he owes to 
+                # multiple?
+                if total_amnt == self.pots[-1].bet_to_match:
                     self.__new_side_pot_on_raise = True
                 else:
                     # Player called all-in and couldn't match the current bet.
@@ -276,7 +288,7 @@ class PotManager:
                     # player could cover to the newly created pot, all while
                     # managing who's contributed what, where, and is eligible
                     # to win it...
-                    self.__handle_all_in_call(player)
+                    self.__handle_all_in_call(player, amount)
 
 
         self.__delegate_amount_to_side_pots(player, amount)

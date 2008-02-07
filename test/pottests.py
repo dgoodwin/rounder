@@ -84,9 +84,13 @@ class PotTests(unittest.TestCase):
 
         self.assertEquals(300, pot.pots[0].bet_to_match)
         self.assertEquals(600, pot.pots[0].amount)
+        self.assertEquals(3, len(pot.pots[0].players))
+        self.assertTrue(self.players[1] in pot.pots[0].players)
 
         self.assertEquals(100, pot.pots[1].bet_to_match)
         self.assertEquals(100, pot.pots[1].amount)
+        self.assertEquals(2, len(pot.pots[1].players))
+        self.assertFalse(self.players[1] in pot.pots[1].players)
 
     #def test_nightmare_scenario(self):
     #    self.players = create_players([1000, 300, 1000, 500, 100, 1000])
