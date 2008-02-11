@@ -29,11 +29,19 @@ import settestpath
 
 from rounder.currency import Currency
 from rounder.pot import PotManager
+from rounder.core import RounderException
 from utils import create_players_list, create_players
 
 CHIPS = 1000
 
 class PotTests(unittest.TestCase):
+
+    def test_add_to_much(self):
+        self.players = create_players([400, 500, 500, 700])
+        pot_mgr = PotManager(self.players)
+        self.assertRaises(AssertionError, pot_mgr.add,
+            self.players[0], Currency(401))
+
 
     def test_side_pot_created_all_in_raise(self):
         self.players = create_players_list(4, CHIPS)
@@ -92,8 +100,21 @@ class PotTests(unittest.TestCase):
         self.assertEquals(2, len(pot_mgr.pots[1].players))
         self.assertFalse(self.players[1] in pot_mgr.pots[1].players)
 
-    #def test_nightmare_scenario(self):
-    #    self.players = create_players([1000, 300, 1000, 500, 100, 1000])
+    def assert_pots(self, pot_mgr, expected):
+        self.assertEquals(len(expected), len(pot_mgr.pots))
+        for i in range(len(expected)):
+            self.assertEquals(expected[i], pot_mgr.pots[i].amount)
+
+    def test_nightmare_scenario(self):
+        self.players = create_players([1000, 300, 1000, 500, 100, 1000])
+        pot_mgr = PotManager(self.players)
+        
+        pot_mgr.add(self.players[0], Currency(400))
+        pot_mgr.add(self.players[1], Currency(300))
+        self.assert_pots(pot_mgr, [600, 100])
+
+        pot_mgr.add(self.players[2], Currency(400))
+        self.assert_pots(pot_mgr, [900, 200])
 
 
 

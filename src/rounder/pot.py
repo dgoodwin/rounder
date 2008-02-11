@@ -197,7 +197,6 @@ class PotManager:
         """
         logger.debug("%s calls all-in for $%s." % (player.name, amount))
         for pot in self.pots:
-            print "$$$$$$$" + str(pot)
             if pot.is_player_eligible(player):
                 owing = pot.get_amount_owing(player)
                 if owing < player.chips:
@@ -209,6 +208,7 @@ class PotManager:
 
                     # Adjust the bet to match:
                     old_bet_to_match = pot.bet_to_match
+                    logger.debug("old = %s" % old_bet_to_match)
                     pot.bet_to_match = pot.hand_bets[player] + owing
                     logger.debug("Adjusted pot %s to %s" %
                         (self.pots.index(pot), pot.bet_to_match))
@@ -224,7 +224,7 @@ class PotManager:
                     new_pot = Pot(new_players)
                     new_pot.bet_to_match = old_bet_to_match - pot.bet_to_match
                     logger.debug("New pot: %s" % new_pot)
-                    logger.debug("   bet to match = " % new_pot.bet_to_match)
+                    logger.debug("   bet to match = %s" % new_pot.bet_to_match)
                     
                     # Copy any excess bets from players into the new pot:
                     logger.debug("players = %s" % pot.players)
@@ -234,7 +234,8 @@ class PotManager:
                         if pot.hand_bets[pl] > pot.bet_to_match:
                             overflow = pot.hand_bets[pl] - \
                                 pot.bet_to_match
-                            logger.debug("%s overflow = %s" % (pl.name, overflow))
+                            logger.debug("%s overflow = %s" % (pl.name, 
+                                overflow))
                             new_pot.hand_bets[pl] =  overflow
                             new_pot.amount = new_pot.amount + overflow
                             pot.amount = pot.amount - overflow
@@ -261,7 +262,7 @@ class PotManager:
         raised = False
         total_amnt = amount + self.bet_this_round(player)
         logger.debug("total_amount = %s" % total_amnt)
-        if total_amnt > self.pots[0].bet_to_match:
+        if total_amnt > self.bet_to_match:
             logger.debug("Detected a raise, setting new bet to match: %s",
                 amount + self.bet_this_round(player))
             raised = True
@@ -302,11 +303,14 @@ class PotManager:
         logger.debug("__delegate_amount_to_side_pots")
         logger.debug("player = %s" % player.name)
         amount_copy = amount
+        i = 0
         for pot in self.pots:
+            i = i + 1
+            logger.debug("   pot %s" % i)
 
             owes_this_pot = pot.get_amount_owing(player)
-            logger.debug("bet_to_match = %s" % pot.bet_to_match)
-            logger.debug("%s owes_this_pot = %s" % (player.name, owes_this_pot))
+            logger.debug("      bet_to_match = %s" % pot.bet_to_match)
+            logger.debug("      %s owes = %s" % (player.name, owes_this_pot))
 
             # Looks strange here, but remember owes_this_pot is either
             # the amount the player must call, or all the chips they have,
@@ -322,7 +326,7 @@ class PotManager:
                 pot.amount = pot.amount + owes_this_pot
                 pot.hand_bets[player] = pot.hand_bets[player] + owes_this_pot
 
-                logger.debug("amount_copy = %s" % amount_copy)
+                logger.debug("      amount_copy = %s" % amount_copy)
                 assert(amount_copy >= 0)
                 if amount_copy == 0:
                     # Player has nothing left to contribute
