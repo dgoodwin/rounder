@@ -38,7 +38,8 @@ class CerealizerTests(unittest.TestCase):
     """ Tests exercising the rounder serialization code. """
 
     def test_simple_serialize(self):
-        tuple = create_table(10, 0)
+        tuple = create_table([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 
+            1000, 1000], 0)
         table = tuple[1]
         state = TableState(table)
         str = dumps(state)

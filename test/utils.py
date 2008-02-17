@@ -48,15 +48,17 @@ def create_players(chip_counts):
         i = i + 1
     return l
 
-def create_table(num_players, dealer_index):
+def create_table(chip_counts, dealer_index):
     limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
     table = Table(name="Test Table", limit=limit, seats=10)
 
     players = []
-    for i in range(num_players):
-        new_player = Player(name='player' + str(i), chips=Currency(CHIPS))
+    i = 0
+    for chip_count in chip_counts:
+        new_player = Player(name='player' + str(i), chips=Currency(chip_count))
         table.seat_player(new_player, i)
         players.append(new_player)
+        i = i + 1
 
     return (limit, table, players)
 

@@ -116,7 +116,11 @@ class SeatsTests(unittest.TestCase):
 class TableTests(unittest.TestCase):
 
     def __create_table(self, num_players, dealer_index):
-        tuple = create_table(num_players, dealer_index)
+        chip_counts = []
+        for i in range(num_players):
+            chip_counts.append(Currency(1000))
+
+        tuple = create_table(chip_counts, dealer_index)
         self.limit = tuple[0]
         self.table = tuple[1]
         self.players = tuple[2]
