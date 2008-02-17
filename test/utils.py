@@ -44,7 +44,7 @@ def create_players(chip_counts):
     l = []
     i = 0
     for c in chip_counts:
-        l.append(Player(name='player' + str(i), seat=i, chips=c))
+        l.append(Player(name='player' + str(i), seat=i, chips=Currency(c)))
         i = i + 1
     return l
 
