@@ -68,6 +68,17 @@ class Pot:
         """
         return player in self.players
 
+    def debug(self):
+        logger.debug("Pot: $%s" % self.amount)
+        logger.debug("  Bet to Match: %s" % self.bet_to_match)
+        logger.debug("  Players:")
+        for player in self.players:
+            temp = Currency(0.00)
+            if self.round_bets.has_key(player):
+                temp = self.round_bets[player]
+            logger.debug("    %s - $%s - $%s" % (player.name, 
+                self.hand_bets[player], temp))
+
 
 
 class PotManager:
@@ -245,7 +256,12 @@ class PotManager:
                                 pot.bet_to_match
                             pot.round_bets[pl] = pot.bet_to_match
 
-                    self.pots.append(new_pot)
+                    # Add the new pot right after the one that put the player
+                    # all in. Makes more sense to me to keep them in order
+                    # and I belive assumptions are made elsewhere that the 
+                    # last pot must be the most recently active one.
+                    old_pot_index = self.pots.index(pot)
+                    self.pots.insert(old_pot_index + 1, new_pot)
 
                     # Stop looking at pots.
                     # NOTE: Makes assumption that pots cannot be created such
@@ -253,6 +269,24 @@ class PotManager:
                     # others created later on. I think this is accurate but 
                     # we'll see how this thing works down the road.
                     break
+
+    def raise_bet_to_match(self, amount):
+        """ 
+        Raise the appropriate pots bet to match based on the new incoming
+        bet. Basically amounts to setting the bet to match on the last 
+        pot in the list to this guys total bet, minus what he's contributed
+        """
+        if len(self.pots) == 1:
+            # TODO: Get this right, needs to be relevant to last pot minus
+            # what the guy's already commited to the other pots.
+            self.pots[-1].bet_to_match = amount
+        else:
+            temp = Currency(0.00)
+            for pot in self.pots[0:-1]:
+                temp = temp + pot.bet_to_match
+            self.pots[-1].bet_to_match = amount - temp
+
+
 
     def add(self, player, amount):
         """ Add funds from player to the pot. """
@@ -270,7 +304,7 @@ class PotManager:
             if self.__new_side_pot_on_raise:
                 self.create_new_pot(total_amnt)
             else:
-                self.pots[-1].bet_to_match = total_amnt
+                self.raise_bet_to_match(total_amnt)
 
         if amount == player.chips:
             if raised:
@@ -293,6 +327,7 @@ class PotManager:
 
 
         self.__delegate_amount_to_side_pots(player, amount)
+        self.__debug_pots()
 
     def __delegate_amount_to_side_pots(self, player, amount):
         """
@@ -333,6 +368,10 @@ class PotManager:
                     break
 
         player.subtract_chips(amount)
+
+    def __debug_pots(self):
+        for p in self.pots:
+            p.debug()
 
     def split(self, winners):
         """ 

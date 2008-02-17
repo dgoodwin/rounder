@@ -116,6 +116,21 @@ class PotTests(unittest.TestCase):
         pot_mgr.add(self.players[2], Currency(400))
         self.assert_pots(pot_mgr, [900, 200])
 
+        pot_mgr.add(self.players[3], Currency(500))
+        self.assert_pots(pot_mgr, [1200, 400])
+
+        pot_mgr.add(self.players[4], Currency(100))
+        self.assert_pots(pot_mgr, [500, 800, 400])
+
+        pot_mgr.add(self.players[5], Currency(500))
+        self.assert_pots(pot_mgr, [600, 1000, 600])
+
+        pot_mgr.add(self.players[0], Currency(100))
+        self.assert_pots(pot_mgr, [600, 1000, 700])
+
+        pot_mgr.add(self.players[2], Currency(100))
+        self.assert_pots(pot_mgr, [600, 1000, 800])
+
 
 
 class SplitPotTests(unittest.TestCase):
