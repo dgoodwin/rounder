@@ -106,7 +106,7 @@ class PotTests(unittest.TestCase):
             self.assertEquals(expected[i], pot_mgr.pots[i].amount)
 
     def test_nightmare_scenario(self):
-        self.players = create_players([1000, 300, 1000, 500, 100, 1000])
+        self.players = create_players([1000, 300, 1000, 400, 500, 100, 1000])
         pot_mgr = PotManager(self.players)
         
         pot_mgr.add(self.players[0], Currency(400))
@@ -116,20 +116,23 @@ class PotTests(unittest.TestCase):
         pot_mgr.add(self.players[2], Currency(400))
         self.assert_pots(pot_mgr, [900, 200])
 
-        pot_mgr.add(self.players[3], Currency(500))
-        self.assert_pots(pot_mgr, [1200, 400])
+        pot_mgr.add(self.players[3], Currency(400))
+        self.assert_pots(pot_mgr, [1200, 300])
 
-        pot_mgr.add(self.players[4], Currency(100))
-        self.assert_pots(pot_mgr, [500, 800, 400])
+        pot_mgr.add(self.players[4], Currency(500))
+        self.assert_pots(pot_mgr, [1500, 400, 100])
 
-        pot_mgr.add(self.players[5], Currency(500))
-        self.assert_pots(pot_mgr, [600, 1000, 600])
+        pot_mgr.add(self.players[5], Currency(100))
+        self.assert_pots(pot_mgr, [600, 1000, 400, 100])
+
+        pot_mgr.add(self.players[6], Currency(500))
+        self.assert_pots(pot_mgr, [700, 1200, 500, 200])
 
         pot_mgr.add(self.players[0], Currency(100))
-        self.assert_pots(pot_mgr, [600, 1000, 700])
+        self.assert_pots(pot_mgr, [700, 1200, 500, 300])
 
         pot_mgr.add(self.players[2], Currency(100))
-        self.assert_pots(pot_mgr, [600, 1000, 800])
+        self.assert_pots(pot_mgr, [700, 1200, 500, 400])
 
 
 

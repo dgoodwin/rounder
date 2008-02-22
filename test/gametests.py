@@ -397,6 +397,10 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[1], 3, CHIPS - 4)
         self.assertTrue(self.players[2].folded)
 
+    def test_nightmare_side_pots(self):
+        #self.fail()
+        pass
+
 
 
 def suite():

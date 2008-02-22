@@ -33,7 +33,8 @@ class Pot:
     """
     def __init__(self, players):
         # Players eligible for this pot:
-        self.players = players
+        self.players = []
+        self.players.extend(players)
         self.amount = Currency(0.00)
         self.bet_to_match = Currency(0.00)
 
@@ -79,6 +80,20 @@ class Pot:
             logger.debug("    %s - $%s - $%s" % (player.name, 
                 self.hand_bets[player], temp))
 
+    def remove_player(self, player):
+        """ 
+        Remove a player from being eligible for this pot.
+
+        Called when the player calls all-in but their chips were all used
+        in calling the bet in earlier side-pots.
+        """
+        assert(player in self.players)
+        assert(self.hand_bets[player] == Currency(0.00))
+        assert(self.round_bets.has_key(player) == False)
+
+        self.players.remove(player)
+        self.hand_bets.pop(player)
+
 
 
 class PotManager:
@@ -90,7 +105,9 @@ class PotManager:
     """
 
     def __init__(self, players):
-        self.players = players
+        # Leave the list of players passed in intact:
+        self.players = []
+        self.players.extend(players)
 
         # List of all pots, intially just 1 but more to come if players
         # start going all-in:
@@ -227,7 +244,7 @@ class PotManager:
                     # Create the new pots list of eligible players:
                     new_players = []
                     for pl in pot.players:
-                        if pot.hand_bets[pl] + pl.chips > pot.bet_to_match:
+                        if pl != player:
                             # Player is eligible to play for the new pot.
                             new_players.append(pl)
 
@@ -256,11 +273,22 @@ class PotManager:
                                 pot.bet_to_match
                             pot.round_bets[pl] = pot.bet_to_match
 
+                    old_pot_index = self.pots.index(pot)
+
+                    # Remove the user from any subsequent pots they were 
+                    # eligible for:
+                    for temp_pot in self.pots[old_pot_index+1:]:
+                        if temp_pot.hand_bets.has_key(player) or \
+                            temp_pot.hand_bets[player] == 0:
+                            logger.debug("Removing player from pot: %s" 
+                                    % temp_pot.amount)
+                            temp_pot.remove_player(player)
+
+
                     # Add the new pot right after the one that put the player
                     # all in. Makes more sense to me to keep them in order
                     # and I belive assumptions are made elsewhere that the 
                     # last pot must be the most recently active one.
-                    old_pot_index = self.pots.index(pot)
                     self.pots.insert(old_pot_index + 1, new_pot)
 
                     # Stop looking at pots.
@@ -290,8 +318,8 @@ class PotManager:
 
     def add(self, player, amount):
         """ Add funds from player to the pot. """
-        assert (amount <= player.chips)
         logger.debug("%s adding %s to the pot." % (player.name, amount))
+        assert (amount <= player.chips)
 
         raised = False
         total_amnt = amount + self.bet_this_round(player)
@@ -314,7 +342,7 @@ class PotManager:
                 logger.debug("%s has called all-in" % player.name)
                 # TODO: Shouldn't use pot index here, what if he owes to 
                 # multiple?
-                if total_amnt == self.pots[-1].bet_to_match:
+                if total_amnt == self.bet_to_match:
                     self.__new_side_pot_on_raise = True
                 else:
                     # Player called all-in and couldn't match the current bet.
