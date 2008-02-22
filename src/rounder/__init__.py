@@ -1,7 +1,7 @@
-#   Wuja - Google Calendar (tm) notifications for the GNOME desktop.
+#   Rounder - Poker for the GNOME Desktop
 #
-#   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
-#   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2006-2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2006-2008 James Bowes <jbowes@dangerouslyinc.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
