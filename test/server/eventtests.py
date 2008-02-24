@@ -156,6 +156,37 @@ class EventTests(BaseServerFixture):
         self.assertEquals(1, len(filter_event_type(self.user1, PlayerSatOut)))
         self.assertEquals(1, len(filter_event_type(self.user2, PlayerSatOut)))
 
+    def test_player_called(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+
+        # Post blinds:
+        self.user1.act_randomly(self.table.id)
+        self.user2.act_randomly(self.table.id)
+
+        # Preflop action:
+        self.user1.act(self.table.id, Call)
+        self.user2.act(self.table.id, Call)
+
+        user1_events = filter_event_type(self.user1, PlayerCalled)
+        self.assertEquals(2, len(user1_events))
+        user1_call = user1_events[0]
+        self.assertEquals(self.user1.name, user1_call.player_name)
+        self.assertEquals(Currency(0.5), user1_call.amount)
+        user2_call = user1_events[1]
+        self.assertEquals(self.user2.name, user2_call.player_name)
+        self.assertEquals(Currency(0), user2_call.amount)
+
+        user2_events = filter_event_type(self.user2, PlayerCalled)
+        self.assertEquals(2, len(user2_events))
+        user1_call = user2_events[0]
+        self.assertEquals(self.user1.name, user1_call.player_name)
+        self.assertEquals(Currency(0.5), user1_call.amount)
+        user2_call = user2_events[1]
+        self.assertEquals(self.user2.name, user2_call.player_name)
+        self.assertEquals(Currency(0), user2_call.amount)
+
 
 
 

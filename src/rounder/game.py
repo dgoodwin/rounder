@@ -489,6 +489,8 @@ class TexasHoldemGame(Game):
             self.add_to_pot(player, action.amount)
             if action.amount == 0:
                 logger.debug("Table %s: %s checks" % (self.table.id, player.name))
+            event = PlayerCalled(self.table, player.name, action.amount)
+            self.table.notify_all(event)
 
         if isinstance(action, Raise):
             if self.gsm.get_current_state() == STATE_PREFLOP:

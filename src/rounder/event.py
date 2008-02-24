@@ -140,6 +140,23 @@ class CommunityCardsDealt(Event):
 
 
 
+class PlayerCalled(Event):
+
+    """
+    Player called the current bet.
+
+    Amount is the amount they called, excluding anything they had
+    previously committed to the pot on previous action.
+    """
+
+    def __init__(self, table, player_name, amount):
+
+        Event.__init__(self, table)
+        self.player_name = player_name
+        self.amount = amount
+
+
+# All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
     Event, 
     PlayerJoinedGame,
@@ -148,5 +165,6 @@ ALL_EVENTS = [
     PlayerPostedBlind,
     HoleCardsDealt,
     CommunityCardsDealt,
+    PlayerCalled,
 ]
 
