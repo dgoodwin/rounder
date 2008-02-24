@@ -160,11 +160,9 @@ class EventTests(BaseServerFixture):
         self.user1_table.view_sit(self.user1, 0)
         self.user2_table.view_sit(self.user2, 1)
         self.user1_table.view_start_game(self.user1)
-
         # Post blinds:
         self.user1.act_randomly(self.table.id)
         self.user2.act_randomly(self.table.id)
-
         # Preflop action:
         self.user1.act(self.table.id, Call)
         self.user2.act(self.table.id, Call)
@@ -187,6 +185,28 @@ class EventTests(BaseServerFixture):
         self.assertEquals(self.user2.name, user2_call.player_name)
         self.assertEquals(Currency(0), user2_call.amount)
 
+    def test_player_raised(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+        # Post blinds:
+        self.user1.act_randomly(self.table.id)
+        self.user2.act_randomly(self.table.id)
+        # Preflop action:
+        self.user1.act(self.table.id, Call)
+        self.user2.act(self.table.id, Raise, [1])
+
+        user1_events = filter_event_type(self.user1, PlayerRaised)
+        self.assertEquals(1, len(user1_events))
+        user2_raise = user1_events[0]
+        self.assertEquals(self.user2.name, user2_raise.player_name)
+        self.assertEquals(Currency(1), user2_raise.amount)
+
+        user2_events = filter_event_type(self.user2, PlayerRaised)
+        self.assertEquals(1, len(user2_events))
+        user2_raise = user2_events[0]
+        self.assertEquals(self.user2.name, user2_raise.player_name)
+        self.assertEquals(Currency(1), user2_raise.amount)
 
 
 

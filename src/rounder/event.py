@@ -156,6 +156,23 @@ class PlayerCalled(Event):
         self.amount = amount
 
 
+
+class PlayerRaised(Event):
+
+    """
+    Player raised the current bet.
+
+    Amount is the amount raised over the existing bet.
+    """
+
+    def __init__(self, table, player_name, amount):
+
+        Event.__init__(self, table)
+        self.player_name = player_name
+        self.amount = amount
+
+
+
 # All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
     Event, 
@@ -166,5 +183,6 @@ ALL_EVENTS = [
     HoleCardsDealt,
     CommunityCardsDealt,
     PlayerCalled,
+    PlayerRaised,
 ]
 

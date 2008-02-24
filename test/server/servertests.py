@@ -141,13 +141,15 @@ class TestUser(User):
         self.server.process_action(self.table_views[table_id].table,
             self, r, params)
 
-    def act(self, table_id, action_type):
+    def act(self, table_id, action_type, params=None):
         i = 0
+        if params is None:
+            params = []
         for action in self.pending_actions:
             if isinstance(action, action_type):
                 self.pending_actions = []
                 self.server.process_action(self.table_views[table_id].table,
-                    self, i, [])
+                    self, i, params)
             i += 1
 
         raise Exception("Unable to find action of type %s" % action_type)

@@ -500,6 +500,9 @@ class TexasHoldemGame(Game):
             amount = self.pot_mgr.amount_to_match(player) + action.amount
             self.add_to_pot(player, amount)
 
+            event = PlayerRaised(self.table, player.name, action.amount)
+            self.table.notify_all(event)
+
         if isinstance(action, Fold):
             player.folded = True
 
