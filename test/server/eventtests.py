@@ -40,9 +40,9 @@ class EventTests(BaseServerFixture):
         self.user1_table.view_sit(self.user1, 0)
         self.assertEquals(1, len(self.user1.events))
         self.assertEquals(1, len(self.user2.events))
-        self.assertTrue(isinstance(self.user1.events[0], 
+        self.assertTrue(isinstance(self.user1.events[0],
             PlayerJoinedGame))
-        self.assertTrue(isinstance(self.user2.events[0], 
+        self.assertTrue(isinstance(self.user2.events[0],
             PlayerJoinedGame))
 
     def test_new_hand_started(self):
@@ -129,9 +129,9 @@ class EventTests(BaseServerFixture):
         self.assertEquals(1, len(self.user1.events))
         self.assertEquals(1, len(self.user2.events))
 
-        self.assertTrue(isinstance(self.user1.events[0], 
+        self.assertTrue(isinstance(self.user1.events[0],
             PlayerSatOut))
-        self.assertTrue(isinstance(self.user2.events[0], 
+        self.assertTrue(isinstance(self.user2.events[0],
             PlayerSatOut))
 
     def test_player_sits_out_during_hand(self):
@@ -143,7 +143,7 @@ class EventTests(BaseServerFixture):
         self.user1.act_randomly(self.table.id)
         self.user2.act_randomly(self.table.id)
 
-        # User 2 sits out, but the hand is already underway and they're 
+        # User 2 sits out, but the hand is already underway and they're
         # second to act, therefore the PlayerSatOut event shouldn't be
         # sent until after the hand is completed:
         self.user2_table.view_sit_out(self.user2)
@@ -208,11 +208,32 @@ class EventTests(BaseServerFixture):
         self.assertEquals(self.user2.name, user2_raise.player_name)
         self.assertEquals(Currency(1), user2_raise.amount)
 
+    def test_player_folded(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.user1_table.view_start_game(self.user1)
+        # Post blinds:
+        self.user1.act_randomly(self.table.id)
+        self.user2.act_randomly(self.table.id)
+        # Preflop action:
+        self.user1.act(self.table.id, Call)
+        self.user2.act(self.table.id, Fold)
+
+        user1_events = filter_event_type(self.user1, PlayerFolded)
+        self.assertEquals(1, len(user1_events))
+        user2_fold = user1_events[0]
+        self.assertEquals(self.user2.name, user2_fold.player_name)
+
+        user2_events = filter_event_type(self.user2, PlayerFolded)
+        self.assertEquals(1, len(user2_events))
+        user2_fold = user2_events[0]
+        self.assertEquals(self.user2.name, user2_fold.player_name)
+
 
 
 def filter_event_type(user, event_type):
-    """ 
-    Filter the users list of received events and return only those that 
+    """
+    Filter the users list of received events and return only those that
     match the given type.
     """
     events_of_type = []

@@ -58,7 +58,7 @@ def find_next_to_act(players, last_actor_position, pot_mgr, bb_exception=None):
     next_to_act = None
     for i in range(len(players)):
         p = players[(last_actor_position + 1 + i) % len(players)]
-        if not p.folded: 
+        if not p.folded:
 
             if pot_mgr.bet_to_match == 0 and not pot_mgr.has_bet_this_round(p):
                 logger.debug("1")
@@ -87,7 +87,7 @@ def find_next_to_act(players, last_actor_position, pot_mgr, bb_exception=None):
 
 class GameStateMachine:
 
-    """ 
+    """
     State machine to represent the current game state. Game instances
     create a state machine and populate it with various states, each
     of which maps to a method to be called when transitioning into
@@ -180,7 +180,7 @@ class Game(object):
         self.table.notify_all(new_hand_event)
 
     def process_action(self, action):
-        """ 
+        """
         Process a player action.
 
         Assume that any parameters required for the action have already
@@ -194,15 +194,15 @@ class Game(object):
         raise NotImplementedError()
 
     def abort(self):
-        """ 
-        Abort the current hand and return control to the object that 
+        """
+        Abort the current hand and return control to the object that
         created us.
         """
         logger.warn("Aborting game:")
         self.aborted = True
         self.pot_mgr.refund_all()
         if self.total_value() > 0:
-            logger.error("Funds left in pot after refuding all players: " + 
+            logger.error("Funds left in pot after refuding all players: " +
                 str(self.pot_mgr.total_value()))
         self.callback()
 
@@ -214,7 +214,7 @@ class Game(object):
         if self.finished:
             raise RounderException("Game is finished.")
 
-    def __get_active_players(self):    
+    def __get_active_players(self):
         active_players = []
         for p in self.players:
             if not p.folded:
@@ -222,21 +222,21 @@ class Game(object):
         return active_players
     active_players = property(__get_active_players, None)
 
-        
+
 
 
 class TexasHoldemGame(Game):
 
     """ Texas Hold'em, the Cadillac of poker. """
 
-    def __init__(self, limit, players, dealer_index, sb_index, bb_index, 
+    def __init__(self, limit, players, dealer_index, sb_index, bb_index,
         callback, table=None):
         """
         Blind indicies indicate players who have agreed to post the blinds for
         this hand, thus we can immediately retrieve them and get underway.
 
-        Players list represents only those players who were actively at the 
-        table AND sitting in when the hand began. Positions in the list are 
+        Players list represents only those players who were actively at the
+        table AND sitting in when the hand began. Positions in the list are
         not relative. All the game cares about is where they sit in relation
         to one another.
         """
@@ -251,7 +251,7 @@ class TexasHoldemGame(Game):
         # check preflop if the pot isn't raised, despite already having
         # contributed the current amount to the pot. (which we normally use
         # to determine when betting for this round is over)
-        # Set to None if the pot is raised preflop, or once we progress to the 
+        # Set to None if the pot is raised preflop, or once we progress to the
         # flop.
         self.big_blind_exception = self.players[bb_index]
 
@@ -292,7 +292,7 @@ class TexasHoldemGame(Game):
         self.gsm.add_state(STATE_GAMEOVER, self.game_over)
 
     def __reset_betting_round_state(self):
-        """ 
+        """
         Resets any members tracking data for the current round of betting. Can
         be used both when starting a new game or moving on to the next round
         of betting within an existing game.
@@ -310,24 +310,24 @@ class TexasHoldemGame(Game):
         self.__continue_betting_round()
 
     def __collect_blinds(self):
-        """ 
-        Collect blinds from the players who agreed to post them. 
+        """
+        Collect blinds from the players who agreed to post them.
         (normally handled by the table)
         """
 
         self._check_if_finished()
         self.add_to_pot(self.small_blind, self.limit.small_blind)
-        logger.info("Table %s: %s posts the small blind: %s", 
-            self.__get_table_id(), self.small_blind.name, 
+        logger.info("Table %s: %s posts the small blind: %s",
+            self.__get_table_id(), self.small_blind.name,
             self.limit.small_blind)
-        blind_event = PlayerPostedBlind(self.table, self.small_blind.name, 
+        blind_event = PlayerPostedBlind(self.table, self.small_blind.name,
             self.limit.small_blind)
         self.table.notify_all(blind_event)
 
         self.add_to_pot(self.big_blind, self.limit.big_blind)
-        logger.info("Table %s: %s posts the big blind: %s", 
+        logger.info("Table %s: %s posts the big blind: %s",
             self.__get_table_id(), self.big_blind.name, self.limit.big_blind)
-        blind_event = PlayerPostedBlind(self.table, self.big_blind.name, 
+        blind_event = PlayerPostedBlind(self.table, self.big_blind.name,
             self.limit.big_blind)
         self.table.notify_all(blind_event)
 
@@ -363,7 +363,7 @@ class TexasHoldemGame(Game):
         logger.debug("active players: %s", len(self.active_players))
         # Check if everyone has folded:
         if len(self.active_players) == 1:
-            self.game_over() 
+            self.game_over()
             return
 
         last_actor_position = self.__positions[self.__last_actor]
@@ -376,7 +376,7 @@ class TexasHoldemGame(Game):
         if next_to_act is not None:
             in_pot = self.pot_mgr.bet_this_round(next_to_act)
 
-            options = self.limit.create_actions(next_to_act, 
+            options = self.limit.create_actions(next_to_act,
                 in_pot, self.pot_mgr.bet_to_match, self.__get_bet_level())
             self.prompt_player(next_to_act, options)
             return
@@ -430,7 +430,7 @@ class TexasHoldemGame(Game):
         self.__continue_betting_round()
 
     def add_to_pot(self, player, amount):
-        """ 
+        """
         Adds the specified amount to the pot. Handles adjustment of players
         stack as well as internal tracking of who has contributed what.
         """
@@ -465,7 +465,7 @@ class TexasHoldemGame(Game):
                 self.table.prompt_player(player, actions_list)
 
     def sit_out(self, player):
-        """ 
+        """
         Handle a player sitting out.
 
         Note this method is called by the table object which has
@@ -505,6 +505,8 @@ class TexasHoldemGame(Game):
 
         if isinstance(action, Fold):
             player.folded = True
+            event = PlayerFolded(self. table, player.name)
+            self.table.notify_all(event)
 
         # Remove this player from the pending actions map:
         self.__last_actor = player
@@ -513,7 +515,7 @@ class TexasHoldemGame(Game):
         self.__continue_betting_round()
 
     def advance(self):
-        """ 
+        """
         Check if we no longer have any actions pending and advance the
         game state if possible.
         """

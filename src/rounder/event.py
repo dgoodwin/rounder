@@ -18,8 +18,8 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" 
-The Rounder Events Module 
+"""
+The Rounder Events Module
 
 Events are read-only data transfer objects used to pass to clients whenever
 something happens that they need to be notified of. The objects do nothing,
@@ -41,7 +41,7 @@ from rounder.dto import TableState
 
 class Event:
 
-    """ 
+    """
     Parent Event class. Events represent anything happening at a table that
     players need to be notified of.
     """
@@ -53,7 +53,7 @@ class Event:
 
 class PlayerJoinedGame(Event):
 
-    """ 
+    """
     Player joined the game.
     """
 
@@ -63,14 +63,14 @@ class PlayerJoinedGame(Event):
         self.seat_num = seat_num
 
     def __repr__(self):
-        return "PlayerJoinedGame: %s took seat %s" % (self.player_name, 
+        return "PlayerJoinedGame: %s took seat %s" % (self.player_name,
             self.seat_num)
 
 
 
 class PlayerSatOut(Event):
 
-    """ 
+    """
     Player sat out. (but did not leave the table)
     """
 
@@ -101,7 +101,7 @@ class PlayerPostedBlind(Event):
     A player has agreed to post the blind.
 
     While players agree to post blinds before a hand is actually underway,
-    this event is only sent when the hand begins and the blinds actually 
+    this event is only sent when the hand begins and the blinds actually
     enter the pot.
     """
 
@@ -115,7 +115,7 @@ class PlayerPostedBlind(Event):
 class HoleCardsDealt(Event):
 
     """
-    Hole cards have been dealt to the player receiving the event. 
+    Hole cards have been dealt to the player receiving the event.
     (Player clients recieve no notification about hole cards being
     dealt to other players.)
     """
@@ -173,9 +173,22 @@ class PlayerRaised(Event):
 
 
 
+class PlayerFolded(Event):
+
+    """
+    Player folded.
+    """
+
+    def __init__(self, table, player_name):
+
+        Event.__init__(self, table)
+        self.player_name = player_name
+
+
+
 # All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
-    Event, 
+    Event,
     PlayerJoinedGame,
     PlayerSatOut,
     NewHandStarted,
@@ -184,5 +197,6 @@ ALL_EVENTS = [
     CommunityCardsDealt,
     PlayerCalled,
     PlayerRaised,
+    PlayerFolded,
 ]
 
