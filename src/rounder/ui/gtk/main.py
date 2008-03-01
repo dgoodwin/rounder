@@ -78,7 +78,7 @@ class RounderGtk:
 
     @staticmethod
     def show_connect_dialog(widget):
-        
+
         """ Opens the connect to server dialog. """
 
         connect_dialog = ConnectDialog()
@@ -120,5 +120,10 @@ class ConnectDialog:
         host = host_entry.get_text()
         port_spinbutton = self.glade_xml.get_widget('port-spinbutton')
         port = port_spinbutton.get_value_as_int()
+        username_entry = self.glade_xml.get_widget('username-entry')
+        username = username_entry.get_text()
+        password_entry = self.glade_xml.get_widget('password-entry')
+        password = password_entry.get_text()
         logger.debug("Connecting to %s on port %s" % (host, port))
+        logger.debug("   as: %s / %s" % (username, password))
 
