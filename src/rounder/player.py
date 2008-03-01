@@ -27,8 +27,8 @@ from rounder.core import RounderException
 
 class Player:
 
-    """ 
-    Player at a poker table. Note one account could be playing at 
+    """
+    Player at a poker table. Note one account could be playing at
     multiple tables concurrently, in which case one Player would be
     created for each.
     """
@@ -40,8 +40,6 @@ class Player:
         self.table = table
         self.seat = seat
         self.cards = []
-        self.final_hand = None
-        self.final_hand_rank = None
         self.sitting_out = False
         self.folded = False
         self.pending_actions = []
@@ -49,13 +47,11 @@ class Player:
     def reset(self):
         """ Reset player state specific to a hand. """
         self.cards = []
-        self.final_hand = None
-        self.final_hand_rank = None
         self.folded = False
         self.pending_actions = []
-        
+
     def prompt(self, actions):
-        """ 
+        """
         Prompt this player to make a choice among the given actions.
         Returns nothing, but rather an asynchronous call back into the game
         (and perhaps parent objects such as the server) will return the
@@ -93,7 +89,7 @@ class Player:
         # NOTE: Separate function to hopefully help prevent errors.
         if amount < 0:
             raise RounderException("Negative amount, use add_chips instead.")
-        logger.debug("Subtracting chips from " + str(self.name) + ": " + 
+        logger.debug("Subtracting chips from " + str(self.name) + ": " +
             str(amount))
         self.chips = self.chips - amount
 
