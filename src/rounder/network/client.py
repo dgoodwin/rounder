@@ -27,7 +27,7 @@ from twisted.cred import credentials
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
-from rounder.network.serialize import loads
+from rounder.network.serialize import dumps, loads
 
 class RounderNetworkClient(pb.Referenceable):
 
@@ -46,12 +46,12 @@ class RounderNetworkClient(pb.Referenceable):
     the server. Calls to the UI should be clean, readable, and use objects
     whenever possible.
 
-    Callback methods for a method X should be named X_success_cb and 
+    Callback methods for a method X should be named X_success_cb and
     X_success_failure_cb.
     """
 
     def __init__(self, username, ui):
-        """ 
+        """
         Initializes a network client.
 
             ui = Reference to a client user interface where we can pass
@@ -127,7 +127,7 @@ class RounderNetworkClient(pb.Referenceable):
         """
         Prompt player to choose one of the given actions for a table.
         """
-        logger.debug("Table %s: %s received actions:" % (table_id, 
+        logger.debug("Table %s: %s received actions:" % (table_id,
             self.username))
         try:
             deserialized_actions = []
@@ -146,8 +146,9 @@ class RounderNetworkClient(pb.Referenceable):
         """
         Display an incoming event to the user.
         """
-        deserialized_event = dumps(event)
-        logger.debug("Table %s: received event: %s" % deserialized_event)
+        deserialized_event = loads(event)
+        logger.debug("Table %s: received event: %s" % (table_id,
+            deserialized_event))
         # TODO
 
     def act(self, table_id, action_index, params):
@@ -157,7 +158,7 @@ class RounderNetworkClient(pb.Referenceable):
         selected by an index into the list the server sent.
         """
         # TODO: add parameters here
-        logger.debug("Table %s: Sending action index %s to server: %s" % 
+        logger.debug("Table %s: Sending action index %s to server: %s" %
             (table_id, action_index, params))
         self.table_views[table_id].callRemote("process_action", action_index,
             params)
