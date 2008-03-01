@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """ Rounder Distutils Setup Script """
 
 __revision__ = "$Revision$"
