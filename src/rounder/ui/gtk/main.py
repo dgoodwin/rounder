@@ -52,7 +52,12 @@ def find_file_on_path(pathname):
 
 class RounderGtk:
 
-    """ The Rounder GTK Client """
+    """ 
+    The Rounder GTK Client 
+
+    Represents the main Rounder interface to connect to a server, view
+    available tables, and join them. (opening a separate window)
+    """
 
     def __init__(self):
 
@@ -60,37 +65,71 @@ class RounderGtk:
         glade_file = 'rounder/ui/gtk/data/rounder.glade'
         glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = glade_xml.get_widget('main-window')
+        self.table_list = glade_xml.get_widget('table-list')
 
         signals = {
             'on_connect_activate': self.show_connect_dialog,
             'on_main_window_destroy' : self.shutdown,
         }
         glade_xml.signal_autoconnect(signals)
+        self.__populate_table_list()
 
         main_window.show_all()
 
-    @staticmethod
-    def main():
+    def main(self):
 
         """ Launch the GTK main loop. """
 
         gtk.main()
 
-    @staticmethod
-    def show_connect_dialog(widget):
+    def show_connect_dialog(self, widget):
 
         """ Opens the connect to server dialog. """
 
         connect_dialog = ConnectDialog()
 
-    @staticmethod
-    def shutdown(widget):
+    def shutdown(self, widget):
 
         """ Closes the application. """
 
         logger.info("Stopping application.")
         gtk.main_quit()
 
+    def __populate_table_list(self):
+
+        """ Populate the list of tables in the main server window. """
+
+        column_names = ["Table", "Limit", "Players"]
+        cell_data_funcs = [self.__cell_table, self.__cell_limit,
+            self.__cell_players]
+
+        tables = gtk.ListStore(str, str, str)
+        tables.append(["Table 1", "$2/4 Limit", "5"])
+        tables.append(["Table 2", "$3/6 Limit", "2"])
+        tables.append(["Table 3", "$1/2 Limit", "10"])
+        tables.append(["Table 4", "$5/10 Limit", "4"])
+        tables.append(["Table 5", "$100/200 Limit", "2"])
+
+        columns = [None] * len(column_names)
+
+        # Populate the table columns and cells:
+        for n in range (0, len(column_names)):
+            cell = gtk.CellRendererText()
+            columns[n] = gtk.TreeViewColumn(column_names[n], cell)
+            columns[n].set_cell_data_func(cell, cell_data_funcs[n])
+            self.table_list.append_column(columns[n])
+
+        self.table_list.set_model(tables)
+
+
+    def __cell_table(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 0))
+
+    def __cell_limit(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 1))
+
+    def __cell_players(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 2))
 
 
 
