@@ -2,6 +2,7 @@
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
 #   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2008 Kenny MacDermid <kenny@kmdconsulting.ca>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,6 +30,9 @@ class RounderException(Exception):
     def __str__(self):
         return repr(self.value)
 
+class InvalidPlay(RounderException):
+    """ Client did something they are not aloud to do. """
+    pass
 
 def array_to_string(array):
     output = ""

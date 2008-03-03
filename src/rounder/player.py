@@ -2,6 +2,7 @@
 #
 #   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
 #   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2008 Kenny MacDermid <kenny@kmdconsulting.ca>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -21,6 +22,8 @@
 """ The Rounder Player Module """
 
 from logging import getLogger
+from currency import Currency
+from rounder.core import InvalidPlay
 logger = getLogger("rounder.player")
 
 from rounder.core import RounderException
@@ -42,17 +45,70 @@ class Player:
         self.cards = []
         self.sitting_out = False
         self.folded = False
-        self.pending_actions = []
+        self.in_hand = False
+
+        self.reset()
 
     def reset(self):
         """ Reset player state specific to a hand. """
         self.cards = []
+        self.allin = False
+        self.current_bet = Currency(0)
+        self.final_hand = None
+        self.final_hand_rank = None
         self.folded = False
         self.pending_actions = []
+        self.new_round()
+
+    def new_round(self):
+        """ Called for each new round of betting. """
+        amount = self.current_bet
+        self.current_bet = Currency(0)
+        self.raise_count = -1
+        logger.debug("Player bet: " + str(amount))
+        return amount
+
+    def can_act(self, raise_count):
+        """ Check if the player has another move to make this round. """
+        if self.folded or self.allin:
+            return False
+
+        if (self.raise_count == raise_count):
+            return False
+
+        return True
+
+    def call_bet(self, pot_size, raise_count):
+        amount = pot_size - self.current_bet
+        if amount > self.chips:
+            amount = self.chips
+
+        self.bet(amount, raise_count)
+
+    def bet(self, amount, raise_count):
+        """ A bet made by a client. """
+        # TODO: Maybe this is too much state for the player to be worried about
+        if (amount + self.current_bet == 0 and raise_count > 0    ):
+            logger.debug("Client tried to bet 0")
+            raise InvalidPlay("Client cannot bet 0")
+
+        # TODO: should this be a better exception?
+        assert(raise_count == -1 or self.raise_count != raise_count)
+
+        if (amount > self.chips):
+            logger.debug("Client tried to bet more then they had")
+            raise InvalidPlay("Client does not have enough chips for that bet")
+        elif (amount == self.chips):
+            self.allin = True
+
+        self.chips -= amount
+        self.current_bet += amount
+        self.raise_count = raise_count
 
     def prompt(self, actions):
         """
         Prompt this player to make a choice among the given actions.
+
         Returns nothing, but rather an asynchronous call back into the game
         (and perhaps parent objects such as the server) will return the
         players selection.
