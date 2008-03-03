@@ -32,6 +32,8 @@ import sys
 from logging import getLogger
 logger = getLogger("rounder.ui.gtk.main")
 
+from rounder.network.client import RounderNetworkClient
+
 def find_file_on_path(pathname):
 
     """
@@ -70,9 +72,14 @@ class RounderGtk:
         signals = {
             'on_connect_activate': self.show_connect_dialog,
             'on_main_window_destroy' : self.shutdown,
+            'on_connect_button_clicked': self.show_connect_dialog,
         }
         glade_xml.signal_autoconnect(signals)
         self.__populate_table_list()
+
+        self.client = None
+
+        self.connect_dialog = None # Set once connect dialog is open
 
         main_window.show_all()
 
@@ -86,7 +93,19 @@ class RounderGtk:
 
         """ Opens the connect to server dialog. """
 
-        connect_dialog = ConnectDialog()
+        if self.connect_dialog == None:
+            self.connect_dialog = ConnectDialog(self)
+        else:
+            logger.debug("Connect dialog already open.")
+
+    def connect_cb(self, client):
+        """ 
+        Callback used by the connect dialog after a connection to a server
+        has been successfully made.
+        """
+        logger.info("Connected to %s:%s as %s" % (client.host, client.port, 
+            client.username))
+        self.client = client
 
     def shutdown(self, widget):
 
@@ -137,19 +156,22 @@ class ConnectDialog:
 
     """ Dialog for connecting to a server. """
 
-    def __init__(self):
+    def __init__(self, app):
 
         logger.debug("Opening connect dialog.")
+
+        self.app = app
+
         glade_file = 'rounder/ui/gtk/data/connect.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
-        connect_dialog = self.glade_xml.get_widget('connect-dialog')
+        self.connect_dialog = self.glade_xml.get_widget('connect-dialog')
 
         signals = {
             'on_connect_button_clicked': self.connect,
         }
         self.glade_xml.signal_autoconnect(signals)
 
-        connect_dialog.show_all()
+        self.connect_dialog.show_all()
 
     def connect(self, widget):
 
@@ -165,4 +187,14 @@ class ConnectDialog:
         password = password_entry.get_text()
         logger.debug("Connecting to %s on port %s" % (host, port))
         logger.debug("   as: %s / %s" % (username, password))
+
+        # Attempt to connect to the specified server by creating a client
+        # object. If successful pass the client back to the main application,
+        # otherwise display an error status message and let the user try
+        # again:
+        client = RounderNetworkClient(self.app)
+        # TODO: try/except here:
+        client.connect(host, port, username, password)
+        self.connect_dialog.destroy()
+        self.app.connect_cb(client)
 

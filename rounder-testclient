@@ -47,7 +47,7 @@ class TestClientUI:
         self.username = username
         self.password = password
         self.interactive = interactive
-        self.client = RounderNetworkClient(self.username, self)
+        self.client = RounderNetworkClient(self)
         self.client.connect('localhost', SERVER_PORT, self.username, 
             self.password)
 

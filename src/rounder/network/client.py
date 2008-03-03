@@ -50,22 +50,27 @@ class RounderNetworkClient(pb.Referenceable):
     X_success_failure_cb.
     """
 
-    def __init__(self, username, ui):
+    def __init__(self, ui):
         """
         Initializes a network client.
 
             ui = Reference to a client user interface where we can pass
                 responses on to.
         """
-        self.username = username
         self.ui = ui
         self.table_views = {}
+        self.username = None
+        self.host = None
+        self.port = None
 
-    def connect(self, host, port, user, password):
+    def connect(self, host, port, username, password):
         """ Initiate connection to a server. """
         factory = pb.PBClientFactory()
+        self.host = host
+        self.port = port
+        self.username = username
         reactor.connectTCP(host, port, factory)
-        def1 = factory.login(credentials.UsernamePassword(user, password),
+        def1 = factory.login(credentials.UsernamePassword(username, password),
             client=self)
         def1.addCallback(self.connected)
         reactor.run()
