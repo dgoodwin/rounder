@@ -37,7 +37,6 @@ gtk2reactor.install()
 from rounder.network.client import RounderNetworkClient
 
 def find_file_on_path(pathname):
-
     """
     Scan the Python path and locate a file with the given name.
 
@@ -55,7 +54,6 @@ def find_file_on_path(pathname):
         % pathname)
 
 class RounderGtk:
-
     """ 
     The Rounder GTK Client 
 
@@ -86,10 +84,16 @@ class RounderGtk:
         main_window.show_all()
 
     def main(self):
-
         """ Launch the GTK main loop. """
 
         gtk.main()
+
+    def shutdown(self, widget):
+        """ Closes the application. """
+        if self.client != None:
+            self.client.shutdown()
+        logger.info("Stopping application.")
+        gtk.main_quit()
 
     def show_connect_dialog(self, widget):
         """ Opens the connect to server dialog. """
@@ -112,16 +116,9 @@ class RounderGtk:
     def connect_failed_cb(self):
         """ Connection failed callback. """
         logger.warn("Connect failed")
-
-    def shutdown(self, widget):
-
-        """ Closes the application. """
-
-        logger.info("Stopping application.")
-        gtk.main_quit()
+        self.connect_dialog.display_status("Login failed")
 
     def __populate_table_list(self):
-
         """ Populate the list of tables in the main server window. """
 
         column_names = ["Table", "Limit", "Players"]
@@ -159,7 +156,6 @@ class RounderGtk:
 
 
 class ConnectDialog:
-
     """ Dialog for connecting to a server. """
 
     def __init__(self, app):
@@ -180,9 +176,7 @@ class ConnectDialog:
         self.connect_dialog.show_all()
 
     def connect(self, widget):
-
         """ Attempt to open a connection to the host and port specified. """
-
         host_entry = self.glade_xml.get_widget('host-entry')
         host = host_entry.get_text()
         port_spinbutton = self.glade_xml.get_widget('port-spinbutton')
@@ -203,6 +197,13 @@ class ConnectDialog:
             client.connect(host, port, username, password)
         except Exception, e:
             logger.error("Unable to login to %s as %s" % (host, username))
+
+    def display_status(self, message):
+        """ Display a message to the user. """
+        statusbar = self.glade_xml.get_widget('statusbar')
+        print statusbar
+        statusbar.push(statusbar.get_context_id("?"), message)
+        statusbar.show()
 
     def destroy(self):
         """
