@@ -72,13 +72,6 @@ class TestClientUI:
                 break
 
     def took_seat(self, table_id, seat_num):
-        # if any seats remain empty, create another dummy player, otherwise
-        # request that we start a game:
-        #if PLAYERS < 10:
-        #    TestClientUI()
-        #else:
-        #    print "%s requesting game" % self.username
-        #    self.client.start_game(table_id)
         if self.interactive:
             self.client.start_game(table_id)
 

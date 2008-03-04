@@ -63,7 +63,7 @@ class RounderNetworkClient(pb.Referenceable):
         self.host = None
         self.port = None
 
-    def connect(self, host, port, username, password):
+    def connect(self, host, port, username, password, success_cb=None, failure_cb=None):
         """ Initiate connection to a server. """
         factory = pb.PBClientFactory()
         self.host = host
@@ -72,18 +72,23 @@ class RounderNetworkClient(pb.Referenceable):
         reactor.connectTCP(host, port, factory)
         def1 = factory.login(credentials.UsernamePassword(username, password),
             client=self)
-        def1.addCallback(self.connected)
+        def1.addCallbacks(self.connect_success_cb, self.connect_failed_cb)
         reactor.run()
 
     @staticmethod
     def shutdown():
         reactor.stop()
 
-    def connected(self, perspective):
+    def connect_success_cb(self, perspective):
         """ Callback for successful connection. """
         logger.debug("connected!")
         self.perspective = perspective
-        self.ui.connected()
+        self.ui.connect_success_cb(self)
+
+    def connect_failed_cb(self, failure):
+        """ Callback for a failed connection attempt. """
+        logger.debug("Connection failed: %s" % failure)
+        self.ui.connect_failed_cb()
 
     def get_table_list(self):
         """ Request a list of tables from the server. """

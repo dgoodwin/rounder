@@ -31,6 +31,8 @@ import sys
 
 from logging import getLogger
 logger = getLogger("rounder.ui.gtk.main")
+from twisted.internet import gtk2reactor
+gtk2reactor.install()
 
 from rounder.network.client import RounderNetworkClient
 
@@ -90,15 +92,13 @@ class RounderGtk:
         gtk.main()
 
     def show_connect_dialog(self, widget):
-
         """ Opens the connect to server dialog. """
-
         if self.connect_dialog == None:
             self.connect_dialog = ConnectDialog(self)
         else:
             logger.debug("Connect dialog already open.")
 
-    def connect_cb(self, client):
+    def connect_success_cb(self, client):
         """ 
         Callback used by the connect dialog after a connection to a server
         has been successfully made.
@@ -106,6 +106,12 @@ class RounderGtk:
         logger.info("Connected to %s:%s as %s" % (client.host, client.port, 
             client.username))
         self.client = client
+        self.connect_dialog.destroy()
+        self.connect_dialog = None
+
+    def connect_failed_cb(self):
+        """ Connection failed callback. """
+        logger.warn("Connect failed")
 
     def shutdown(self, widget):
 
@@ -193,8 +199,15 @@ class ConnectDialog:
         # otherwise display an error status message and let the user try
         # again:
         client = RounderNetworkClient(self.app)
-        # TODO: try/except here:
-        client.connect(host, port, username, password)
+        try:
+            client.connect(host, port, username, password)
+        except Exception, e:
+            logger.error("Unable to login to %s as %s" % (host, username))
+
+    def destroy(self):
+        """
+        Called by main Rounder application who receives the success callback
+        from the network client.
+        """
         self.connect_dialog.destroy()
-        self.app.connect_cb(client)
 
