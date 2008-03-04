@@ -534,15 +534,19 @@ class TexasHoldemGame(Game):
 
         for pot in self.pot_mgr.pots:
             winners = []
-            cards = self.__cards_for_players(pot.players)
-            result = evaluator.winners(game="holdem", pockets=cards,
-            board=board)
+            players = filter(lambda x: x.folded == False, pot.players)
 
-        for index in result['hi']:
-            if not pot.players[index].folded:
-                winners.append(pot.players[index])
+            if len(players) == 1:
+                winners = players
+            else:
+                cards = self.__cards_for_players(players)
+                result = evaluator.winners(game="holdem", pockets=cards,
+                    board=board)
 
-        self.__payout_pot(pot, winners)
+                for index in result['hi']:
+                    winners.append(players[index])
+
+            self.__payout_pot(pot, winners)
 
         for p in self.players:
             p.reset()
