@@ -127,7 +127,7 @@ class Game(object):
 
     """ Parent class of all poker games. """
 
-    def __init__(self, limit, players, callback, table=None):
+    def __init__(self, limit, players, callback, table=None, deck=None):
         """
         Constructor expects the list of players to all be active, no one
         sitting out. (TODO: add check for this)
@@ -137,6 +137,7 @@ class Game(object):
 
         self.table = table
         self.limit = limit
+        self._deck = deck
 
         # A callback method we can call when this game is finished to return
         # control to the object that created us:
@@ -207,7 +208,7 @@ class TexasHoldemGame(Game):
     """ Texas Hold'em, the Cadillac of poker. """
 
     def __init__(self, limit, players, dealer_index, sb_index, bb_index,
-        callback, table=None):
+        callback, table=None, deck=None):
         """
         Blind indicies indicate players who have agreed to post the blinds for
         this hand, thus we can immediately retrieve them and get underway.
@@ -218,7 +219,7 @@ class TexasHoldemGame(Game):
         to one another.
         """
 
-        Game.__init__(self, limit, players, callback, table)
+        Game.__init__(self, limit, players, callback, table, deck)
 
         self.dealer = self.players[dealer_index]
         self.small_blind = self.players[sb_index]
@@ -250,8 +251,9 @@ class TexasHoldemGame(Game):
 
         self.community_cards = []
 
-        self.__deck = Deck()
-        self.__deck.shuffle()
+        if self._deck == None:
+            self._deck = Deck()
+            self._deck.shuffle()
 
         self.__current_bet = Currency(0)
         self.__raise_count = 0
@@ -329,7 +331,7 @@ class TexasHoldemGame(Game):
         self._check_if_finished()
         for i in range(2): # execute loop twice
             for p in self.players:
-                card = self.__deck.draw_card()
+                card = self._deck.draw_card()
                 p.cards.append(card)
 
         # Send out notifications, done separately so we only have to
@@ -395,7 +397,7 @@ class TexasHoldemGame(Game):
         self._check_if_finished()
 
         for i in range(3):
-            self.community_cards.append(self.__deck.draw_card())
+            self.community_cards.append(self._deck.draw_card())
 
         event = CommunityCardsDealt(self.table, self.community_cards)
         self.table.notify_all(event)
@@ -404,13 +406,13 @@ class TexasHoldemGame(Game):
     def turn(self):
         """ Deal the turn and initiate the betting. """
         self._check_if_finished()
-        self.community_cards.append(self.__deck.draw_card())
+        self.community_cards.append(self._deck.draw_card())
         self.__continue_betting_round()
 
     def river(self):
         """ Deal the river and initiate the betting. """
         self._check_if_finished()
-        self.community_cards.append(self.__deck.draw_card())
+        self.community_cards.append(self._deck.draw_card())
         self.__continue_betting_round()
 
     def prompt_player(self, player, actions_list):
