@@ -24,6 +24,27 @@ import unittest
 import settestpath
 from rounder.deck import OutOfCardsException
 from rounder.deck import Deck
+from cardtests import create_cards_from_list
+
+
+#Deck Utiltiy methods useful for testing
+def reorder_deck(deck, card_list):
+    """Pull the list of values to the front of the deck
+
+    It should be noted that this will reorder the deck and therefore
+    should not be run after any cards are handed out to players.
+
+    """
+    count = 0
+    for card in card_list:
+        index = deck.cards.index(card)
+
+        # Take the actual card instead of the list because they could just
+        # compare the same.
+        card = deck.cards[index]
+        deck.cards[index] = deck.cards[count]
+        deck.cards[count] = card
+        count += 1
 
 class DeckTests(unittest.TestCase):
 
@@ -42,12 +63,26 @@ class DeckTests(unittest.TestCase):
         d = Deck()
         for i in range(0, 53):
             d.draw_card()
-	    
+
+class DeckTestUtilsTests(unittest.TestCase):
+    def test_reorder_deck_one(self):
+        deck = Deck()
+        cards = create_cards_from_list(['Ad', 'As', 'Ah'])
+        reorder_deck(deck, cards)
+
+        for i in range(3):
+            self.assertEquals(deck.cards[i], cards[i], "Card %d incorrect" % i)
+
+        for i in range(3,52):
+            for j in range(3):
+                self.assertNotEquals(deck.cards[i], cards[j],
+                    "Card %d in deck twice" % j)
 
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(DeckTests))
+    suite.addTest(unittest.makeSuite(DeckTestUtilsTests))
     return suite
 
 if __name__ == '__main__':

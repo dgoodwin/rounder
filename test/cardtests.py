@@ -32,6 +32,9 @@ from rounder.card import CLUB
 from rounder.card import Card
 from rounder.core import RounderException
 
+def create_cards_from_list(value_list):
+    return [Card(value) for value in value_list]
+
 class CardTests(unittest.TestCase):
 
     def testCreateCardByString(self):
