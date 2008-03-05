@@ -27,7 +27,7 @@ from twisted.cred import credentials
 from logging import getLogger
 logger = getLogger("rounder.network.client")
 
-from rounder.network.serialize import dumps, loads
+from rounder.network.serialize import loads
 
 class RounderNetworkClient(pb.Referenceable):
 
@@ -63,7 +63,7 @@ class RounderNetworkClient(pb.Referenceable):
         self.host = None
         self.port = None
 
-    def connect(self, host, port, username, password, success_cb=None, failure_cb=None):
+    def connect(self, host, port, username, password):
         """ Initiate connection to a server. """
         factory = pb.PBClientFactory()
         self.host = host
@@ -72,7 +72,7 @@ class RounderNetworkClient(pb.Referenceable):
         reactor.connectTCP(host, port, factory)
         def1 = factory.login(credentials.UsernamePassword(username, password),
             client=self)
-        def1.addCallbacks(self.connect_success_cb, self.connect_failed_cb)
+        def1.addCallbacks(self.connect_success_cb, self.connect_failure_cb)
         reactor.run()
 
     @staticmethod
@@ -85,10 +85,10 @@ class RounderNetworkClient(pb.Referenceable):
         self.perspective = perspective
         self.ui.connect_success_cb(self)
 
-    def connect_failed_cb(self, failure):
+    def connect_failure_cb(self, failure):
         """ Callback for a failed connection attempt. """
         logger.debug("Connection failed: %s" % failure)
-        self.ui.connect_failed_cb()
+        self.ui.connect_failure_cb()
 
     def get_table_list(self):
         """ Request a list of tables from the server. """
@@ -99,7 +99,12 @@ class RounderNetworkClient(pb.Referenceable):
     def get_table_list_success_cb(self, data):
         """ Called when a list of tables is received. """
         logger.debug("got table list")
-        self.ui.got_table_list(data)
+        table_listings = []
+        for t in data:
+            temp = loads(t)
+            logger.debug("   %s" % temp)
+            table_listings.append(temp)
+        self.ui.got_table_list(table_listings)
 
     def open_table(self, table_id):
         """ Open a table. """

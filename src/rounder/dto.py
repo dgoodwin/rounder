@@ -61,6 +61,29 @@ class TableState:
 
 
 
+class TableListing:
+    """
+    Minimal representation of a table for use in the server window's table 
+    list.
+
+    Contains only necessary information such as table ID, name, limit, and
+    the current number of players. Differs from the TableState object which
+    contains enough information to update the table on an observers screen.
+    """
+
+    def __init__(self, table):
+        self.id = table.id
+        self.name = table.name
+        self.limit = table.limit
+        self.player_count = len(table.seats.seated_players)
+
+    def __str__(self):
+        return "%s - %s - %s players" % (self.name,
+            self.limit, self.player_count)
+
+
+
+
 class PlayerState:
 
     """ 

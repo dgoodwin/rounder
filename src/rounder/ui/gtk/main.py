@@ -35,6 +35,7 @@ from twisted.internet import gtk2reactor
 gtk2reactor.install()
 
 from rounder.network.client import RounderNetworkClient
+from rounder.network.serialize import register_message_classes
 
 def find_file_on_path(pathname):
     """
@@ -75,17 +76,17 @@ class RounderGtk:
             'on_connect_button_clicked': self.show_connect_dialog,
         }
         glade_xml.signal_autoconnect(signals)
-        self.__populate_table_list()
 
         self.client = None
 
         self.connect_dialog = None # Set once connect dialog is open
 
+        register_message_classes()
+
         main_window.show_all()
 
     def main(self):
         """ Launch the GTK main loop. """
-
         gtk.main()
 
     def shutdown(self, widget):
@@ -112,25 +113,24 @@ class RounderGtk:
         self.client = client
         self.connect_dialog.destroy()
         self.connect_dialog = None
+        self.client.get_table_list()
 
-    def connect_failed_cb(self):
+    def connect_failure_cb(self):
         """ Connection failed callback. """
         logger.warn("Connect failed")
         self.connect_dialog.display_status("Login failed")
 
-    def __populate_table_list(self):
+    def got_table_list(self, table_listings):
         """ Populate the list of tables in the main server window. """
 
+        logger.debug("Populating table list")
         column_names = ["Table", "Limit", "Players"]
         cell_data_funcs = [self.__cell_table, self.__cell_limit,
             self.__cell_players]
 
         tables = gtk.ListStore(str, str, str)
-        tables.append(["Table 1", "$2/4 Limit", "5"])
-        tables.append(["Table 2", "$3/6 Limit", "2"])
-        tables.append(["Table 3", "$1/2 Limit", "10"])
-        tables.append(["Table 4", "$5/10 Limit", "4"])
-        tables.append(["Table 5", "$100/200 Limit", "2"])
+        for table in table_listings:
+            tables.append([table.name, table.limit, table.player_count])
 
         columns = [None] * len(column_names)
 
@@ -201,7 +201,6 @@ class ConnectDialog:
     def display_status(self, message):
         """ Display a message to the user. """
         statusbar = self.glade_xml.get_widget('statusbar')
-        print statusbar
         statusbar.push(statusbar.get_context_id("?"), message)
         statusbar.show()
 

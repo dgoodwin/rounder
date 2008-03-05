@@ -87,6 +87,14 @@ class Seats(object):
     def get_player(self, seat_number):
         return self.__seats[seat_number]
 
+    def __get_seated_players(self):
+        seated = []
+        for player in self.__seats:
+            if player != None:
+                seated.append(player)
+        return seated
+    seated_players = property(__get_seated_players, None)
+
     def __get_active_players(self):    
         active_players = []
         for p in self.__seats:

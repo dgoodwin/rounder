@@ -31,7 +31,7 @@ logger = getLogger("rounder.network.server")
 from rounder.limit import FixedLimit
 from rounder.table import Table
 from rounder.currency import Currency
-from rounder.dto import TableState
+from rounder.dto import TableState, TableListing
 from rounder.player import Player
 from rounder.core import RounderException
 from rounder.network.serialize import register_message_classes, dumps
@@ -67,7 +67,7 @@ class RounderNetworkServer:
         """ Returns a list of visible tables to the client. """
         tables = []
         for t in self.table_views.values():
-            tables.append((t.table.id, t.table.name))
+            tables.append(dumps(TableListing(t.table)))
         return tables
 
     def open_table(self, table_id, user):
