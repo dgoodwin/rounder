@@ -32,8 +32,9 @@ from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
 from rounder.table import Table
+from rounder.deck import Deck
 from rounder.game import TexasHoldemGame, GameStateMachine, find_next_to_act
-    
+
 from rounder.game import STATE_PREFLOP, STATE_FLOP, STATE_TURN, STATE_RIVER, \
     STATE_GAMEOVER
 from rounder.currency import Currency
@@ -41,6 +42,8 @@ from rounder.utils import find_action_in_list
 from rounder.pot import PotManager
 
 from utils import create_players_list, create_table
+from cardtests import create_cards_from_list
+from decktests import reorder_deck
 
 CHIPS = 1000
 
@@ -53,7 +56,7 @@ class NextToActTests(unittest.TestCase):
     def __set_bet(self, player, amount, round):
         """
         Adds the specified amount to the pot and subtracts from the players
-        stack. 
+        stack.
         """
         player.bet(amount, round)
 
@@ -145,7 +148,7 @@ class GameStateMachineTests(unittest.TestCase):
         machine = GameStateMachine()
         machine.add_state("postblinds", self.callback)
         machine.advance()
-        self.assertRaises(RounderException, machine.add_state, "any", 
+        self.assertRaises(RounderException, machine.add_state, "any",
             self.callback)
 
     def test_callback(self):
@@ -162,7 +165,9 @@ class TexasHoldemTests(unittest.TestCase):
     def game_over_callback(self):
         self.game_over = True
 
-    def __create_game(self, chip_counts, dealer_index, sb_index, bb_index):
+    def __create_game(self, chip_counts, dealer_index, sb_index, bb_index,
+        deck=None):
+
         limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
 
         temp_tuple = create_table(chip_counts, dealer_index)
@@ -174,9 +179,9 @@ class TexasHoldemTests(unittest.TestCase):
         players_copy = []
         players_copy.extend(self.players)
 
-        self.game = TexasHoldemGame(limit=limit, players=players_copy, 
+        self.game = TexasHoldemGame(limit=limit, players=players_copy,
             dealer_index=dealer_index, sb_index=sb_index, bb_index=bb_index,
-            callback=self.game_over_callback, table=table)
+            callback=self.game_over_callback, table=table, deck=deck)
         self.game.advance()
 
         # Referenced in game over callback for determining that a game ended
@@ -184,7 +189,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.game_over = False
 
     def test_collect_blinds(self):
-        self.__create_game([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 
+        self.__create_game([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000,
             1000, 1000], 0, 1, 2)
         self.assertEquals(10, len(self.game.players))
         # self.assertEquals(3, self.game.pot_mgr.total_value())
@@ -206,10 +211,10 @@ class TexasHoldemTests(unittest.TestCase):
 
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
         self.__call(self.players[1], 1, CHIPS - 2)
-        
+
         self.assertEquals(STATE_PREFLOP, self.game.gsm.get_current_state())
         self.__call(self.players[2], 0, CHIPS - 2)
-        
+
         # Onward to the flop!
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
 
@@ -220,6 +225,23 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[1], 1, CHIPS - 2)
         self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
+
+    def __find_player_with_action(self):
+        for player in self.players:
+            if player.pending_actions:
+                return player
+
+    def __play_round(self, plays):
+        """ Make the simple plays 'c' == call, 'f' == fold.  """
+        for play in plays:
+            player = self.__find_player_with_action()
+            if play == 'c':
+                action = find_action_in_list(Call, player.pending_actions)
+            elif play == 'f':
+                action = find_action_in_list(Fold, player.pending_actions)
+            else:
+                self.assertTrue(False, "Only 'c'all and 'f'old supported")
+            self.game.process_action(player, action)
 
     def __call(self, player, expected_amount, expected_chips=None):
         self.assertEquals(3, len(player.pending_actions))
@@ -277,7 +299,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
         self.assertEquals(3, len(self.game.community_cards))
-    
+
         self.__raise(self.players[1], 2, CHIPS - 4)
         self.__call(self.players[2], 2, CHIPS - 4)
         self.__raise(self.players[3], 2, CHIPS - 6)
@@ -335,7 +357,7 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[2], 0, CHIPS - 2)
         self.assertEquals(STATE_FLOP, self.game.gsm.get_current_state())
         self.assertEquals(3, len(self.game.community_cards))
-    
+
         self.__raise(self.players[1], 2, CHIPS - 4)
         self.__call(self.players[2], 2, CHIPS - 4)
         self.__call(self.players[3], 2, CHIPS - 4)
@@ -388,6 +410,28 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[1], 3, CHIPS - 4)
         self.assertTrue(self.players[2].folded)
 
+    def test_best_hand_on_flop(self):
+        """ Player 0 with best hand loses because of fold """
+        cards = ['Ah', '2d', '3d', '4d', # First Card
+                 'Kh', '5d', '6d', '7d', # Second Card
+                 'Qh', 'Jh', 'Th',      # Flop
+                 '8s',                   # Turn
+                 '9s']                   # River
+
+        deck = Deck()
+        reorder_deck(deck, create_cards_from_list(cards))
+        self.__create_game([1000, 1000, 1000, 1000], 3, 1, 2, deck)
+
+        self.__play_round(['c', 'c', 'c', 'c']) # Preflop (order different)
+        self.__play_round(['f', 'c', 'c', 'f']) # Flop
+        self.__play_round(['c', 'c'])           # Turn
+        self.__play_round(['c', 'c'])           # River
+
+        # Straight on board, should split pot between [1, 2]
+        self.assertEquals(STATE_GAMEOVER, self.game.gsm.get_current_state())
+        self.assertTrue(self.game.finished)
+        self.assertEquals(CHIPS + 2, self.players[2].chips)
+        self.assertEquals(CHIPS + 2, self.players[1].chips)
 
 
 def suite():
