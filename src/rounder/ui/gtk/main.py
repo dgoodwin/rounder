@@ -65,23 +65,27 @@ class RounderGtk:
     def __init__(self):
 
         logger.info("Starting application.")
+        register_message_classes()
+
         glade_file = 'rounder/ui/gtk/data/rounder.glade'
         glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
+
         main_window = glade_xml.get_widget('main-window')
         self.table_list = glade_xml.get_widget('table-list')
+        self.statusbar = glade_xml.get_widget('statusbar')
 
         signals = {
             'on_connect_activate': self.show_connect_dialog,
             'on_main_window_destroy' : self.shutdown,
             'on_connect_button_clicked': self.show_connect_dialog,
+            'on_quit_button_clicked': self.shutdown,
         }
         glade_xml.signal_autoconnect(signals)
 
         self.client = None
-
         self.connect_dialog = None # Set once connect dialog is open
 
-        register_message_classes()
+        self.set_status("Connect to a server to begin playing.")
 
         main_window.show_all()
 
@@ -118,10 +122,15 @@ class RounderGtk:
     def connect_failure_cb(self):
         """ Connection failed callback. """
         logger.warn("Connect failed")
-        self.connect_dialog.display_status("Login failed")
+        self.connect_dialog.set_status("Login failed.")
 
     def got_table_list(self, table_listings):
-        """ Populate the list of tables in the main server window. """
+        """ 
+        Populate the list of tables in the main server window. 
+
+        GTK TreeView's aren't fun but this works in conjunction with the
+        __cell_* methods to populate the columns.
+        """
 
         logger.debug("Populating table list")
         column_names = ["Table", "Limit", "Players"]
@@ -152,6 +161,11 @@ class RounderGtk:
 
     def __cell_players(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 2))
+
+    def set_status(self, message):
+        """ Display a message in the main window's status bar. """
+        self.statusbar.push(self.statusbar.get_context_id("Rounder"), message)
+        self.statusbar.show()
 
 
 
@@ -198,10 +212,10 @@ class ConnectDialog:
         except Exception, e:
             logger.error("Unable to login to %s as %s" % (host, username))
 
-    def display_status(self, message):
-        """ Display a message to the user. """
+    def set_status(self, message):
+        """ Display a message in the connect dialog's status bar. """
         statusbar = self.glade_xml.get_widget('statusbar')
-        statusbar.push(statusbar.get_context_id("?"), message)
+        statusbar.push(statusbar.get_context_id("Connect Dialog"), message)
         statusbar.show()
 
     def destroy(self):
