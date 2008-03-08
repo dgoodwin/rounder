@@ -165,7 +165,19 @@ class ClientTable(pb.Referenceable):
         """
         self.__view = table_view
         self.state = table_state
-        self.ui = None
+        #self.ui = None
+
+    def add_observer(self):
+        """
+        TODO!
+
+        Could use observers for the UI interaction. Once the network client
+        creates a ClientTable and hands it back to the client application,
+        the client could then add itself, or a UI table construct, as an
+        observer. We could check here that the observer supports the callback
+        methods.
+        """
+        pass
 
     def sit(self, seat):
         """ Request the specified seat index at the specified table. """
