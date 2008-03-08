@@ -82,7 +82,9 @@ class RounderGtk:
         }
         glade_xml.signal_autoconnect(signals)
 
+        # Reference to a network client.
         self.client = None
+
         self.connect_dialog = None # Set once connect dialog is open
 
         self.set_status("Connect to a server to begin playing.")
@@ -117,6 +119,7 @@ class RounderGtk:
         self.client = client
         self.connect_dialog.destroy()
         self.connect_dialog = None
+        self.set_status("Connected!")
         self.client.get_table_list()
 
     def connect_failure_cb(self):
@@ -151,7 +154,6 @@ class RounderGtk:
             self.table_list.append_column(columns[n])
 
         self.table_list.set_model(tables)
-
 
     def __cell_table(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 0))

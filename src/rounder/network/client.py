@@ -58,7 +58,7 @@ class RounderNetworkClient(pb.Referenceable):
                 responses on to.
         """
         self.ui = ui
-        self.table_views = {}
+        self.tables = {} # Hash of table id's to ClientTable objects
         self.username = None
         self.host = None
         self.port = None
@@ -94,7 +94,8 @@ class RounderNetworkClient(pb.Referenceable):
         """ Request a list of tables from the server. """
         logger.debug("requesting table list")
         d = self.perspective.callRemote("list_tables")
-        d.addCallback(self.get_table_list_success_cb)
+        d.addCallbacks(self.get_table_list_success_cb, 
+            self.get_table_list_failure_cb)
 
     def get_table_list_success_cb(self, data):
         """ Called when a list of tables is received. """
@@ -105,6 +106,10 @@ class RounderNetworkClient(pb.Referenceable):
             logger.debug("   %s" % temp)
             table_listings.append(temp)
         self.ui.got_table_list(table_listings)
+
+    def get_table_list_failure_cb(self, failure):
+        """ Callback for a failed get tables attempt. """
+        pass
 
     def open_table(self, table_id):
         """ Open a table. """
@@ -117,45 +122,19 @@ class RounderNetworkClient(pb.Referenceable):
         table_view = data[0]
         table_state = loads(data[1])
         logger.debug("Table opened successfully: %s" % table_state.name)
-        self.table_views[table_state.id] = table_view
-        self.ui.table_opened(table_state)
 
-    def take_seat(self, table_id, seat):
-        """ Request the specified seat index at the specified table. """
-        logger.debug("Requesting seat %s at table %s" % (seat, table_id))
-        d = self.table_views[table_id].callRemote("sit", seat)
-        d.addCallback(self.take_seat_success_cb)
-
-    def take_seat_success_cb(self, data):
-        """ Callback for successfully sitting down. """
-        table_id = data[0]
-        seat_num = data[1]
-        logger.debug("Succesfully took seat %s at table: %s" % (seat_num,
-            table_id))
-        self.ui.took_seat(table_id, seat_num)
-
-    def start_game(self, table_id):
-        """ Request the server start a new game at a table. """
-        d = self.table_views[table_id].callRemote("start_game")
+        table = ClientTable(table_view, table_state)
+        self.tables[table_state.id] = table
+        self.ui.table_opened(table)
 
     def remote_prompt(self, table_id, actions):
         """
         Prompt player to choose one of the given actions for a table.
         """
-        logger.debug("Table %s: %s received actions:" % (table_id,
-            self.username))
-        try:
-            deserialized_actions = []
-            for serialized_action in actions:
-                action = loads(serialized_action)
-                logger.debug("   %s" % action)
-                deserialized_actions.append(action)
-
-            # TODO: save actions provided for client side validation
-            self.ui.prompt(table_id, deserialized_actions)
-        except Exception, e:
-            logger.error(e)
-            raise e
+        # TODO: I don't yet see a way to get the server a reference to the 
+        # ClientTables, but I'm sure there's a way. Until this is adressed,
+        # will delegate the call there manually:
+        self.tables[table_id].prompt(actions)
 
     def remote_notify(self, table_id, event):
         """
@@ -166,6 +145,67 @@ class RounderNetworkClient(pb.Referenceable):
             deserialized_event))
         # TODO
 
+    def remote_print(self, msg):
+        logger.warn("Server said: %s" % msg)
+
+
+
+class ClientTable(pb.Referenceable):
+    """
+    A client side table object maintaining state of the table and exposing
+    remote methods the UI can call to interact with the table on the server.
+
+    Thin wrapper over the Rounder server's TableView object.
+    """
+
+    def __init__(self, table_view, table_state):
+        """
+        Initialize the table with the given remote view and state received 
+        from the server.
+        """
+        self.__view = table_view
+        self.state = table_state
+        self.ui = None
+
+    def sit(self, seat):
+        """ Request the specified seat index at the specified table. """
+        logger.debug("Requesting seat %s at table %s" % (seat, table_id))
+        d = self.__view.callRemote("sit", seat)
+        d.addCallback(self.sit_success_cb)
+
+    def sit_success_cb(self, data):
+        """ Callback for successfully taking a seat at the table. """
+        seat_num = data
+        logger.debug("Succesfully took seat %s at table: %s" % (seat_num,
+            self.state.id))
+        #self.ui.took_seat(table_id, seat_num)
+
+    def start_game(self):
+        """ Request the server start a new game at this table. """
+        d = self.view.callRemote("start_game")
+
+    def prompt(self, serialized_actions):
+        """ 
+        Deserialize the given actions and prompt the ui to choose one. 
+        """
+
+        logger.debug("Table %s: %s received actions:" % (table_id,
+            self.username))
+        try:
+            deserialized_actions = []
+            for serialized_action in actions:
+                action = loads(serialized_action)
+                logger.debug("   %s" % action)
+                deserialized_actions.append(action)
+
+            # TODO: save actions provided for client side validation
+
+            # TODO: Notify UI.
+            #self.ui.prompt(table_id, deserialized_actions)
+        except Exception, e:
+            logger.error(e)
+            raise e
+
     def act(self, table_id, action_index, params):
         """
         Server prompts clients with a list of actions. To ensure the client
@@ -175,8 +215,6 @@ class RounderNetworkClient(pb.Referenceable):
         # TODO: add parameters here
         logger.debug("Table %s: Sending action index %s to server: %s" %
             (table_id, action_index, params))
-        self.table_views[table_id].callRemote("process_action", action_index,
+        self.view.callRemote("process_action", action_index,
             params)
 
-    def remote_print(self, msg):
-        logger.warn("Server said: %s" % msg)
