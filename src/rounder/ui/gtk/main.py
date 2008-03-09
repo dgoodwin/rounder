@@ -114,14 +114,11 @@ class RounderGtk:
         to join.
         """
         logger.info("Opening table window")
-        logger.debug("   row clicked: %s" % row)
-
-        treeselection = treeview.get_selection()
-        (model, iter) = treeselection.get_selected()
 
         model = treeview.get_model()
-        print "Row? %s" % model[row]
-        print "Row? %s" % model[row][0]
+        logger.debug("   row clicked: %s" % row)
+        logger.debug("   table id: %s" % model[row][0])
+        logger.debug("   table name: %s" % model[row][1])
 
         table_win = TableWindow(self)
 
@@ -159,13 +156,14 @@ class RounderGtk:
         """
 
         logger.debug("Populating table list")
-        column_names = ["Table", "Limit", "Players"]
-        cell_data_funcs = [self.__cell_table, self.__cell_limit,
-            self.__cell_players]
+        column_names = ["Table ID", "Name", "Limit", "Players"]
+        cell_data_funcs = [self.__cell_table_id, self.__cell_table, 
+            self.__cell_limit, self.__cell_players]
 
-        tables = gtk.ListStore(str, str, str)
+        tables = gtk.ListStore(int, str, str, str)
         for table in table_listings:
-            tables.append([table.name, table.limit, table.player_count])
+            tables.append([table.id, table.name, table.limit, 
+                table.player_count])
 
         columns = [None] * len(column_names)
 
@@ -178,14 +176,17 @@ class RounderGtk:
 
         self.table_list.set_model(tables)
 
-    def __cell_table(self, column, cell, model, iter):
+    def __cell_table_id(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 0))
 
-    def __cell_limit(self, column, cell, model, iter):
+    def __cell_table(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 1))
 
-    def __cell_players(self, column, cell, model, iter):
+    def __cell_limit(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 2))
+
+    def __cell_players(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 3))
 
     def set_status(self, message):
         """ Display a message in the main window's status bar. """
