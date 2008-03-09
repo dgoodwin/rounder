@@ -79,8 +79,12 @@ class RounderGtk:
             'on_main_window_destroy' : self.shutdown,
             'on_connect_button_clicked': self.show_connect_dialog,
             'on_quit_button_clicked': self.shutdown,
+            'on_table_list_row_activated': self.open_table,
         }
         glade_xml.signal_autoconnect(signals)
+
+        treeselection = self.table_list.get_selection()
+        treeselection.set_mode(gtk.SELECTION_SINGLE)
 
         # Reference to a network client.
         self.client = None
@@ -101,6 +105,25 @@ class RounderGtk:
             self.client.shutdown()
         logger.info("Stopping application.")
         gtk.main_quit()
+
+    def open_table(self, treeview, row, column):
+        """ 
+        Open a table window.
+
+        Connected to the table list and called when the user selected a table
+        to join.
+        """
+        logger.info("Opening table window")
+        logger.debug("   row clicked: %s" % row)
+
+        treeselection = treeview.get_selection()
+        (model, iter) = treeselection.get_selected()
+
+        model = treeview.get_model()
+        print "Row? %s" % model[row]
+        print "Row? %s" % model[row][0]
+
+        table_win = TableWindow(self)
 
     def show_connect_dialog(self, widget):
         """ Opens the connect to server dialog. """
@@ -226,4 +249,26 @@ class ConnectDialog:
         from the network client.
         """
         self.connect_dialog.destroy()
+
+
+
+class TableWindow:
+    """ Dialog for a poker table. """
+
+    def __init__(self, app):
+
+        logger.debug("Opening table window.")
+
+        self.app = app
+
+        glade_file = 'rounder/ui/gtk/data/table.glade'
+        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
+        self.table_window = self.glade_xml.get_widget('table-window')
+
+        #signals = {
+        #    'on_connect_button_clicked': self.connect,
+        #}
+        #self.glade_xml.signal_autoconnect(signals)
+
+        self.table_window.show_all()
 
