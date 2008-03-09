@@ -277,6 +277,9 @@ def run_server():
     p = portal.Portal(realm, [checker])
 
     realm.server.create_table("Table 1")
+    realm.server.create_table("Table 2")
+    realm.server.create_table("Table 3")
+    realm.server.create_table("Table 4")
 
     reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(p))
     reactor.run()
