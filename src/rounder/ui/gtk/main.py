@@ -68,11 +68,11 @@ class RounderGtk:
         register_message_classes()
 
         glade_file = 'rounder/ui/gtk/data/rounder.glade'
-        glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
+        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
 
-        main_window = glade_xml.get_widget('main-window')
-        self.table_list = glade_xml.get_widget('table-list')
-        self.statusbar = glade_xml.get_widget('statusbar')
+        main_window = self.glade_xml.get_widget('main-window')
+        self.table_list = self.glade_xml.get_widget('table-list')
+        self.statusbar = self.glade_xml.get_widget('statusbar')
 
         signals = {
             'on_connect_activate': self.show_connect_dialog,
@@ -81,7 +81,7 @@ class RounderGtk:
             'on_quit_button_clicked': self.shutdown,
             'on_table_list_row_activated': self.open_table,
         }
-        glade_xml.signal_autoconnect(signals)
+        self.glade_xml.signal_autoconnect(signals)
 
         treeselection = self.table_list.get_selection()
         treeselection.set_mode(gtk.SELECTION_SINGLE)
@@ -140,6 +140,13 @@ class RounderGtk:
         self.connect_dialog.destroy()
         self.connect_dialog = None
         self.set_status("Connected!")
+
+
+        server_label = self.glade_xml.get_widget('server-label')
+        server_label.set_text(client.host)
+        username_label = self.glade_xml.get_widget('username-label')
+        username_label.set_text(client.username)
+
         self.client.get_table_list()
 
     def connect_failure_cb(self):

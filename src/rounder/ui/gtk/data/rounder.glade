@@ -122,7 +122,7 @@
 	      <property name="column_spacing">7</property>
 
 	      <child>
-		<widget class="GtkLabel" id="server-label">
+		<widget class="GtkLabel" id="server-title">
 		  <property name="visible">True</property>
 		  <property name="label" translatable="yes">Server:</property>
 		  <property name="use_underline">False</property>
@@ -150,7 +150,7 @@
 	      </child>
 
 	      <child>
-		<widget class="GtkLabel" id="label2">
+		<widget class="GtkLabel" id="username-title">
 		  <property name="visible">True</property>
 		  <property name="label" translatable="yes">Username:</property>
 		  <property name="use_underline">False</property>
@@ -178,7 +178,7 @@
 	      </child>
 
 	      <child>
-		<widget class="GtkLabel" id="server-value">
+		<widget class="GtkLabel" id="server-label">
 		  <property name="visible">True</property>
 		  <property name="label" translatable="yes">NONE</property>
 		  <property name="use_underline">False</property>
@@ -206,7 +206,7 @@
 	      </child>
 
 	      <child>
-		<widget class="GtkLabel" id="label4">
+		<widget class="GtkLabel" id="username-label">
 		  <property name="visible">True</property>
 		  <property name="label" translatable="yes">NONE</property>
 		  <property name="use_underline">False</property>
