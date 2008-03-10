@@ -94,6 +94,7 @@ class RounderGtk:
         self.set_status("Connect to a server to begin playing.")
 
         main_window.show_all()
+        self.show_connect_dialog(None)
 
     def main(self):
         """ Launch the GTK main loop. """
@@ -119,8 +120,10 @@ class RounderGtk:
         logger.debug("   row clicked: %s" % row)
         logger.debug("   table id: %s" % model[row][0])
         logger.debug("   table name: %s" % model[row][1])
+        self.client.open_table(model[row][0])
 
-        table_win = TableWindow(self)
+    def open_table_success_cb(self, client_table):
+        table_win = TableWindow(self, client_table)
 
     def show_connect_dialog(self, widget):
         """ Opens the connect to server dialog. """
@@ -139,7 +142,7 @@ class RounderGtk:
         self.client = client
         self.connect_dialog.destroy()
         self.connect_dialog = None
-        self.set_status("Connected!")
+        self.set_status("Connected to server: %s" % client.host)
 
 
         server_label = self.glade_xml.get_widget('server-label')
@@ -263,15 +266,27 @@ class ConnectDialog:
 class TableWindow:
     """ Dialog for a poker table. """
 
-    def __init__(self, app):
+    def __init__(self, app, client_table):
+        """
+        Create a new table window with a reference to the parent application
+        window, as well as the client table we can use to perform actions.
+        """
 
         logger.debug("Opening table window.")
 
         self.app = app
+        self.client_table = client_table
 
         glade_file = 'rounder/ui/gtk/data/table.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         self.table_window = self.glade_xml.get_widget('table-window')
+        self.table_window.set_title(client_table.state.name)
+
+        table_name = self.glade_xml.get_widget('table-label')
+        table_name.set_text(client_table.state.name)
+
+        limit = self.glade_xml.get_widget('limit-label')
+        limit.set_text(str(client_table.state.limit))
 
         #signals = {
         #    'on_connect_button_clicked': self.connect,

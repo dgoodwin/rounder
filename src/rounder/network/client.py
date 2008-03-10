@@ -125,7 +125,7 @@ class RounderNetworkClient(pb.Referenceable):
 
         table = ClientTable(table_view, table_state)
         self.tables[table_state.id] = table
-        self.ui.table_opened(table)
+        self.ui.open_table_success_cb(table)
 
     def remote_prompt(self, table_id, actions):
         """
