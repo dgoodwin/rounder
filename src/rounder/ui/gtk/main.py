@@ -37,6 +37,19 @@ gtk2reactor.install()
 from rounder.network.client import RounderNetworkClient
 from rounder.network.serialize import register_message_classes
 
+SEAT_BUTTON_INDEX = {
+    'seat0-button': 0,
+    'seat1-button': 1,
+    'seat2-button': 2,
+    'seat3-button': 3,
+    'seat4-button': 4,
+    'seat5-button': 5,
+    'seat6-button': 6,
+    'seat7-button': 7,
+    'seat8-button': 8,
+    'seat9-button': 9,
+}
+
 def find_file_on_path(pathname):
     """
     Scan the Python path and locate a file with the given name.
@@ -288,10 +301,23 @@ class TableWindow:
         limit = self.glade_xml.get_widget('limit-label')
         limit.set_text(str(client_table.state.limit))
 
-        #signals = {
-        #    'on_connect_button_clicked': self.connect,
-        #}
-        #self.glade_xml.signal_autoconnect(signals)
+        signals = {
+            'on_seat0_sit_button_clicked': self.handle_sit_button,
+            'on_seat1_sit_button_clicked': self.handle_sit_button,
+            'on_seat2_sit_button_clicked': self.handle_sit_button,
+            'on_seat3_sit_button_clicked': self.handle_sit_button,
+            'on_seat4_sit_button_clicked': self.handle_sit_button,
+            'on_seat5_sit_button_clicked': self.handle_sit_button,
+            'on_seat6_sit_button_clicked': self.handle_sit_button,
+            'on_seat7_sit_button_clicked': self.handle_sit_button,
+            'on_seat8_sit_button_clicked': self.handle_sit_button,
+            'on_seat9_sit_button_clicked': self.handle_sit_button,
+        }
+        self.glade_xml.signal_autoconnect(signals)
 
         self.table_window.show_all()
+
+    def handle_sit_button(self, widget):
+        logger.debug("Sit button pressed.")
+        logger.debug(widget.get_name())
 

@@ -443,6 +443,7 @@
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
+	      <signal name="clicked" handler="on_seat0_sit_button_clicked" last_modification_time="Mon, 10 Mar 2008 02:59:00 GMT"/>
 	    </widget>
 	    <packing>
 	      <property name="left_attach">3</property>
@@ -623,13 +624,14 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkButton" id="button2">
+	    <widget class="GtkButton" id="seat1-sit-button">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label" translatable="yes">Sit</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
+	      <signal name="clicked" handler="on_seat1_sit_button_clicked" last_modification_time="Mon, 10 Mar 2008 02:58:50 GMT"/>
 	    </widget>
 	    <packing>
 	      <property name="left_attach">3</property>
@@ -642,13 +644,14 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkButton" id="button3">
+	    <widget class="GtkButton" id="seat2-sit-button">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label" translatable="yes">Sit</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
+	      <signal name="clicked" handler="on_seat2_sit_button_clicked" last_modification_time="Mon, 10 Mar 2008 02:58:40 GMT"/>
 	    </widget>
 	    <packing>
 	      <property name="left_attach">3</property>
@@ -661,13 +664,14 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkButton" id="button4">
+	    <widget class="GtkButton" id="seat3-sit-button">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label" translatable="yes">Sit</property>
 	      <property name="use_underline">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
+	      <signal name="clicked" handler="on_seat3_sit_button_clicked" last_modification_time="Mon, 10 Mar 2008 02:58:33 GMT"/>
 	    </widget>
 	    <packing>
 	      <property name="left_attach">3</property>
