@@ -78,6 +78,12 @@ class Seats(object):
 
         self.players_by_username[player.name] = player
 
+    def remove_player(self, username):
+        player = self.players_by_username[username]
+        index = self.__seats.index(player)
+        self.__seats[index] = None
+        self.players_by_username.pop(player.name)
+
     def has_username(self, username):
         """
         Check if a player with the given username is seated at the table.
@@ -430,14 +436,26 @@ class Table(object):
     def add_observer(self, username):
         """ Add a username to the list of observers. """
         # Sanity check: make sure this user isn't already observing:
+        logger.info("%s observing table" % username)
         if username in self.observers:
             raise RounderException("%s already observing table %s" % 
                 (username, self.id))
         self.observers.append(username)
 
     def remove_observer(self, username):
-        """ Remove a username from the list of observers. """
+        """ 
+        Remove a username from the list of observers. 
+        
+        Called both when a user disconnects and leaves the table.
+        """
+        logger.info("%s left table." % username)
         self.observers.remove(username)
+        # TODO: internal state to worry about here?
+        # player could be just observing
+        # call the sit_out method?
+        if self.seats.has_username(username):
+            self.seats.remove_player(username)
+
 
     def notify_all(self, event):
         """ Notify observers of this table that a player was seated. """

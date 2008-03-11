@@ -74,10 +74,6 @@ class RounderNetworkServer:
         assert(self.users.has_key(username))
         self.users.pop(username)
 
-        for tv in self.table_views.values():
-            if username in tv.table.observers:
-                tv.table.remove_observer(username)
-
     def create_table(self, name):
         """ Create a new table. """
         # TODO: stop hard coding everything :)
@@ -185,6 +181,9 @@ class User(pb.Avatar):
         self.remote = None
         self.server.remove_user(self.name)
 
+        for tv in self.table_views.values():
+            tv.table.remove_observer(self.name)
+
     def send(self, message):
         self.remote.callRemote("print", message)
 
@@ -259,6 +258,11 @@ class TableView(pb.Viewable):
     def view_sit_out(self, from_user):
         self.server.sit_out_player(self.table, from_user)
 
+    def view_leave(self, from_user):
+        """ Leave the table. """
+        self.table.remove_observer(from_user.name)
+        from_user.table_views.pop(self.table.id)
+
     def view_start_game(self, from_user):
         """ 
         Called when a user requests a new hand be started.
@@ -277,7 +281,7 @@ class TableView(pb.Viewable):
         Called by clients attempting to perform an action.
         """
         server.process_action(self.table, from_user, action_index, params)
-         
+
 
 
 def run_server():

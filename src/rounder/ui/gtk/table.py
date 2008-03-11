@@ -90,7 +90,16 @@ class TableWindow:
         }
         self.glade_xml.signal_autoconnect(signals)
 
+        self.table_window.connect("delete_event", self.confirm_window_close)
+
         self.table_window.show_all()
+
+    def confirm_window_close(self, widget, event, data=None):
+        logger.debug("Confirming window close.")
+        # NOTE: Just closing the window here for now, confirmation comes 
+        # later:
+        self.client_table.leave()
+        return False # set to true for confirm screen
 
     def handle_sit_button(self, widget):
         seat = SEAT_BUTTON_INDEX[widget.get_name()]

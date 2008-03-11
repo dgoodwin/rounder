@@ -183,7 +183,12 @@ class ClientTable(pb.Referenceable):
 
     def start_game(self):
         """ Request the server start a new game at this table. """
-        d = self.view.callRemote("start_game")
+        d = self.__view.callRemote("start_game")
+
+    def leave(self):
+        """ Leave this table. """
+        logger.info("Table %s: Leaving." % self.state.id)
+        d = self.__view.callRemote("leave")
 
     def prompt(self, serialized_actions):
         """ 
