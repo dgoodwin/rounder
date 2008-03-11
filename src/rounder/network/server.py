@@ -53,6 +53,31 @@ class RounderNetworkServer:
         self.users = {} # hash of usernames to their perspectives
         self.table_views = {}
 
+    def add_user(self, username, perspective):
+        """ 
+        Add a user perspective.
+        
+        Called when a user successfully authenticates and connects to the
+        server.
+        """
+        logger.info("User connected to server: %s" % username)
+        assert(not self.users.has_key(username))
+        self.users[username] = perspective
+
+    def remove_user(self, username):
+        """
+        Remove a user perspective.
+
+        Called when a user has disconnected.
+        """
+        logger.info("User disconnected from server: %s" % username)
+        assert(self.users.has_key(username))
+        self.users.pop(username)
+
+        for tv in self.table_views.values():
+            if username in tv.table.observers:
+                tv.table.remove_observer(username)
+
     def create_table(self, name):
         """ Create a new table. """
         # TODO: stop hard coding everything :)
@@ -147,11 +172,9 @@ class User(pb.Avatar):
     """ An authenticated user's perspective. """
 
     def __init__(self, name, server):
-
-        logger.info("User authenticated: %s" % name)
         self.name = name
         self.server = server
-        self.server.users[self.name] = self
+        self.server.add_user(name, self)
         self.remote = None
         self.table_views = {}
 
@@ -160,6 +183,7 @@ class User(pb.Avatar):
 
     def detached(self, mind):
         self.remote = None
+        self.server.remove_user(self.name)
 
     def send(self, message):
         self.remote.callRemote("print", message)

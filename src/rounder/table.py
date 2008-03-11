@@ -435,6 +435,10 @@ class Table(object):
                 (username, self.id))
         self.observers.append(username)
 
+    def remove_observer(self, username):
+        """ Remove a username from the list of observers. """
+        self.observers.remove(username)
+
     def notify_all(self, event):
         """ Notify observers of this table that a player was seated. """
         for o in self.observers:
