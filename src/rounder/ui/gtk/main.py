@@ -26,9 +26,6 @@ pygtk.require('2.0')
 import gtk
 import gtk.glade
 
-import os
-import sys
-
 from logging import getLogger
 logger = getLogger("rounder.ui.gtk.main")
 from twisted.internet import gtk2reactor
@@ -36,36 +33,8 @@ gtk2reactor.install()
 
 from rounder.network.client import RounderNetworkClient
 from rounder.network.serialize import register_message_classes
-
-SEAT_BUTTON_INDEX = {
-    'seat0-button': 0,
-    'seat1-button': 1,
-    'seat2-button': 2,
-    'seat3-button': 3,
-    'seat4-button': 4,
-    'seat5-button': 5,
-    'seat6-button': 6,
-    'seat7-button': 7,
-    'seat8-button': 8,
-    'seat9-button': 9,
-}
-
-def find_file_on_path(pathname):
-    """
-    Scan the Python path and locate a file with the given name.
-
-    See:
-      http://www.linuxjournal.com/xstatic/articles/lj/0087/4702/4702l2.html
-    """
-
-    if os.path.isabs(pathname):
-        return pathname
-    for dirname in sys.path:
-        candidate = os.path.join(dirname, pathname)
-        if os.path.isfile(candidate):
-            return candidate
-    raise Exception("Could not find %s on the Python path."
-        % pathname)
+from rounder.ui.gtk.util import find_file_on_path
+from rounder.ui.gtk.table import TableWindow
 
 class RounderGtk:
     """ 
@@ -273,51 +242,3 @@ class ConnectDialog:
         from the network client.
         """
         self.connect_dialog.destroy()
-
-
-
-class TableWindow:
-    """ Dialog for a poker table. """
-
-    def __init__(self, app, client_table):
-        """
-        Create a new table window with a reference to the parent application
-        window, as well as the client table we can use to perform actions.
-        """
-
-        logger.debug("Opening table window.")
-
-        self.app = app
-        self.client_table = client_table
-
-        glade_file = 'rounder/ui/gtk/data/table.glade'
-        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
-        self.table_window = self.glade_xml.get_widget('table-window')
-        self.table_window.set_title(client_table.state.name)
-
-        table_name = self.glade_xml.get_widget('table-label')
-        table_name.set_text(client_table.state.name)
-
-        limit = self.glade_xml.get_widget('limit-label')
-        limit.set_text(str(client_table.state.limit))
-
-        signals = {
-            'on_seat0_sit_button_clicked': self.handle_sit_button,
-            'on_seat1_sit_button_clicked': self.handle_sit_button,
-            'on_seat2_sit_button_clicked': self.handle_sit_button,
-            'on_seat3_sit_button_clicked': self.handle_sit_button,
-            'on_seat4_sit_button_clicked': self.handle_sit_button,
-            'on_seat5_sit_button_clicked': self.handle_sit_button,
-            'on_seat6_sit_button_clicked': self.handle_sit_button,
-            'on_seat7_sit_button_clicked': self.handle_sit_button,
-            'on_seat8_sit_button_clicked': self.handle_sit_button,
-            'on_seat9_sit_button_clicked': self.handle_sit_button,
-        }
-        self.glade_xml.signal_autoconnect(signals)
-
-        self.table_window.show_all()
-
-    def handle_sit_button(self, widget):
-        logger.debug("Sit button pressed.")
-        logger.debug(widget.get_name())
-

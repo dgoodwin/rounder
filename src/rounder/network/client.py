@@ -165,23 +165,12 @@ class ClientTable(pb.Referenceable):
         """
         self.__view = table_view
         self.state = table_state
-        #self.ui = None
-
-    def add_observer(self):
-        """
-        TODO!
-
-        Could use observers for the UI interaction. Once the network client
-        creates a ClientTable and hands it back to the client application,
-        the client could then add itself, or a UI table construct, as an
-        observer. We could check here that the observer supports the callback
-        methods.
-        """
-        pass
+        self.ui = None
 
     def sit(self, seat):
         """ Request the specified seat index at the specified table. """
-        logger.debug("Requesting seat %s at table %s" % (seat, table_id))
+        logger.debug("Requesting seat %s at table %s" % (seat, 
+            self.state.id))
         d = self.__view.callRemote("sit", seat)
         d.addCallback(self.sit_success_cb)
 
@@ -190,7 +179,7 @@ class ClientTable(pb.Referenceable):
         seat_num = data
         logger.debug("Succesfully took seat %s at table: %s" % (seat_num,
             self.state.id))
-        #self.ui.took_seat(table_id, seat_num)
+        self.ui.sit_success_cb(seat_num)
 
     def start_game(self):
         """ Request the server start a new game at this table. """

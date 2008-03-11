@@ -93,7 +93,7 @@ class RounderNetworkServer:
             table.seat_player(player, seat_num)
         except RounderException, e:
             raise e
-        return (table.id, seat_num)
+        return seat_num
 
     def sit_out_player(self, table, user):
         """ Sit out a player. """
