@@ -26,6 +26,7 @@ from logging import getLogger
 logger = getLogger("rounder.ui.gtk.table")
 
 from rounder.ui.gtk.util import find_file_on_path
+from rounder.event import *
 
 SEAT_BUTTON_INDEX = {
     'seat0-sit-button': 0,
@@ -69,6 +70,7 @@ class TableWindow:
         limit = self.glade_xml.get_widget('limit-label')
         limit.set_text(str(client_table.state.limit))
 
+        self.am_seated = False
 
         self.gui_seats = []
         for i in range(0, 4):
@@ -109,14 +111,14 @@ class TableWindow:
         self.client_table.sit(seat)
 
     def sit_success_cb(self, seat):
-        self.chat_line("You took seat %s." % seat)
+        self.seated = True
         for seat in self.gui_seats:
             seat.sit_button_disable()
 
     def chat_line(self, msg):
         """ Append a line to the chat area on the table. """
         buf = self.chat_textview.get_buffer()
-        buf.insert(buf.get_end_iter(), msg)
+        buf.insert(buf.get_end_iter(), msg + "\n")
     
     def process_event(self, event):
         """
@@ -129,6 +131,12 @@ class TableWindow:
         everything at the table.
         """
         self.__render_table_state(event.table_state)
+
+        if isinstance(event, PlayerJoinedTable):
+            self.chat_line("%s took seat %s." % (event.player_name, 
+                    event.seat_num))
+            if not self.am_seated:
+                self.gui_seats[event.seat_num].sit_button_disable()
 
     def __render_table_state(self, state):
         logger.debug("Rendering table state:")
