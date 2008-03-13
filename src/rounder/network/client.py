@@ -144,6 +144,7 @@ class RounderNetworkClient(pb.Referenceable):
         logger.debug("Table %s: received event: %s" % (table_id,
             deserialized_event))
         # TODO
+        self.tables[table_id].process_event(deserialized_event)
 
     def remote_print(self, msg):
         logger.warn("Server said: %s" % msg)
@@ -223,4 +224,13 @@ class ClientTable(pb.Referenceable):
             (table_id, action_index, params))
         self.view.callRemote("process_action", action_index,
             params)
+
+    def process_event(self, event):
+        """
+        Called by the parent network client when it receives and event we
+        need to display to the user for this table.
+        """
+        self.state = event.table_state
+        self.ui.process_event(event)
+
 

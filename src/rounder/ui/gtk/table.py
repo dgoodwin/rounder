@@ -69,11 +69,11 @@ class TableWindow:
         limit = self.glade_xml.get_widget('limit-label')
         limit.set_text(str(client_table.state.limit))
 
-        self.seat_buttons = []
+
+        self.gui_seats = []
         for i in range(0, 4):
-            button_name = "seat%s-sit-button" % i
-            button = self.glade_xml.get_widget(button_name)
-            self.seat_buttons.append(button)
+            seat = GuiSeat(self.glade_xml, i)
+            self.gui_seats.append(seat)
 
         # TODO: Replace these all with one signal?
         signals = {
@@ -92,6 +92,8 @@ class TableWindow:
 
         self.table_window.connect("delete_event", self.confirm_window_close)
 
+        self.__render_table_state(self.client_table.state)
+
         self.table_window.show_all()
 
     def confirm_window_close(self, widget, event, data=None):
@@ -108,12 +110,55 @@ class TableWindow:
 
     def sit_success_cb(self, seat):
         self.chat_line("You took seat %s." % seat)
-        for button in self.seat_buttons:
-            button.set_sensitive(False)
+        for seat in self.gui_seats:
+            seat.sit_button_disable()
 
     def chat_line(self, msg):
         """ Append a line to the chat area on the table. """
         buf = self.chat_textview.get_buffer()
         buf.insert(buf.get_end_iter(), msg)
+    
+    def process_event(self, event):
+        """
+        Display the incoming event to the user.
 
+        Currently the event's all contain a table state DTO object which we
+        can use to display the entire table. This obviously duplicates a lot
+        of data and may have to change in the future to reduce bandwidth.
+        For now we can get away with just using the table state to update
+        everything at the table.
+        """
+        self.__render_table_state(event.table_state)
+
+    def __render_table_state(self, state):
+        logger.debug("Rendering table state:")
+        state.print_state()
+        for i in range(0, 4):
+            if state.seats[i] != None:
+                self.gui_seats[i].set_username(state.seats[i].name)
+            else:
+                self.gui_seats[i].set_username("")
+
+
+
+class GuiSeat:
+    """
+    Tiny object to encapsulate hard coded assumptions about the widgets
+    that compose a seat.
+    """
+    def __init__(self, glade_xml, seat_number):
+        self.glade_xml = glade_xml
+        self.seat_number = seat_number
+
+        self.__player_label = self.glade_xml.get_widget("seat%s-player-label"
+                % seat_number)
+
+        button_name = "seat%s-sit-button" % seat_number
+        self.__sit_button = self.glade_xml.get_widget(button_name)
+
+    def set_username(self, username):
+        self.__player_label.set_text(username)
+
+    def sit_button_disable(self):
+        self.__sit_button.set_sensitive(False)
 

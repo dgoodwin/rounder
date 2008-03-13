@@ -96,7 +96,7 @@ class Seats(object):
     def get_seat_number(self, username):
         i = 0
         for p in self.__seats:
-            if p.name == username:
+            if p != None and p.name == username:
                 return i
             i = i + 1
         raise RounderException("Unable to find seated user: %s" % username)
@@ -464,9 +464,9 @@ class Table(object):
         # player could be just observing
         # call the sit_out method?
         if self.seats.has_username(username):
-            event = PlayerLeftTable(self, username, 
-                self.seats.get_seat_number(username))
+            seat_num = self.seats.get_seat_number(username)
             self.seats.remove_player(username)
+            event = PlayerLeftTable(self, username, seat_num) 
             self.notify_all(event)
 
 
