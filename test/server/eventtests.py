@@ -41,9 +41,21 @@ class EventTests(BaseServerFixture):
         self.assertEquals(1, len(self.user1.events))
         self.assertEquals(1, len(self.user2.events))
         self.assertTrue(isinstance(self.user1.events[0],
-            PlayerJoinedGame))
+            PlayerJoinedTable))
         self.assertTrue(isinstance(self.user2.events[0],
-            PlayerJoinedGame))
+            PlayerJoinedTable))
+
+    def test_player_left_events(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.clear_player_events()
+        self.user1_table.view_leave(self.user1)
+
+        user2_events = filter_event_type(self.user2, PlayerLeftTable)
+
+        self.assertEquals(1, len(user2_events))
+
+        self.assertTrue(isinstance(user2_events[0],
+            PlayerLeftTable))
 
     def test_new_hand_started(self):
         # TODO: Why does the user perspective still need a ref to the user?

@@ -59,6 +59,8 @@ class BaseServerFixture(unittest.TestCase):
         for user in self.users:
             user.events = []
 
+
+
 class RounderNetworkServerTests(BaseServerFixture):
 
     """ Tests exercising the server network controller. """
@@ -106,6 +108,11 @@ class RounderNetworkServerTests(BaseServerFixture):
         while self.table.hand_underway():
             user = self.find_user_with_pending_actions()
             user.act_randomly(self.table.id)
+
+    def test_remove_user(self):
+        self.assertTrue(self.server.users.has_key(self.user1.name))
+        self.user1.detached(None)
+        self.assertFalse(self.server.users.has_key(self.user1.name))
 
 
 

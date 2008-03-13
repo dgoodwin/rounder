@@ -27,7 +27,7 @@ from rounder.action import PostBlind
 from rounder.core import RounderException
 from rounder.game import GameStateMachine, TexasHoldemGame
 from rounder.utils import find_action_in_list
-from rounder.event import PlayerJoinedGame, PlayerSatOut
+from rounder.event import PlayerJoinedTable, PlayerLeftTable, PlayerSatOut
 
 STATE_SMALL_BLIND = "small_blind"
 STATE_BIG_BLIND = "big_blind"
@@ -92,6 +92,14 @@ class Seats(object):
 
     def get_player(self, seat_number):
         return self.__seats[seat_number]
+
+    def get_seat_number(self, username):
+        i = 0
+        for p in self.__seats:
+            if p.name == username:
+                return i
+            i = i + 1
+        raise RounderException("Unable to find seated user: %s" % username)
 
     def __get_seated_players(self):
         seated = []
@@ -299,7 +307,7 @@ class Table(object):
         player.table = self
         logger.debug("Table %s: %s took seat %s" % (self.id, player.name,
             seat_num))
-        event = PlayerJoinedGame(self, player.name, seat_num)
+        event = PlayerJoinedTable(self, player.name, seat_num)
         self.notify_all(event)
 
     def prompt_small_blind(self):
@@ -450,11 +458,16 @@ class Table(object):
         """
         logger.info("%s left table." % username)
         self.observers.remove(username)
+        # TODO: Split into two calls, one for leaving seat, another for
+        # leaving the actual table?
         # TODO: internal state to worry about here?
         # player could be just observing
         # call the sit_out method?
         if self.seats.has_username(username):
+            event = PlayerLeftTable(self, username, 
+                self.seats.get_seat_number(username))
             self.seats.remove_player(username)
+            self.notify_all(event)
 
 
     def notify_all(self, event):

@@ -51,10 +51,10 @@ class Event:
 
 
 
-class PlayerJoinedGame(Event):
+class PlayerJoinedTable(Event):
 
     """
-    Player joined the game.
+    Player sat down at the table.
     """
 
     def __init__(self, table, player_name, seat_num):
@@ -63,7 +63,24 @@ class PlayerJoinedGame(Event):
         self.seat_num = seat_num
 
     def __repr__(self):
-        return "PlayerJoinedGame: %s took seat %s" % (self.player_name,
+        return "PlayerJoinedTable: %s took seat %s" % (self.player_name,
+            self.seat_num)
+
+
+
+class PlayerLeftTable(Event):
+
+    """
+    Player left the table.
+    """
+
+    def __init__(self, table, player_name, seat_num):
+        Event.__init__(self, table)
+        self.player_name = player_name
+        self.seat_num = seat_num
+
+    def __repr__(self):
+        return "PlayerLeftTable: %s left seat %s" % (self.player_name,
             self.seat_num)
 
 
@@ -189,7 +206,8 @@ class PlayerFolded(Event):
 # All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
     Event,
-    PlayerJoinedGame,
+    PlayerJoinedTable,
+    PlayerLeftTable,
     PlayerSatOut,
     NewHandStarted,
     PlayerPostedBlind,
