@@ -297,6 +297,9 @@ class Table(object):
         a hand is already underway.
         """
         logger.info("Table %s: Waiting for more players." % (self.id))
+        event = HandCancelled(self)
+        self.notify_all(event)
+
         self.gsm.reset()
         self.small_blind = None
         self.big_blind = None
@@ -351,20 +354,31 @@ class Table(object):
         post_bb = PostBlind(self.limit.big_blind)
         self.prompt_player(bb, [post_bb])
 
-    def sit_out(self, player):
-        """ Called by a player who wishes to sit out. """
+    def sit_out(self, player, left_table=False):
+        """ 
+        Called by a player who wishes to sit out. 
+
+        Because the edge case code for when a player sits out is so similar
+        to when they leave the table, handling both in this one method.
+        """
         logger.info("Table %s: Sitting player out: %s" % (self.id, player))
         pending_actions_copy = []
         pending_actions_copy.extend(player.pending_actions)
         player.sit_out()
 
         event = PlayerSatOut(self, player.name)
+        if left_table:
+            seat_num = self.seats.get_seat_number(player.name)
+            event = PlayerLeftTable(self, player.name, seat_num) 
+
         if self.hand_underway():
             self.game_over_event_queue.append(event)
             self.game.sit_out(player)
         else:
             
             self.notify_all(event)
+            # Check if this players departure interferes with our gathering
+            # blinds for a new hand:
 
             if len(self.seats.active_players) < MIN_PLAYERS_FOR_HAND:
                 logger.debug("Table %s: Not enough players for a new hand." %
@@ -383,6 +397,10 @@ class Table(object):
                     # if down to heads up, we need a different small blind:
                     self.__restart()
                 self.prompt_big_blind()
+
+            # Remove the player if they left the table completely.
+            if left_table:
+                self.seats.remove_player(player.name)
 
     def process_action(self, username, action_index, params):
         """
@@ -464,14 +482,10 @@ class Table(object):
         # TODO: Split into two calls, one for leaving seat, another for
         # leaving the actual table?
         # TODO: internal state to worry about here?
-        # player could be just observing
-        # call the sit_out method?
         if self.seats.has_username(username):
             seat_num = self.seats.get_seat_number(username)
-            self.seats.remove_player(username)
-            event = PlayerLeftTable(self, username, seat_num) 
-            self.notify_all(event)
-
+            player = self.seats.get_player(seat_num)
+            self.sit_out(player, left_table=True)
 
     def notify_all(self, event):
         """ Notify observers of this table that a player was seated. """

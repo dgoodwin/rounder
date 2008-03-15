@@ -80,6 +80,28 @@ class EventTests(BaseServerFixture):
         user2_events = filter_event_type(self.user1, NewHandStarted)
         self.assertEquals(1, len(user2_events))
 
+    def test_hand_cancelled(self):
+        self.user1_table.view_sit(self.user1, 0)
+        self.user2_table.view_sit(self.user2, 1)
+        self.clear_player_events()
+
+        self.user1_table.view_start_game(self.user1)
+        # No event until the blinds agree to post and the hand begins:
+        # Should first get a PlayerPrompted event (gathering blinds):
+        self.assertEquals(1, len(self.user1.events))
+        self.assertEquals(1, len(self.user2.events))
+        self.assertTrue(isinstance(self.user1.events[0], PlayerPrompted))
+        self.assertTrue(isinstance(self.user2.events[0], PlayerPrompted))
+        self.clear_player_events()
+
+        # Player we're waiting on leaves the table:
+        self.user1_table.view_leave(self.user1)
+        self.assertEquals(0, len(self.user1.events))
+        self.assertEquals(2, len(self.user2.events))
+        print self.user2.events
+        self.assertTrue(isinstance(self.user2.events[0], PlayerLeftTable))
+        self.assertTrue(isinstance(self.user2.events[1], HandCancelled))
+
     def test_player_posted_blind(self):
         self.user1_table.view_sit(self.user1, 0)
         self.user2_table.view_sit(self.user2, 1)
@@ -138,13 +160,18 @@ class EventTests(BaseServerFixture):
         self.user1_table.view_sit_out(self.user1)
 
         # Events should have gone out immediately:
-        self.assertEquals(1, len(self.user1.events))
-        self.assertEquals(1, len(self.user2.events))
+        self.assertEquals(2, len(self.user1.events))
+        self.assertEquals(2, len(self.user2.events))
 
         self.assertTrue(isinstance(self.user1.events[0],
             PlayerSatOut))
         self.assertTrue(isinstance(self.user2.events[0],
             PlayerSatOut))
+
+        self.assertTrue(isinstance(self.user1.events[1],
+            HandCancelled))
+        self.assertTrue(isinstance(self.user2.events[1],
+            HandCancelled))
 
     def test_player_sits_out_during_hand(self):
         self.user1_table.view_sit(self.user1, 0)
