@@ -27,7 +27,7 @@ from rounder.action import PostBlind
 from rounder.core import RounderException
 from rounder.game import GameStateMachine, TexasHoldemGame
 from rounder.utils import find_action_in_list
-from rounder.event import PlayerJoinedTable, PlayerLeftTable, PlayerSatOut
+from rounder.event import *
 
 STATE_SMALL_BLIND = "small_blind"
 STATE_BIG_BLIND = "big_blind"
@@ -330,6 +330,9 @@ class Table(object):
         # Doesn't actually prompt the player.
         player.prompt(actions_list)
 
+        event = PlayerPrompted(self, player.name)
+        self.notify_all(event)
+
         if self.server != None:
             self.server.prompt_player(self, player.name, actions_list)
 
@@ -444,7 +447,7 @@ class Table(object):
     def add_observer(self, username):
         """ Add a username to the list of observers. """
         # Sanity check: make sure this user isn't already observing:
-        logger.info("%s observing table" % username)
+        logger.info("Table %s: %s observing table" % (self.id, username))
         if username in self.observers:
             raise RounderException("%s already observing table %s" % 
                 (username, self.id))
@@ -456,7 +459,7 @@ class Table(object):
         
         Called both when a user disconnects and leaves the table.
         """
-        logger.info("%s left table." % username)
+        logger.info("Table %s: %s left table." % (self.id, username))
         self.observers.remove(username)
         # TODO: Split into two calls, one for leaving seat, another for
         # leaving the actual table?

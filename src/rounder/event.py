@@ -100,6 +100,32 @@ class PlayerSatOut(Event):
 
 
 
+class PlayerPrompted(Event):
+
+    """
+    Player has been prompted with actions.
+    """
+
+    def __init__(self, table, player_name):
+
+        Event.__init__(self, table)
+        self.player_name = player_name
+
+
+
+class HandCancelled(Event):
+
+    """
+    Signals that a hand was cancelled. Usually happens when we attempt to
+    start a game but are unable to find players willing to post the blinds.
+    """
+
+    def __init__(self, table):
+
+        Event.__init__(self, table)
+
+
+
 class NewHandStarted(Event):
 
     """
@@ -208,8 +234,10 @@ ALL_EVENTS = [
     Event,
     PlayerJoinedTable,
     PlayerLeftTable,
+    PlayerPrompted,
     PlayerSatOut,
     NewHandStarted,
+    HandCancelled,
     PlayerPostedBlind,
     HoleCardsDealt,
     CommunityCardsDealt,

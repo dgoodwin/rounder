@@ -123,10 +123,11 @@ class RounderGtk(Client):
         logger.info("Connected to %s:%s as %s" % (client.host, client.port, 
             client.username))
         self.client = client
-        self.connect_dialog.destroy()
-        self.connect_dialog = None
-        self.set_status("Connected to server: %s" % client.host)
 
+        # Call also sets our reference to None:
+        self.connect_dialog.destroy(None, None, None)
+
+        self.set_status("Connected to server: %s" % client.host)
 
         server_label = self.glade_xml.get_widget('server-label')
         server_label.set_text(client.host)
@@ -205,6 +206,7 @@ class ConnectDialog:
             'on_connect_button_clicked': self.connect,
         }
         self.glade_xml.signal_autoconnect(signals)
+        self.connect_dialog.connect("delete_event", self.destroy)
 
         self.connect_dialog.show_all()
 
@@ -237,9 +239,11 @@ class ConnectDialog:
         statusbar.push(statusbar.get_context_id("Connect Dialog"), message)
         statusbar.show()
 
-    def destroy(self):
+    def destroy(self, widget, event, data=None):
         """
         Called by main Rounder application who receives the success callback
         from the network client.
         """
+        logger.debug("Closing connect dialog.")
+        self.app.connect_dialog = None
         self.connect_dialog.destroy()

@@ -200,19 +200,17 @@ class ClientTable(pb.Referenceable):
         """ 
         Deserialize the given actions and prompt the ui to choose one. 
         """
-        logger.debug("Table %s: %s received actions:" % (table_id,
-            self.username))
+        logger.debug("Table %s: received actions:" % self.state.id)
         try:
             deserialized_actions = []
-            for serialized_action in actions:
-                action = loads(serialized_action)
+            for action in serialized_actions:
+                action = loads(action)
                 logger.debug("   %s" % action)
                 deserialized_actions.append(action)
 
             # TODO: save actions provided for client side validation
 
-            # TODO: Notify UI.
-            #self.ui.prompt(table_id, deserialized_actions)
+            self.ui.prompt(deserialized_actions)
         except Exception, e:
             logger.error(e)
             raise e

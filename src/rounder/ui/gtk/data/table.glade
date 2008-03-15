@@ -4,13 +4,13 @@
 <glade-interface>
 
 <widget class="GtkWindow" id="table-window">
+  <property name="width_request">600</property>
+  <property name="height_request">600</property>
   <property name="visible">True</property>
   <property name="title" translatable="yes">Table Name</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
-  <property name="window_position">GTK_WIN_POS_CENTER</property>
+  <property name="window_position">GTK_WIN_POS_MOUSE</property>
   <property name="modal">False</property>
-  <property name="default_width">800</property>
-  <property name="default_height">600</property>
   <property name="resizable">False</property>
   <property name="destroy_with_parent">False</property>
   <property name="decorated">True</property>
@@ -346,12 +346,13 @@
       <child>
 	<widget class="GtkTable" id="table2">
 	  <property name="border_width">5</property>
+	  <property name="width_request">600</property>
 	  <property name="visible">True</property>
 	  <property name="n_rows">5</property>
 	  <property name="n_columns">4</property>
 	  <property name="homogeneous">False</property>
-	  <property name="row_spacing">4</property>
-	  <property name="column_spacing">46</property>
+	  <property name="row_spacing">5</property>
+	  <property name="column_spacing">125</property>
 
 	  <child>
 	    <widget class="GtkLabel" id="seat0-player-label">
@@ -871,15 +872,15 @@
 
 	  <child>
 	    <widget class="GtkTextView" id="chat-textview">
-	      <property name="height_request">200</property>
+	      <property name="border_width">1</property>
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
-	      <property name="editable">True</property>
+	      <property name="editable">False</property>
 	      <property name="overwrite">False</property>
 	      <property name="accepts_tab">True</property>
 	      <property name="justification">GTK_JUSTIFY_LEFT</property>
 	      <property name="wrap_mode">GTK_WRAP_NONE</property>
-	      <property name="cursor_visible">True</property>
+	      <property name="cursor_visible">False</property>
 	      <property name="pixels_above_lines">0</property>
 	      <property name="pixels_below_lines">0</property>
 	      <property name="pixels_inside_wrap">0</property>
@@ -900,6 +901,7 @@
       <child>
 	<widget class="GtkHBox" id="hbox1">
 	  <property name="border_width">5</property>
+	  <property name="height_request">100</property>
 	  <property name="visible">True</property>
 	  <property name="homogeneous">True</property>
 	  <property name="spacing">0</property>
@@ -968,6 +970,7 @@
 	  <property name="use_underline">True</property>
 	  <property name="relief">GTK_RELIEF_NORMAL</property>
 	  <property name="focus_on_click">True</property>
+	  <signal name="clicked" handler="on_deal_button_clicked" last_modification_time="Sat, 15 Mar 2008 19:54:59 GMT"/>
 	</widget>
 	<packing>
 	  <property name="padding">0</property>

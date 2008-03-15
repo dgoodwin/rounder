@@ -27,6 +27,7 @@ logger = getLogger("rounder.ui.gtk.table")
 
 from rounder.ui.gtk.util import find_file_on_path
 from rounder.event import *
+from rounder.action import *
 
 SEAT_BUTTON_INDEX = {
     'seat0-sit-button': 0,
@@ -100,6 +101,7 @@ class TableWindow:
             'on_seat7_sit_button_clicked': self.handle_sit_button,
             'on_seat8_sit_button_clicked': self.handle_sit_button,
             'on_seat9_sit_button_clicked': self.handle_sit_button,
+            'on_deal_button_clicked': self.handle_deal_button,
         }
         self.glade_xml.signal_autoconnect(signals)
 
@@ -121,8 +123,14 @@ class TableWindow:
         logger.info("Requesting seat %s" % seat)
         self.client_table.sit(seat)
 
+    def handle_deal_button(self, widget):
+        logger.info("Requesting to start a hand.")
+        self.client_table.start_game()
+
     def sit_success_cb(self, seat):
         self.seated = True
+        if not self.client_table.state.hand_underway:
+            self.deal_button.set_sensitive(True)
         for seat in self.gui_seats:
             seat.sit_button_disable()
 
@@ -149,14 +157,41 @@ class TableWindow:
             if not self.am_seated:
                 self.gui_seats[event.seat_num].sit_button_disable()
 
+        elif isinstance(event, PlayerPrompted):
+            self.chat_line("Waiting for %s to act." % event.player_name)
+            # If our deal button is enabled this is likely the initial
+            # prompt to post blinds and we can disable the button as the
+            # hand will soon be underway. If the server is unable to find
+            # player's willing to post blinds a HandCancelled event will
+            # be sent out.
+            self.deal_button.set_sensitive(False)
+
+        elif isinstance(event, HandCancelled):
+            self.chat_line("Hand cancelled.")
+            self.deal_button.set_sensitive(True)
+
+        elif isinstance(event, NewHandStarted):
+            self.chat_line("Dealing hand.")
+            self.deal_button.set_sensitive(False)
+
     def __render_table_state(self, state):
         logger.debug("Rendering table state:")
         state.print_state()
         for i in range(0, 4):
             if state.seats[i] != None:
                 self.gui_seats[i].set_username(state.seats[i].name)
+                if not self.am_seated:
+                    self.gui_seats[i].sit_button_disable()
             else:
                 self.gui_seats[i].set_username("")
+
+    def prompt(self, actions):
+        """ Prompt player to act. """
+        for action in actions:
+            if isinstance(action, PostBlind):
+                logger.debug("Prompting to post blind.")
+                self.call_button.set_label("Post blind: $%s" % action.amount)
+                self.call_button.set_sensitive(True)
 
 
 

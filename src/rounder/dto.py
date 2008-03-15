@@ -40,6 +40,7 @@ class TableState:
         self.id = table.id
         self.name = table.name
         self.limit = table.limit
+        self.hand_underway = (table.gsm.current != None)
         # TODO: board cards
         # TODO: player states
 
@@ -56,8 +57,12 @@ class TableState:
     def print_state(self):
         """ Print the table state. """
         print "Table state for table: %s" % self.name
+        print "   hand underway: %s" % self.hand_underway
+        i = 0
+        print "   seats:"
         for s in self.seats:
-            print "   " + str(s)
+            print "   %s - %s" % (i, s)
+            i = i + 1
 
 
 
