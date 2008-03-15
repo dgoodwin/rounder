@@ -26,6 +26,7 @@ from logging import getLogger
 logger = getLogger("rounder.ui.gtk.table")
 
 from rounder.ui.gtk.util import find_file_on_path
+from rounder.ui.client import Table
 from rounder.event import *
 from rounder.action import *
 
@@ -42,7 +43,7 @@ SEAT_BUTTON_INDEX = {
     'seat9-sit-button': 9,
 }
 
-class TableWindow:
+class TableWindow(Table):
     """ Dialog for a poker table. """
 
     def __init__(self, app, client_table):
@@ -127,7 +128,7 @@ class TableWindow:
         logger.info("Requesting to start a hand.")
         self.client_table.start_game()
 
-    def sit_success_cb(self, seat):
+    def sit_success(self, seat):
         self.seated = True
         if not self.client_table.state.hand_underway:
             self.deal_button.set_sensitive(True)

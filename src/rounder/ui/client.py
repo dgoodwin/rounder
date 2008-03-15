@@ -40,3 +40,19 @@ class Client:
     def log_error(self, failure):
         """ Called any time you want the client to log an error message. """
         return failure
+
+class Table:
+    """ Everything you need to implement a table. """
+
+    def __init__(self):
+        pass
+
+    def sit_success(self, seat_number):
+        pass
+
+    def process_event(self, event):
+        pass
+
+    def log_error(self, failure):
+        """ Called any time an error message is returned - will likely disappear."""
+        return failure

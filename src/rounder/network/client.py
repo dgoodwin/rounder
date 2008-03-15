@@ -173,19 +173,23 @@ class ClientTable(pb.Referenceable):
         self.state = table_state
         self.ui = None
 
+    def log_error(self, failure):
+        self.ui.log_error(failure)
+
     def sit(self, seat):
         """ Request the specified seat index at the specified table. """
         logger.debug("Requesting seat %s at table %s" % (seat, 
             self.state.id))
         d = self.__view.callRemote("sit", seat)
         d.addCallback(self.sit_success_cb)
+        d.addErrback(self.log_error)
 
     def sit_success_cb(self, data):
         """ Callback for successfully taking a seat at the table. """
         seat_num = data
         logger.debug("Succesfully took seat %s at table: %s" % (seat_num,
             self.state.id))
-        self.ui.sit_success_cb(seat_num)
+        self.ui.sit_success(seat_num)
 
     def start_game(self):
         """ Request the server start a new game at this table. """
