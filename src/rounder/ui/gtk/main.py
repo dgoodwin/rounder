@@ -33,10 +33,11 @@ gtk2reactor.install()
 
 from rounder.network.client import RounderNetworkClient
 from rounder.network.serialize import register_message_classes
+from rounder.ui.client import Client
 from rounder.ui.gtk.util import find_file_on_path
 from rounder.ui.gtk.table import TableWindow
 
-class RounderGtk:
+class RounderGtk(Client):
     """ 
     The Rounder GTK Client 
 
@@ -114,7 +115,7 @@ class RounderGtk:
         else:
             logger.debug("Connect dialog already open.")
 
-    def connect_success_cb(self, client):
+    def connect_success(self, client):
         """ 
         Callback used by the connect dialog after a connection to a server
         has been successfully made.
@@ -134,7 +135,7 @@ class RounderGtk:
 
         self.client.get_table_list()
 
-    def connect_failure_cb(self):
+    def connect_failure(self):
         """ Connection failed callback. """
         logger.warn("Connect failed")
         self.connect_dialog.set_status("Login failed.")

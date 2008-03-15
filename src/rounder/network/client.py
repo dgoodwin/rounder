@@ -73,22 +73,26 @@ class RounderNetworkClient(pb.Referenceable):
         def1 = factory.login(credentials.UsernamePassword(username, password),
             client=self)
         def1.addCallbacks(self.connect_success_cb, self.connect_failure_cb)
+        def1.addErrback(self.log_error)
         reactor.run()
 
     @staticmethod
     def shutdown():
         reactor.stop()
 
+    def log_error(self, failure):
+        self.ui.log_error(failure)
+
     def connect_success_cb(self, perspective):
         """ Callback for successful connection. """
         logger.debug("connected!")
         self.perspective = perspective
-        self.ui.connect_success_cb(self)
+        self.ui.connect_success(self)
 
     def connect_failure_cb(self, failure):
         """ Callback for a failed connection attempt. """
         logger.debug("Connection failed: %s" % failure)
-        self.ui.connect_failure_cb()
+        self.ui.connect_failure()
 
     def get_table_list(self):
         """ Request a list of tables from the server. """
@@ -96,6 +100,7 @@ class RounderNetworkClient(pb.Referenceable):
         d = self.perspective.callRemote("list_tables")
         d.addCallbacks(self.get_table_list_success_cb, 
             self.get_table_list_failure_cb)
+        d.addErrback(self.log_error)
 
     def get_table_list_success_cb(self, data):
         """ Called when a list of tables is received. """
@@ -115,7 +120,7 @@ class RounderNetworkClient(pb.Referenceable):
         """ Open a table. """
         logger.debug("Opening table: %s" % table_id)
         d = self.perspective.callRemote("open_table", table_id)
-        d.addCallback(self.open_table_success_cb)
+        d.addCallbacks(self.open_table_success_cb, self.log_error)
 
     def open_table_success_cb(self, data):
         """ Callback for a successful table open. """
