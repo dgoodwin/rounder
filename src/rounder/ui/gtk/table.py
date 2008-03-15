@@ -70,6 +70,17 @@ class TableWindow:
         limit = self.glade_xml.get_widget('limit-label')
         limit.set_text(str(client_table.state.limit))
 
+        # TODO: Check if hand is underway before disabling this button:
+        self.deal_button = self.glade_xml.get_widget('deal-button')
+        self.deal_button.set_sensitive(False)
+
+        self.fold_button = self.glade_xml.get_widget('fold-button')
+        self.fold_button.set_sensitive(False)
+        self.call_button = self.glade_xml.get_widget('call-button')
+        self.call_button.set_sensitive(False)
+        self.raise_button = self.glade_xml.get_widget('raise-button')
+        self.raise_button.set_sensitive(False)
+
         self.am_seated = False
 
         self.gui_seats = []

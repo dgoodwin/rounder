@@ -200,7 +200,6 @@ class ClientTable(pb.Referenceable):
         """ 
         Deserialize the given actions and prompt the ui to choose one. 
         """
-
         logger.debug("Table %s: %s received actions:" % (table_id,
             self.username))
         try:
