@@ -58,20 +58,20 @@ class EventTests(BaseServerFixture):
             PlayerLeftTable))
 
     def test_new_hand_started(self):
-        # TODO: Why does the user perspective still need a ref to the user?
         self.user1_table.view_sit(self.user1, 0)
         self.user2_table.view_sit(self.user2, 1)
         self.clear_player_events()
 
         self.user1_table.view_start_game(self.user1)
         # No event until the blinds agree to post and the hand begins:
-        self.assertEquals(0, len(self.user1.events))
-        self.assertEquals(0, len(self.user2.events))
+        # Should first get a PlayerPrompted event (gathering blinds):
+        self.assertEquals(1, len(self.user1.events))
+        self.assertEquals(1, len(self.user2.events))
+        self.assertTrue(isinstance(self.user1.events[0], PlayerPrompted))
+        self.assertTrue(isinstance(self.user2.events[0], PlayerPrompted))
 
         # Post small blind:
         self.user1.act_randomly(self.table.id)
-        self.assertEquals(0, len(self.user1.events))
-        self.assertEquals(0, len(self.user2.events))
 
         # Post big blind, now we should see our event:
         self.user2.act_randomly(self.table.id)
