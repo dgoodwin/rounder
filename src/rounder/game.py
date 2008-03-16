@@ -465,15 +465,18 @@ class TexasHoldemGame(Game):
             player.bet(req_amount, self.__raise_count)
 
             if action.amount == 0:
-                logger.debug("Table %s: %s checks" % (self.table.id, player.username))
+                logger.debug("Table %s: %s checks" % (self.table.id, 
+                    player.username))
             event = PlayerCalled(self.table, player.username, action.amount)
             self.table.notify_all(event)
 
         if isinstance(action, Raise):
-            req_amount = self.__current_bet + action.amount - player.current_bet
+            req_amount = self.__current_bet + action.amount - \
+                    player.current_bet
             self.__raise_count += 1
 
-            # This is also checked in limit.py, but I think here makes more sense
+            # This is also checked in limit.py, but I think here makes more 
+            # sense:
             if action.amount > player.chips:
                 raise InvalidPlay("Player tried to raise more then their chips")
 

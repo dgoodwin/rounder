@@ -84,6 +84,8 @@ class PotTests(unittest.TestCase):
         pots = potmgr.pots
 
         self.assertEquals(2, len(pots))
+        self.assertTrue(pots[1].is_main_pot)
+        self.assertFalse(pots[0].is_main_pot)
         self.assertEquals(2, len(pots[0].players))
         self.assertEquals(3, len(pots[1].players))
         self.assertEquals(set(self.players[:2]), set(pots[0].players))

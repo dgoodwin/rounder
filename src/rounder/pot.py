@@ -32,10 +32,11 @@ class Pot:
     
     NOTE: Do not try to smoke!
     """
-    def __init__(self, players):
+    def __init__(self, players, is_main_pot=False):
         # Players eligible for this pot:
         self.players = players[:]
         self.amount = Currency(0)
+        self.is_main_pot = is_main_pot # False for side pots
 
     def __add__(self, amount):
         self.amount += amount
@@ -61,7 +62,12 @@ class PotManager:
     def __add_players_to_pot(self, players, amount):
         if self.createNew == True:
             self.createNew = False
-            self.pots.insert(0, Pot(players))
+            is_main_pot = False
+            if len(self.pots) == 0:
+                is_main_pot = True
+            # NOTE: New pots inserted at start of the list, i.e. the main
+            # pot will always be the last:
+            self.pots.insert(0, Pot(players, is_main_pot))
 
         self.pots[0] += amount * len(players)
 

@@ -133,3 +133,4 @@ class PotState:
 
     def __init__(self, pot):
         self.amount = pot.amount
+        self.is_main_pot = pot.is_main_pot
