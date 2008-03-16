@@ -129,6 +129,7 @@ class RounderNetworkClient(pb.Referenceable):
         logger.debug("Table opened successfully: %s" % table_state.name)
 
         table = ClientTable(table_view, table_state)
+        table.ui = self.ui
         self.tables[table_state.id] = table
         self.ui.open_table_success_cb(table)
 

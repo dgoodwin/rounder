@@ -76,6 +76,14 @@ class TxtRounderClientServerCallback(Client):
         self.screen.write("Joined Table")
         self.state.table = table
 
+    def sit_success(self, seat_number):
+        self.screen.write("Took seat %d" % seat_number)
+
+    def process_event(self, event):
+        # XXX Do something here
+        pass
+
+
 class CursesStdIO:
     """fake fd to be registered as a reader with the twisted reactor. """
 
