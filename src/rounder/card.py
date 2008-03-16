@@ -112,6 +112,9 @@ class Card:
         self.rank = self._parse_rank(rank)
         self.suit = self._parse_suit(suit)
 
+    def __repr__(self):
+        return str(self)
+
     @staticmethod
     def _parse_rank(rank):
         """ Check the rank value to ensure it is valid. """

@@ -41,8 +41,9 @@ class TableState:
         self.name = table.name
         self.limit = table.limit
         self.hand_underway = (table.gsm.current != None)
-        # TODO: board cards
-        # TODO: player states
+        self.community_cards = []
+        if table.game != None:
+            self.community_cards = table.game.community_cards
 
         # for now represent seated players as a list of tuples, player name
         # and stack size:

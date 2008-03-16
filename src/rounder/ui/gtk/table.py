@@ -72,6 +72,9 @@ class TableWindow(Table):
         limit = self.glade_xml.get_widget('limit-label')
         limit.set_text(str(client_table.state.limit))
 
+        self.board_label = self.glade_xml.get_widget('board-label')
+        self.pot_label = self.glade_xml.get_widget('pot-label')
+
         self.deal_button = self.glade_xml.get_widget('deal-button')
         self.deal_button.set_sensitive(False)
 
@@ -83,7 +86,6 @@ class TableWindow(Table):
         self.__raise_handler_id = None
         self.__fold_handler_id = None
         self.__disable_action_buttons()
-
 
         self.gui_seats = []
         for i in range(0, 4):
@@ -277,11 +279,27 @@ class TableWindow(Table):
                 event.cards[1]))
             self.my_hole_cards = event.cards
 
+        elif isinstance(event, CommunityCardsDealt):
+            self.chat_line("Community cards: %s" % event.cards)
+
         self.__render_table_state(event.table_state)
 
     def __render_table_state(self, state):
         logger.debug("Rendering table state:")
         #state.print_state()
+    
+        # Render board cards:
+        if len(state.community_cards) == 0:
+            self.board_label.set_text("")
+        else:
+            cards_string = ""
+            for c in state.community_cards:
+                if len(cards_string) == 0:
+                    cards_string = str(c)
+                else:
+                    cards_string = "%s %s" % (cards_string, c)
+            self.board_label.set_text(cards_string)
+
         for i in range(0, 4):
             seat = self.gui_seats[i]
 
@@ -290,7 +308,7 @@ class TableWindow(Table):
                 seat.set_username(player_state.name)
                 seat.sit_button_disable()
 
-                # Render cards:
+                # Render player cards:
                 if player_state.folded:
                     seat.set_hole_cards("Folded")
                 elif player_state.sitting_out:
