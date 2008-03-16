@@ -23,6 +23,9 @@
 __revision__ = "$Revision$"
 
 import logging.config
+import colorhandler
+logging.StreamHandler = colorhandler.ColorStreamHandler
+
 from os.path import expanduser, exists, abspath
 
 def setup_logging(conf_file_locations):
