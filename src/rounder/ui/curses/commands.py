@@ -19,6 +19,19 @@ class HelpCommand(object):
             state.screen.write(helpmsg)
 
 
+class QuitCommand(object):
+
+    name = "quit"
+    args = None
+    summary = "quit playing rounder"
+
+    @staticmethod
+    def do(state, args):
+        # XXX Be nicer about this
+        from twisted.internet import reactor
+        reactor.stop()
+
+
 class ConnectCommand(object):
 
     name = "connect"
@@ -84,4 +97,5 @@ class SitCommand(object):
         state.table.sit(seatid)
 
 
-commands = (HelpCommand, ConnectCommand, ListCommand, JoinCommand, SitCommand)
+commands = (HelpCommand, ConnectCommand, ListCommand, JoinCommand, SitCommand,
+        QuitCommand)

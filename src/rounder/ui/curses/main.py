@@ -186,6 +186,9 @@ class RounderScreen(CursesStdIO):
         self.position_cursor()
         self.stdscr.refresh()
 
+    def connectionLost(self, why):
+        pass
+
 class RounderCurses:
     def main(self):
         # TODO: why do I have to do this?
