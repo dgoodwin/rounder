@@ -146,7 +146,7 @@ class Seats(object):
         """
         if self.small_blind != None:
             raise RounderException("Small blind already defined: %s" % 
-                self.get_player(self.__small_blind_index))
+                self.small_blind)
 
         if self.dealer == None:
             raise RounderException("Need a dealer before small blind.")
@@ -265,6 +265,8 @@ class Table(object):
         """ Called by a game when it has finished. """
         logger.info("Table %s: Game over" % self.id)
 
+        self.small_blind = None
+        self.big_blind = None
         self.game = None
         self.gsm.reset()
 

@@ -305,6 +305,13 @@ class EventTests(BaseServerFixture):
         events = filter_event_type(self.user2, PlayerShowedCards)
         self.assertEquals(2, len(events))
 
+    def test_game_over(self):
+        self.__run_complete_hand()
+        events = filter_event_type(self.user1, GameOver)
+        self.assertEquals(1, len(events))
+        events = filter_event_type(self.user2, GameOver)
+        self.assertEquals(1, len(events))
+
 
 
 def filter_event_type(user, event_type):

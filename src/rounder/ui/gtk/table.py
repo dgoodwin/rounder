@@ -158,6 +158,8 @@ class TableWindow(Table):
         """ Append a line to the chat area on the table. """
         buf = self.chat_textview.get_buffer()
         buf.insert(buf.get_end_iter(), msg + "\n")
+        mark = buf.create_mark("end", buf.get_end_iter())
+        self.chat_textview.scroll_to_mark(mark, 0.0)
     
     def __disable_action_buttons(self):
         self.call_button.set_label("Call")
@@ -313,8 +315,7 @@ class TableWindow(Table):
             seat.raised(event.amount)
 
         elif isinstance(event, PlayerFolded):
-            self.chat_line("%s folds." % (event.username,
-                event.amount))
+            self.chat_line("%s folds." % event.username)
             seat = self.__username_to_seat[event.username]
             seat.folded()
 
@@ -326,14 +327,32 @@ class TableWindow(Table):
 
         elif isinstance(event, CommunityCardsDealt):
             self.chat_line("Community cards: %s" % event.cards)
+            # Implicit new round of betting, clear actions from the last one.
+            for seat in self.gui_seats:
+                seat.clear_action()
 
         elif isinstance(event, GameEnding):
             self.chat_line("End of hand.")
+            for seat in self.gui_seats:
+                seat.clear_action()
 
         elif isinstance(event, PlayerShowedCards):
             self.chat_line("%s shows: %s" % (event.username, event.cards))
             seat = self.__username_to_seat[event.username]
             seat.show_hole_cards(event.cards)
+
+        elif isinstance(event, GameOver):
+            for tuple in event.results:
+                pot_state = tuple[0]
+                for pot_winner in tuple[1]:
+                    pot_type = "main"
+                    if not pot_state.is_main_pot:
+                        pot_type = "side"
+                    self.chat_line("%s wins $%s from %s pot" %
+                            (pot_winner.username, pot_winner.amount, 
+                                pot_type))
+            self.deal_button.set_sensitive(True)
+
 
     def __render_table_state(self, state):
         """
@@ -370,7 +389,7 @@ class TableWindow(Table):
             if state.seats[i] != None:
                 player_state = state.seats[i]
                 username = player_state.username
-                seat.set_username(username)
+                seat.set_username("%s $%s" % (username, player_state.chips))
                 seat.sit_button_disable()
 
                 # Render player cards:
@@ -432,6 +451,10 @@ class GuiSeat:
     def is_showing_hole_cards(self):
         """ Return the current text from the hole cards field. """
         return len(self.cards_label.get_text()) > 0
+
+    def clear_action(self):
+        """ Clear the action column. """
+        self.__action_label.set_text("")
 
     def prompted(self):
         """ Indicate in the UI that this seat has been prompted to act. """

@@ -35,6 +35,7 @@ from rounder.deck import Deck
 from rounder.currency import Currency
 from rounder.event import *
 from rounder.utils import find_action_in_list
+from rounder.dto import PotWinner, PotState
 
 GAME_ID_COUNTER = 1
 
@@ -546,6 +547,9 @@ class TexasHoldemGame(Game):
 
         evaluator = PokerEval()
 
+        # List of tuples, (PotState, [PotWinner, ...]):
+        results = []
+
         for pot in self.pot_mgr.pots:
             winners = []
             players = filter(lambda x: x.folded == False, pot.players)
@@ -560,7 +564,11 @@ class TexasHoldemGame(Game):
                 for index in result['hi']:
                     winners.append(players[index])
 
-            self.__payout_pot(pot, winners)
+            pot_winners = self.__payout_pot(pot, winners)
+            results.append((PotState(pot), pot_winners))
+
+        event = GameOver(self.table, results)
+        self.table.notify_all(event)
 
         for p in self.players:
             p.reset()
@@ -569,16 +577,22 @@ class TexasHoldemGame(Game):
         self.callback()
 
     def __payout_pot(self, pot, players):
-        """ Split the pot as evenly as possible amongst the list of winners.
+        """ 
+        Split the pot as evenly as possible amongst the list of winners.
 
-        Potential remaining cent is given to first player in the list."""
+        Potential remaining cent is given to first player in the list.
+
+        Returns PotWinner dto's for this pot.
+        """
         player_count = len(players)
 
         assert(player_count > 0, "No Winner for this pot?")
 
+        pot_winners = []
         if player_count == 1:
             logger.info("Single winner of pot amount %d" % pot.amount)
             players[0].add_chips(pot.amount)
+            pot_winners.append(PotWinner(players[0].username, pot.amount))
         else:
             logger.info("Splitting pot of %d between %d winners" %
                 (pot.amount, player_count))
@@ -592,7 +606,10 @@ class TexasHoldemGame(Game):
                     remainder -= 0.01
 
                 player.add_chips(winnings)
+                pot_winners.append(PotWinner(player.username, winnings))
                 logger.info(   "%s won %s" % (player.username, winnings))
+
+        return pot_winners
 
     def __cards_for_players(self, players):
         pockets = []
