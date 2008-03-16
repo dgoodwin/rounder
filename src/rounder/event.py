@@ -111,6 +111,9 @@ class PlayerPrompted(Event):
         Event.__init__(self, table)
         self.username = username
 
+    def __repr__(self):
+        return "PlayerPrompted: %s" % self.username
+
 
 
 class HandCancelled(Event):
