@@ -75,9 +75,13 @@ class TableWindow(Table):
         self.deal_button = self.glade_xml.get_widget('deal-button')
         self.deal_button.set_sensitive(False)
 
-        self.fold_button = self.glade_xml.get_widget('fold-button')
         self.call_button = self.glade_xml.get_widget('call-button')
         self.raise_button = self.glade_xml.get_widget('raise-button')
+        self.fold_button = self.glade_xml.get_widget('fold-button')
+        # Signal handlers we reuse:
+        self.__call_handler_id = None
+        self.__raise_handler_id = None
+        self.__fold_handler_id = None
         self.__disable_action_buttons()
 
 
@@ -154,7 +158,6 @@ class TableWindow(Table):
         self.fold_button.set_label("Fold")
         self.fold_button.set_sensitive(False)
 
-
     def handle_call_button(self, widget, data):
         """ Handle a call button press. """
 
@@ -166,16 +169,68 @@ class TableWindow(Table):
         logger.debug("Calling $%s." % action.amount)
         self.client_table.act(action_index, [])
 
+    def handle_raise_button(self, widget, data):
+        """ Handle a raise button press. """
+
+        action_index = data[0]
+        action = data[1]
+        raise_amount = data[2]
+
+        self.__disable_action_buttons()
+
+        logger.debug("Raising $%s." % raise_amount)
+        self.client_table.act(action_index, [raise_amount])
+
+    def handle_fold_button(self, widget, data):
+        """ Handle a fold press. """
+
+        action_index = data[0]
+        action = data[1]
+
+        self.__disable_action_buttons()
+
+        logger.debug("Folding.")
+        self.client_table.act(action_index, [])
+
     def prompt(self, actions):
         """ Prompt player to act. """
         index = 0
+        logger.debug("Prompting with actions:")
         for action in actions:
+            logger.debug("   %s" % action)
             if isinstance(action, PostBlind):
-                logger.debug("Prompting to post blind.")
                 self.call_button.set_label("Post blind: $%s" % action.amount)
                 self.call_button.set_sensitive(True)
-                self.call_button.connect('clicked', 
+                if self.__call_handler_id != None:
+                    self.call_button.disconnect(self.__call_handler_id)
+                self.__call_handler_id = self.call_button.connect('clicked',
                         self.handle_call_button, (index, action))
+
+            elif isinstance(action, Call):
+                self.call_button.set_label("Call: $%s" % action.amount)
+                self.call_button.set_sensitive(True)
+                if self.__call_handler_id != None:
+                    self.call_button.disconnect(self.__call_handler_id)
+                self.__call_handler_id = self.call_button.connect('clicked', 
+                        self.handle_call_button, (index, action))
+
+            elif isinstance(action, Raise):
+                # TODO: Note this is only for limit holdem currently:
+                self.raise_button.set_label("Raise: $%s" % action.min_bet)
+                self.raise_button.set_sensitive(True)
+                if self.__raise_handler_id != None:
+                    self.raise_button.disconnect(self.__raise_handler_id)
+                self.__raise_handler_id = self.raise_button.connect('clicked', 
+                        self.handle_raise_button, (index, action, 
+                            action.min_bet))
+
+            elif isinstance(action, Fold):
+                self.fold_button.set_label("Fold")
+                self.fold_button.set_sensitive(True)
+                if self.__fold_handler_id != None:
+                    self.fold_button.disconnect(self.__fold_handler_id)
+                self.__fold_handler_id = self.fold_button.connect('clicked', 
+                        self.handle_fold_button, (index, action)) 
 
             index = index + 1
 
@@ -226,12 +281,9 @@ class TableWindow(Table):
 
     def __render_table_state(self, state):
         logger.debug("Rendering table state:")
-        state.print_state()
+        #state.print_state()
         for i in range(0, 4):
             seat = self.gui_seats[i]
-            print "  i = %s" % i
-            print "  type(i) = %s" % type(i)
-            print "  my seat = %s" % (i == self.my_seat_num)
 
             if state.seats[i] != None:
                 player_state = state.seats[i]
@@ -246,11 +298,8 @@ class TableWindow(Table):
                 elif player_state.num_cards == 0:
                     seat.set_hole_cards("")
                 elif i == self.my_seat_num:
-                    print "   rendering my cards"
-                    print "   %s" % self.my_hole_cards
                     seat.show_hole_cards(self.my_hole_cards)
                 else:
-                    print "   rendering unknown cards"
                     seat.set_hole_cards("XX XX")
 
             else:

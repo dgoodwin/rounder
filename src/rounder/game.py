@@ -23,6 +23,7 @@
 
 from logging import getLogger
 logger = getLogger("rounder.game")
+
 from collections import defaultdict
 
 from pokereval import PokerEval
@@ -393,7 +394,7 @@ class TexasHoldemGame(Game):
         """
         Deal the flop and initiate the betting.
         """
-        logger.info("Table %s: Dealing the flop." % self.__get_table_id)
+        logger.info("Table %s: Dealing the flop." % self.__get_table_id())
         self._check_if_finished()
 
         for i in range(3):

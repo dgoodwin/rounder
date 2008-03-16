@@ -226,10 +226,14 @@ class ClientTable(pb.Referenceable):
         never carries out an action it wasn't given the option to, actions are
         selected by an index into the list the server sent.
         """
+        # Convert all params to strings:
+        string_params = []
+        for p in params:
+            string_params.append(str(p))
         logger.debug("Table %s: Sending action index %s to server: %s" %
-            (self.table_id, action_index, params))
+            (self.table_id, action_index, string_params))
         self.__view.callRemote("process_action", action_index,
-            params)
+            string_params)
 
     def process_event(self, event):
         """

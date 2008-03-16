@@ -23,6 +23,9 @@
 from rounder.core import RounderException
 from rounder.currency import Currency
 
+from logging import getLogger
+logger = getLogger("rounder.action")
+
 class ActionValidationException(RounderException):
 
     """ Exception thrown when invalid action parameters are received. """
@@ -126,6 +129,7 @@ class Raise(Action):
 
     def validate(self, params):
         Action.validate(self, params)
+        logger.debug("Validating params: %s" % params)
         self._check_params_length(params, 1)
         amount = Currency(params[0])
         if amount < self.min_bet or amount > self.max_bet:
