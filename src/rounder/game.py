@@ -526,6 +526,12 @@ class TexasHoldemGame(Game):
         self._check_if_finished()
         self.finished = True
 
+        # Before calculating winners, notify clients that the game is ending:
+        # TODO: Implement optional showing of cards here instead of just
+        # blindly showing the cards for everyone left in the hand?
+        event = GameEnding(self.table)
+        self.table.notify_all(event)
+
         board = []
         for c in self.community_cards:
             board.append(str(c).lower())

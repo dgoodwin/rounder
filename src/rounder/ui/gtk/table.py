@@ -316,6 +316,9 @@ class TableWindow(Table):
         elif isinstance(event, CommunityCardsDealt):
             self.chat_line("Community cards: %s" % event.cards)
 
+        elif isinstance(event, GameEnding):
+            self.chat_line("End of hand.")
+
         self.__render_table_state(event.table_state)
 
     def __render_table_state(self, state):

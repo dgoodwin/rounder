@@ -229,6 +229,21 @@ class PlayerFolded(Event):
 
 
 
+class GameEnding(Event):
+    """
+    Game is ending.
+
+    Clients should not interpret this as the actual end of the game, but
+    rather wait for incoming PlayerShowedCards events, and finally a 
+    GameResults event with information about who won each pot.
+    """
+    
+    def __init__(self, table):
+        Event.__init__(self, table)
+
+
+
+
 # All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
     Event,
@@ -244,5 +259,6 @@ ALL_EVENTS = [
     PlayerCalled,
     PlayerRaised,
     PlayerFolded,
+    GameEnding,
 ]
 
