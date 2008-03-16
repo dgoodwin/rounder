@@ -243,6 +243,22 @@ class GameEnding(Event):
 
 
 
+class GameOver(Event):
+    """
+    Game is over.
+
+    Contains all the final results of the hand, who won with what hand
+    and how much.
+    """
+    
+    def __init__(self, table, results):
+        Event.__init__(self, table)
+
+        # A list of tuples, (PotState, [PotWinner, ...]):
+        self.results = results
+
+
+
 class PlayerShowedCards(Event):
     """
     Player shows their hole cards.
@@ -279,5 +295,6 @@ ALL_EVENTS = [
     PlayerFolded,
     GameEnding,
     PlayerShowedCards,
+    GameOver,
 ]
 

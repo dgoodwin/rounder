@@ -328,14 +328,32 @@ class TableWindow(Table):
 
         elif isinstance(event, CommunityCardsDealt):
             self.chat_line("Community cards: %s" % event.cards)
+            # Implicit new round of betting, clear actions from the last one.
+            for seat in self.gui_seats:
+                seat.clear_action()
 
         elif isinstance(event, GameEnding):
             self.chat_line("End of hand.")
+            for seat in self.gui_seats:
+                seat.clear_action()
 
         elif isinstance(event, PlayerShowedCards):
             self.chat_line("%s shows: %s" % (event.username, event.cards))
             seat = self.__username_to_seat[event.username]
             seat.show_hole_cards(event.cards)
+
+        elif isinstance(event, GameOver):
+            for tuple in event.results:
+                pot_state = tuple[0]
+                for pot_winner in tuple[1]:
+                    pot_type = "main"
+                    if not pot_state.is_main_pot:
+                        pot_type = "side"
+                    self.chat_line("%s wins $%s from %s pot" %
+                            (pot_winner.username, pot_winner.amount, 
+                                pot_type))
+            self.deal_button.set_sensitive(True)
+
 
     def __render_table_state(self, state):
         """
@@ -434,6 +452,10 @@ class GuiSeat:
     def is_showing_hole_cards(self):
         """ Return the current text from the hole cards field. """
         return len(self.cards_label.get_text()) > 0
+
+    def clear_action(self):
+        """ Clear the action column. """
+        self.__action_label.set_text("")
 
     def prompted(self):
         """ Indicate in the UI that this seat has been prompted to act. """

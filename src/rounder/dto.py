@@ -134,3 +134,21 @@ class PotState:
     def __init__(self, pot):
         self.amount = pot.amount
         self.is_main_pot = pot.is_main_pot
+
+    def __repr__(self):
+        return "Pot: $%s" % self.amount
+
+
+
+class PotWinner:
+    """
+    Winner of a pot.
+    """
+
+    def __init__(self, username, amount):
+        self.username = username
+        self.amount = amount
+
+    def __repr__(self):
+        return "PotWinner: %s won $%s" % (self.username, self.amount)
+
