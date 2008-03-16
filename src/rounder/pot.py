@@ -1,7 +1,7 @@
 #   Rounder - Poker for the GNOME Desktop
 #
-#   Copyright (C) 2006-2007 Devan Goodwin <dgoodwin@dangerouslyinc.com>
-#   Copyright (C) 2006-2007 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2006-2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2006-2008 James Bowes <jbowes@dangerouslyinc.com>
 #   Copyright (c) 2008 Kenny MacDermid <kenny@kmdconsulting.ca>
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -51,13 +51,12 @@ class Pot:
         logger.debug("Pot: $%s" % self.amount)
         logger.debug("Players: " + str(self.players))
 
+
+
 class PotManager:
     def __init__(self):
         self.pots = []
         self.createNew = True
-
-        # Devan tells me we need to know how much people have put in total
-        self.per_pay_contrib = defaultdict(int)
 
     def __add_players_to_pot(self, players, amount):
         if self.createNew == True:
@@ -72,14 +71,13 @@ class PotManager:
         amounts.sort()
         players = []
         map(players.extend, player_amounts.values())
-        allready_in = 0
+        already_in = 0
         for amount in amounts:
-            self.__add_players_to_pot(players, amount - allready_in)
-            allready_in = amount
+            self.__add_players_to_pot(players, amount - already_in)
+            already_in = amount
             for player in player_amounts[amount]:
                 if player.allin:
                     self.createNew = True
-                self.per_pay_contrib[player] += amount
                 players.remove(player)
 
     def fold(self, player):

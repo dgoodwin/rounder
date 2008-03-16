@@ -116,10 +116,12 @@ class Raise(Action):
     """
     # TODO: Add existing bet to the contructor?
 
-    def __init__(self, max_bet, min_bet):
+    def __init__(self, max_bet, min_bet, current_bet):
         Action.__init__(self)
         self.max_bet = max_bet
         self.min_bet = min_bet
+        self.current_bet = current_bet
+
         # TODO: protect the amount better?
         self.amount = None # unknown until we receive a response from the player
 

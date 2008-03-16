@@ -113,7 +113,7 @@ class FixedLimit(Limit):
             if raise_amount + current_bet > player.chips:
                 raise_amount = player.chips - current_bet # all-in!
 
-            actions.append(Raise(raise_amount, raise_amount))
+            actions.append(Raise(raise_amount, raise_amount, current_bet))
 
         actions.append(Call(call_amount))
 

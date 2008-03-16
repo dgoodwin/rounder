@@ -24,7 +24,7 @@ from logging import getLogger
 logger = getLogger("rounder.serialize")
 
 import cerealizer
-from rounder.dto import TableState, PlayerState, TableListing
+from rounder.dto import TableState, PlayerState, TableListing, PotState
 from rounder.card import Card, Suit
 from rounder.currency import Currency
 from rounder.action import PostBlind, Call, Raise, Fold
@@ -38,6 +38,7 @@ def register_message_classes():
         Suit,
         TableState,
         TableListing,
+        PotState,
         Currency,
         PlayerState,
         PostBlind,

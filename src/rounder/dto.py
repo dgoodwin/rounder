@@ -28,8 +28,9 @@ initially empty it provides a hook for us to change the DTO should the
 engine object later grow to contain sensitive information.
 """
 
-class TableState:
+from rounder.currency import Currency
 
+class TableState:
     """ 
     Representation of a table fit for sending to a table's observers. 
     Must be careful not to expose any engine internals, this WILL be
@@ -42,8 +43,21 @@ class TableState:
         self.limit = table.limit
         self.hand_underway = (table.gsm.current != None)
         self.community_cards = []
+        self.pots = []
+        self.round_bets = Currency(0.00)
         if table.game != None:
             self.community_cards = table.game.community_cards
+            for pot in table.game.pot_mgr.pots:
+                self.pots.append(PotState(pot))
+
+            # Pots only receive funds after the round of betting has completed,
+            # but clients are more than a little interested in seeing the
+            # amount of money bet in the current round as well. Include this
+            # info and let the client figure out how they want to render it.
+            # (as it's not really part of any pot yet, nor do we know which it
+            # will go to)
+            for p in table.game.players:
+                self.round_bets = self.round_bets + p.current_bet
 
         # for now represent seated players as a list of tuples, player name
         # and stack size:
@@ -91,7 +105,6 @@ class TableListing:
 
 
 class PlayerState:
-
     """ 
     Representation of a Player safe for transmitting over the wire.
     """
@@ -107,3 +120,16 @@ class PlayerState:
 
     def __str__(self):
         return "%s - %s" % (self.username, self.chips)
+
+
+class PotState:
+    """
+    Representaton of a Pot safe for transmitting over the wire.
+
+    The Pot class itself is dangerously close to being safe to transmit as it,
+    but wrapping it here just incase the references to players will
+    pose a problem, or inappropriate information is added in the future.
+    """
+
+    def __init__(self, pot):
+        self.amount = pot.amount

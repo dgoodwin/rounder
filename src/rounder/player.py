@@ -46,6 +46,11 @@ class Player:
         self.folded = False
         self.in_hand = False
 
+        # Initialized by new_round:
+        self.current_bet = None
+        self.raise_round = None
+        self.allin = False
+
         self.reset()
 
     def reset(self):

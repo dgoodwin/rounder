@@ -27,6 +27,7 @@ logger = getLogger("rounder.ui.gtk.table")
 
 from rounder.ui.gtk.util import find_file_on_path
 from rounder.ui.client import Table
+from rounder.currency import Currency
 from rounder.event import *
 from rounder.action import *
 
@@ -179,6 +180,7 @@ class TableWindow(Table):
         action_index = data[0]
         action = data[1]
         raise_amount = data[2]
+        current_bet = data[3]
 
         self.__disable_action_buttons()
 
@@ -226,7 +228,7 @@ class TableWindow(Table):
                     self.raise_button.disconnect(self.__raise_handler_id)
                 self.__raise_handler_id = self.raise_button.connect('clicked', 
                         self.handle_raise_button, (index, action, 
-                            action.min_bet))
+                            action.min_bet, action.current_bet))
 
             elif isinstance(action, Fold):
                 self.fold_button.set_label("Fold")
@@ -321,16 +323,22 @@ class TableWindow(Table):
         state.print_state()
     
         # Render board cards:
-        if len(state.community_cards) == 0:
-            self.board_label.set_text("")
-        else:
-            cards_string = ""
-            for c in state.community_cards:
-                if len(cards_string) == 0:
-                    cards_string = str(c)
-                else:
-                    cards_string = "%s %s" % (cards_string, c)
-            self.board_label.set_text(cards_string)
+        cards_string = ""
+        for c in state.community_cards:
+            if len(cards_string) == 0:
+                cards_string = str(c)
+            else:
+                cards_string = "%s %s" % (cards_string, c)
+        self.board_label.set_text(cards_string)
+
+        # Render pot size:
+        # TODO: Rendering all side pots + pending round bets as one
+        # master pot here for now:
+        pots = Currency(0.00)
+        for pot_state in state.pots:
+            pots = pots + pot_state.amount
+        pots = pots + state.round_bets
+        self.pot_label.set_text("$%s" % pots)
 
         for i in range(0, 4):
             seat = self.gui_seats[i]
