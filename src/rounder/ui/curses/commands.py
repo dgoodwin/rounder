@@ -97,5 +97,17 @@ class SitCommand(object):
         state.table.sit(seatid)
 
 
+class EvalCommand(object):
+
+    name = "eval"
+    args = "expression"
+    summary = "execute a raw python command"
+
+    @staticmethod
+    def do(state, args):
+        expression = " ".join(args)
+        res = eval(expression, {'state' : state})
+        state.screen.write(str(res))
+
 commands = (HelpCommand, ConnectCommand, ListCommand, JoinCommand, SitCommand,
-        QuitCommand)
+        QuitCommand, EvalCommand)
