@@ -117,6 +117,9 @@ class RounderScreen(CursesStdIO):
         self.position_cursor()
         self.stdscr.refresh()
 
+        self.history = []
+        self.history_pos = 0
+
     def set_command(self, commands):
         self.commands = commands
 
@@ -130,6 +133,8 @@ class RounderScreen(CursesStdIO):
 
     def handle_input(self):
         input = self.input
+        self.history.append(input)
+        self.history_pos = 0
         self.input = ""
         self.write(input)
         if not len(input):
@@ -161,7 +166,7 @@ class RounderScreen(CursesStdIO):
 
     def doRead(self):
         c = self.stdscr.getch()
-
+        
         if c in (8, 127, 263): # Backspace
             if len(self.input):
                 self.input = self.input[:-1]
@@ -169,6 +174,22 @@ class RounderScreen(CursesStdIO):
         elif c == 10: # Enter
             self.stdscr.deleteln()
             self.handle_input()
+        elif c == 259: # Up arrow
+            if self.history_pos < len(self.history):
+                self.history_pos += 1
+                self.stdscr.deleteln()
+                self.input = self.history[-self.history_pos]
+                self.stdscr.addstr(self.rows - 1, 0, self.input)
+        elif c == 258: # Down arrow
+            if self.history_pos > 1:
+                self.history_pos -= 1
+                self.stdscr.deleteln()
+                self.input = self.history[-self.history_pos]
+                self.stdscr.addstr(self.rows - 1, 0, self.input)
+            else:
+                self.history_pos = 0
+                self.stdscr.deleteln()
+                self.input = ""
         elif c < 256 and chr(c) in string.printable:
             if len(self.input) == self.cols - 2: return
             self.input = self.input + chr(c)
