@@ -1,8 +1,45 @@
+Want to hack on Rounder? Here's everything you should need to know.
+
+=============
+GENERAL NOTES
+=============
+
+We'll do everything in our power to get contributed patches into the codebase.
+We're attempting to keep the code as clean, logical, and maintainable as
+possible, so in the event a patch is received which we don't understand or
+feel violates any of the above, we may modify it, ask for a re-submit, or just
+start a dialog to help determine what to do. Goal is to be as community
+friendly as possible while still maintaining a stable code base. If you spot
+something in the code you feel violates any of the above, please feel free to
+bring it to up, preferably with suggestions for improvement.
+
+In general, all code should adhere to the Python code style defined in PEP 8:
+
+    http://www.python.org/dev/peps/pep-0008/
+
+Rounder should never have to be 'installed' to be developed against. Most
+everything should be runnable from the base source directory assuming the
+developer has the required dependencies installed.
+
+Unit tests are rounder's lifeblood. Virtually everything short of the client
+code is unit tested and when working with a dynamic language this is extremely
+important for allowing us to refactor problem areas down the road. Tests
+included in the default suite must be "pure" and lightning fast, no disk
+access, no network access, and test the components as fine grained as
+possible.
+
+============
+ARCHITECTURE
+============
+
+See the doc sub-directory. (COMING SOON)
+
 ============
 DEPENDENCIES
 ============
 
-Rounder currently has the following dependencies:
+Rounder currently has the following dependencies: (NOTE: these must currently
+be manually installed until we have packages and distutils setup properly)
 
 * Twisted: http://twistedmatrix.com/trac/
 Python Network library used for all of Rounder's networking.
@@ -25,28 +62,4 @@ RUNNNG TESTS
 From the root of the source directory:
 
     ./runtests.py               Runs all the pure unit tests. (very fast)
-
-To test the network using dummy clients that just randomly choose an action:
-NOTE: this is somewhat outdated and may no longer work. Most of this is now
-tested in the standard unit tests.
-
-    ./rounder-server
-    ./rounder-testclient -u player0 -p password
-    ./rounder-testclient -u player1 -p password -i
-
-    NOTE: more test clients can be created, just add -i to the last one. 
-    The server currently is configured for several playerX logins and 
-    passwords as above.
-
-=============
-GENERAL NOTES
-=============
-
-Rounder should never have to be 'installed' to be developed against. Most
-everything should be runnable from the base source directory.
-
-Unit test everything you possibly can. Keep tests pure if included in the
-default alltests.py, no disk/network access or persistent changes. If need
-arises for non-unit tests we'll setup infrastructure for a separate more time
-consuming suite, but avoid this whenever possible.
 
