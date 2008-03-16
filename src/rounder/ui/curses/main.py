@@ -162,20 +162,19 @@ class RounderScreen(CursesStdIO):
     def doRead(self):
         c = self.stdscr.getch()
 
-        if (c > 256):
-            return
-
-        if c == 8 or c == 127: # Backspace
+        if c in (8, 127, 263): # Backspace
             if len(self.input):
                 self.input = self.input[:-1]
                 self.stdscr.delch(self.rows - 1, len(self.input))
         elif c == 10: # Enter
             self.stdscr.deleteln()
             self.handle_input()
-        elif chr(c) in string.printable:
+        elif c < 256 and chr(c) in string.printable:
             if len(self.input) == self.cols - 2: return
             self.input = self.input + chr(c)
             self.stdscr.insch(self.rows - 1, len(self.input) - 1, chr(c))
+        else:
+            return
 
         self.position_cursor()
         self.stdscr.refresh()
