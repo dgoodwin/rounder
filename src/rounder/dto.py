@@ -103,7 +103,6 @@ class TableListing:
 
 
 
-
 class PlayerState:
     """ 
     Representation of a Player safe for transmitting over the wire.
@@ -120,6 +119,7 @@ class PlayerState:
 
     def __str__(self):
         return "%s - %s" % (self.username, self.chips)
+
 
 
 class PotState:

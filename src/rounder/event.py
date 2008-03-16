@@ -243,6 +243,24 @@ class GameEnding(Event):
 
 
 
+class PlayerShowedCards(Event):
+    """
+    Player shows their hole cards.
+
+    Only used at the end of a hand. Currently sent out for all players left in
+    the hand, but one day may be optional for users who aren't required to
+    show first.
+    """
+
+    def __init__(self, table, username, cards):
+
+        Event.__init__(self, table)
+        self.username = username
+        self.cards = cards
+
+    def __repr__(self):
+        return "PlayerShowedCards: %s - %s" % (self.username, self.cards)
+
 
 # All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
@@ -260,5 +278,6 @@ ALL_EVENTS = [
     PlayerRaised,
     PlayerFolded,
     GameEnding,
+    PlayerShowedCards,
 ]
 

@@ -44,7 +44,6 @@ class Player:
         self.cards = []
         self.sitting_out = False
         self.folded = False
-        self.in_hand = False
 
         # Initialized by new_round:
         self.current_bet = None
@@ -140,8 +139,9 @@ class Player:
     def add_chips(self, amount):
         """ Add chips to the players stack. """
         if amount < 0:
-            raise RounderException("Negative amount, use subtract_chips instead.")
-        logger.debug("Adding chips to " + str(self.username) + ": " + str(amount))
+            raise RounderException("Negative amount, subtract_chips instead.")
+        logger.debug("Adding chips to " + str(self.username) + ": " + 
+                str(amount))
         self.chips = self.chips + amount
 
     def subtract_chips(self, amount):
@@ -152,5 +152,9 @@ class Player:
         logger.debug("Subtracting chips from " + str(self.username) + ": " +
             str(amount))
         self.chips = self.chips - amount
+
+    def __in_hand(self):
+        return (not self.sitting_out) and (not self.folded)
+    in_hand = property(__in_hand, None)
 
 

@@ -262,7 +262,10 @@ class EventTests(BaseServerFixture):
         user2_fold = user2_events[0]
         self.assertEquals(self.user2.username, user2_fold.username)
 
-    def test_game_ending(self):
+    def __run_complete_hand(self):
+        """
+        Run through a complete hand checking down the action.
+        """
         self.user1_table.view_sit(self.user1, 0)
         self.user2_table.view_sit(self.user2, 1)
         self.user1_table.view_start_game(self.user1)
@@ -287,10 +290,20 @@ class EventTests(BaseServerFixture):
         self.user2.act(self.table.id, Call) # more like a check
         self.user1.act(self.table.id, Call) # more like a check
 
+
+    def test_game_ending(self):
+        self.__run_complete_hand()
         gameover_events = filter_event_type(self.user1, GameEnding)
         self.assertEquals(1, len(gameover_events))
         gameover_events = filter_event_type(self.user2, GameEnding)
         self.assertEquals(1, len(gameover_events))
+
+    def test_player_showed_cards(self):
+        self.__run_complete_hand()
+        events = filter_event_type(self.user1, PlayerShowedCards)
+        self.assertEquals(2, len(events))
+        events = filter_event_type(self.user2, PlayerShowedCards)
+        self.assertEquals(2, len(events))
 
 
 

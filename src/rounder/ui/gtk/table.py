@@ -95,8 +95,14 @@ class TableWindow(Table):
         # Will be a pointer to our GuiSeat:
         self.my_seat = None
         self.my_seat_num = None
+
         # Map usernames to seats for dealing with incoming actions:
         self.__username_to_seat = {}
+        for player_state in self.client_table.state.seats:
+            if player_state == None:
+                continue
+            self.__username_to_seat[player_state.username] = \
+                    self.gui_seats[player_state.seat]
 
         # Signal handling:
         # TODO: Replace these all with one signal?
@@ -251,6 +257,10 @@ class TableWindow(Table):
         everything at the table.
         """
 
+        # Render the generic table state first, let the event specific code
+        # expand on this:
+        self.__render_table_state(event.table_state)
+
         if isinstance(event, PlayerJoinedTable):
             self.__username_to_seat[event.username] = \
                 self.gui_seats[event.seat_num]
@@ -260,7 +270,7 @@ class TableWindow(Table):
                 self.gui_seats[event.seat_num].sit_button_disable()
 
         if isinstance(event, PlayerLeftTable):
-            self.__username_to_seat[event.username] = None 
+            self.__username_to_seat.pop(event.username)
             self.chat_line("%s left table." % event.username) 
             if self.my_seat == None:
                 self.gui_seats[event.seat_num].sit_button_enable()
@@ -281,8 +291,8 @@ class TableWindow(Table):
             self.deal_button.set_sensitive(True)
 
         elif isinstance(event, NewHandStarted):
-            self.chat_line("Dealing hand.")
-            self.deal_button.set_sensitive(False)
+            #self.deal_button.set_sensitive(False)
+            pass
 
         elif isinstance(event, PlayerPostedBlind):
             self.chat_line("%s posts blind: $%s" % (event.username,
@@ -312,6 +322,7 @@ class TableWindow(Table):
             self.chat_line("Dealt hole cards: %s %s" % (event.cards[0], 
                 event.cards[1]))
             self.my_hole_cards = event.cards
+            self.my_seat.show_hole_cards(self.my_hole_cards)
 
         elif isinstance(event, CommunityCardsDealt):
             self.chat_line("Community cards: %s" % event.cards)
@@ -319,9 +330,19 @@ class TableWindow(Table):
         elif isinstance(event, GameEnding):
             self.chat_line("End of hand.")
 
-        self.__render_table_state(event.table_state)
+        elif isinstance(event, PlayerShowedCards):
+            self.chat_line("%s shows: %s" % (event.username, event.cards))
+            seat = self.__username_to_seat[event.username]
+            seat.show_hole_cards(event.cards)
 
     def __render_table_state(self, state):
+        """
+        Renders table state every time an event is received.
+
+        Transition this slowly to a state where this is only used when
+        initially joining a table. Let individual event handlers change
+        only the relevant widgets for incoming events.
+        """
         logger.debug("Rendering table state:")
         state.print_state()
     
@@ -349,7 +370,6 @@ class TableWindow(Table):
             if state.seats[i] != None:
                 player_state = state.seats[i]
                 username = player_state.username
-                self.__username_to_seat[username] = seat
                 seat.set_username(username)
                 seat.sit_button_disable()
 
@@ -360,9 +380,8 @@ class TableWindow(Table):
                     seat.set_hole_cards("Sitting Out")
                 elif player_state.num_cards == 0:
                     seat.set_hole_cards("")
-                elif i == self.my_seat_num:
-                    seat.show_hole_cards(self.my_hole_cards)
-                else:
+                # Using this to only set cards display once:
+                elif not seat.is_showing_hole_cards():
                     seat.set_hole_cards("XX XX")
 
             else:
@@ -403,16 +422,16 @@ class GuiSeat:
     def show_hole_cards(self, cards):
         """
         Display hole cards.
-
-        Cards will be set to None if we're displaying another player still
-        in the hand. (done so we can visually see who's left and who's
-        sitting out)
         """
         self.cards_label.set_text("%s %s" % (cards[0], cards[1]))
 
     def set_hole_cards(self, msg):
         """ Hole cards field also used to indicate status in the hand. """
         self.cards_label.set_text(msg)
+
+    def is_showing_hole_cards(self):
+        """ Return the current text from the hole cards field. """
+        return len(self.cards_label.get_text()) > 0
 
     def prompted(self):
         """ Indicate in the UI that this seat has been prompted to act. """
