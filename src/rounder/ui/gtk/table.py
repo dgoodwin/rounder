@@ -158,6 +158,8 @@ class TableWindow(Table):
         """ Append a line to the chat area on the table. """
         buf = self.chat_textview.get_buffer()
         buf.insert(buf.get_end_iter(), msg + "\n")
+        mark = buf.create_mark("end", buf.get_end_iter())
+        self.chat_textview.scroll_to_mark(mark, 0.0)
     
     def __disable_action_buttons(self):
         self.call_button.set_label("Call")
