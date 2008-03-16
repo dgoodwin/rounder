@@ -17,12 +17,14 @@ from rounder.network.serialize import register_message_classes
 from rounder.network.client import RounderNetworkClient
 from rounder.ui.client import Client
 
+from rounder.ui.curses import commands
+
 class TxtRounderState:
 
     def __init__(self, screen):
         self.client = None
         self.table = None
-        self.commands = TxtRounderCommands(self)
+        self.commands = commands.commands
         self.servercb = TxtRounderClientServerCallback(self, screen)
         self.screen = screen
 
@@ -44,44 +46,6 @@ class TxtRounderState:
         # TODO: write in different colour
         self.screen.write(message)
 
-class TxtRounderCommands:
-    """ Client calls to the server. """
-
-    def __init__(self, state):
-        self.state = state
-
-    def help(self):
-        self.state.screen.write("help - Supported Commands:")
-        self.state.screen.write("connect server port user pass - connect to a server")
-        self.state.screen.write("list - list tables")
-        self.state.screen.write("join table_num - join a table")
-        self.state.screen.write("sit seat_num - sit in a seat")
-
-    def connect(self, host, port, username, password):
-        """ Connect to server. """
-        if self.state.is_connected():
-            self.state.log("Error - Already connected")
-            return
-        client = RounderNetworkClient(self.state.servercb)
-        client.connect(host, port, username, password)
-
-    def list(self):
-        """ List tables. """
-        if not self.state.is_connected():
-            self.state.log("Error - Not connected")
-        self.state.client.get_table_list()
-
-    def join(self, tableid):
-        if not self.state.is_connected():
-            self.state.log("Error - Not connected")
-        self.state.client.open_table(tableid)
-
-    def sit(self, seatid):
-        if not self.state.is_connected():
-            self.state.log("Error - Not connected")
-        if not self.state.is_ontable():
-            self.state.log("Error - Not at a table")
-        self.state.table.sit(seatid)
 
 class TxtRounderClientServerCallback(Client):
 
@@ -132,6 +96,8 @@ class RounderScreen(CursesStdIO):
         curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLUE)
 
+        self.state = None
+
         self.input = ""
         self.status = "Disconnected"
         self.rows, self.cols = self.stdscr.getmaxyx()
@@ -161,14 +127,14 @@ class RounderScreen(CursesStdIO):
         if not len(input):
             return
         try:
-            command = self.create_command(input)
-            eval(command, {}, {"x":self.commands})
-        except SyntaxError:
-            self.write("Invalid Command - Syntax Error")
-            self.write(traceback.format_exc())
-        except AttributeError:
-            self.write("Invalid Command - Attribute Error")
-            self.write(traceback.format_exc())
+            command_name, args = self.create_command(input)
+            for command in self.commands:
+                if command.name == command_name:
+                    command.do(self.state, args)
+                    break
+            else:
+                self.write("Invalid Command %s - no such command"
+                        % command_name)
         except Exception:
             self.write(traceback.format_exc())
 
@@ -179,24 +145,11 @@ class RounderScreen(CursesStdIO):
         self.stdscr.refresh()
 
     def create_command(self, input):
-        s = StringIO.StringIO(input)
-        values = csv.reader(s, delimiter=' ').next()
-        if not len(values):
+        values = input.split(' ')
+        if len(values) == 0:
             self.write("Invalid Command - None")
 
-        command = "x." + values[0] + "("
-
-        for value in values[1:]:
-            if value.isdigit():
-                command = command + value + ", "
-            elif value.isalnum():
-                command = command + "\"" + value + "\", "
-
-        if len(values) > 1:
-            command = command[:-2] # remove last ', '
-
-        command = command + ")"
-        return command
+        return values[0], values[1:] or None
 
     def doRead(self):
         c = self.stdscr.getch()
@@ -234,6 +187,7 @@ class RounderCurses:
     def startClient(self, stdscr):
         screen = RounderScreen(stdscr)
         state = TxtRounderState(screen)
+        screen.state = state
         screen.set_command(state.commands)
 
         reactor.addReader(screen)
