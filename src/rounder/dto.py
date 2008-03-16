@@ -61,7 +61,7 @@ class TableState:
         i = 0
         print "   seats:"
         for s in self.seats:
-            print "   %s - %s" % (i, s)
+            print "     %s - %s" % (i, s)
             i = i + 1
 
 
@@ -102,6 +102,7 @@ class PlayerState:
         self.sitting_out = player.sitting_out
         self.folded = player.folded
 
+        self.num_cards = len(player.cards)
 
     def __str__(self):
         return "%s - %s" % (self.name, self.chips)

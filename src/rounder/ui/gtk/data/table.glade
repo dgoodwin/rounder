@@ -383,7 +383,7 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkLabel" id="seat0-status-label">
+	    <widget class="GtkLabel" id="seat0-cards-label">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes"></property>
 	      <property name="use_underline">False</property>
@@ -459,7 +459,7 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkLabel" id="seat1-status-label">
+	    <widget class="GtkLabel" id="seat1-cards-label">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes"></property>
 	      <property name="use_underline">False</property>
@@ -487,7 +487,7 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkLabel" id="seat2-status-label">
+	    <widget class="GtkLabel" id="seat2-cards-label">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes"></property>
 	      <property name="use_underline">False</property>
@@ -515,7 +515,7 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkLabel" id="seat3-status-label">
+	    <widget class="GtkLabel" id="seat3-cards-label">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes"></property>
 	      <property name="use_underline">False</property>
@@ -715,9 +715,9 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkLabel" id="status-column-title">
+	    <widget class="GtkLabel" id="cards-column-title">
 	      <property name="visible">True</property>
-	      <property name="label" translatable="yes">&lt;span size=&quot;large&quot;&gt;Status&lt;/span&gt;</property>
+	      <property name="label" translatable="yes">&lt;span size=&quot;large&quot;&gt;Cards&lt;/span&gt;</property>
 	      <property name="use_underline">False</property>
 	      <property name="use_markup">True</property>
 	      <property name="justify">GTK_JUSTIFY_LEFT</property>

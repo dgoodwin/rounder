@@ -136,6 +136,8 @@ class Card:
         return "%s%s" % (self.get_rank_display(), self.get_suit_display())
 
     def __cmp__(self, other):
+        if other == None:
+            return 0
         if other.rank != self.rank:
             return cmp(other.rank, self.rank)
         else:

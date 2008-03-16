@@ -171,6 +171,7 @@ class ClientTable(pb.Referenceable):
         """
         self.__view = table_view
         self.state = table_state
+        self.table_id = self.state.id
         self.ui = None
 
     def log_error(self, failure):
@@ -219,16 +220,15 @@ class ClientTable(pb.Referenceable):
             logger.error(e)
             raise e
 
-    def act(self, table_id, action_index, params):
+    def act(self, action_index, params):
         """
         Server prompts clients with a list of actions. To ensure the client
         never carries out an action it wasn't given the option to, actions are
         selected by an index into the list the server sent.
         """
-        # TODO: add parameters here
         logger.debug("Table %s: Sending action index %s to server: %s" %
-            (table_id, action_index, params))
-        self.view.callRemote("process_action", action_index,
+            (self.table_id, action_index, params))
+        self.__view.callRemote("process_action", action_index,
             params)
 
     def process_event(self, event):

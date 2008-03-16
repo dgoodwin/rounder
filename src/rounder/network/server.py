@@ -280,7 +280,8 @@ class TableView(pb.Viewable):
         """
         Called by clients attempting to perform an action.
         """
-        server.process_action(self.table, from_user, action_index, params)
+        self.server.process_action(self.table, from_user, action_index, 
+                params)
 
 
 
