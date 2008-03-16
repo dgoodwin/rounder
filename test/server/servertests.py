@@ -110,16 +110,16 @@ class RounderNetworkServerTests(BaseServerFixture):
             user.act_randomly(self.table.id)
 
     def test_remove_user(self):
-        self.assertTrue(self.server.users.has_key(self.user1.name))
+        self.assertTrue(self.server.users.has_key(self.user1.username))
         self.user1.detached(None)
-        self.assertFalse(self.server.users.has_key(self.user1.name))
+        self.assertFalse(self.server.users.has_key(self.user1.username))
 
 
 
 class TestUser(User):
 
-    def __init__(self, name, server):
-        User.__init__(self, name, server)
+    def __init__(self, username, server):
+        User.__init__(self, username, server)
 
         # Queue of all events received.
         self.events = []

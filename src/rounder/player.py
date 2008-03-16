@@ -36,9 +36,8 @@ class Player:
     created for each.
     """
 
-    def __init__(self, name, table=None, seat=None, chips=0):
-        # TODO: Refactor name to username?
-        self.name = name
+    def __init__(self, username, table=None, seat=None, chips=0):
+        self.username = username
         self.chips = chips
         self.table = table
         self.seat = seat
@@ -117,7 +116,7 @@ class Player:
 
     def __repr__(self):
         return "Player: %s (seat: %s, chips: %s)" % \
-            (self.name, self.seat, self.chips)
+            (self.username, self.seat, self.chips)
 
     def clear_pending_actions(self):
         """ Clear any actions pending for this player. """
@@ -137,7 +136,7 @@ class Player:
         """ Add chips to the players stack. """
         if amount < 0:
             raise RounderException("Negative amount, use subtract_chips instead.")
-        logger.debug("Adding chips to " + str(self.name) + ": " + str(amount))
+        logger.debug("Adding chips to " + str(self.username) + ": " + str(amount))
         self.chips = self.chips + amount
 
     def subtract_chips(self, amount):
@@ -145,7 +144,7 @@ class Player:
         # NOTE: Separate function to hopefully help prevent errors.
         if amount < 0:
             raise RounderException("Negative amount, use add_chips instead.")
-        logger.debug("Subtracting chips from " + str(self.name) + ": " +
+        logger.debug("Subtracting chips from " + str(self.username) + ": " +
             str(amount))
         self.chips = self.chips - amount
 

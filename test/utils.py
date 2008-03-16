@@ -33,7 +33,7 @@ def create_players_list(size, chips):
     """
     l = []
     for i in range(size):
-        l.append(Player(name='player' + str(i), seat=i, chips=Currency(chips)))
+        l.append(Player(username='player' + str(i), seat=i, chips=Currency(chips)))
     return l
 
 def create_players(chip_counts):
@@ -44,7 +44,7 @@ def create_players(chip_counts):
     l = []
     i = 0
     for c in chip_counts:
-        l.append(Player(name='player' + str(i), seat=i, chips=Currency(c)))
+        l.append(Player(username='player' + str(i), seat=i, chips=Currency(c)))
         i = i + 1
     return l
 
@@ -55,7 +55,7 @@ def create_table(chip_counts, dealer_index):
     players = []
     i = 0
     for chip_count in chip_counts:
-        new_player = Player(name='player' + str(i), chips=Currency(chip_count))
+        new_player = Player(username='player' + str(i), chips=Currency(chip_count))
         table.seat_player(new_player, i)
         players.append(new_player)
         i = i + 1

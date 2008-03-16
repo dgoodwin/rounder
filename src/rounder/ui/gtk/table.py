@@ -250,28 +250,28 @@ class TableWindow(Table):
         """
 
         if isinstance(event, PlayerJoinedTable):
-            self.__username_to_seat[event.player_name] = \
+            self.__username_to_seat[event.username] = \
                 self.gui_seats[event.seat_num]
-            self.chat_line("%s took seat %s." % (event.player_name, 
+            self.chat_line("%s took seat %s." % (event.username, 
                     event.seat_num))
             if self.my_seat == None:
                 self.gui_seats[event.seat_num].sit_button_disable()
 
         if isinstance(event, PlayerLeftTable):
-            self.__username_to_seat[event.player_name] = None 
-            self.chat_line("%s left table." % event.player_name) 
+            self.__username_to_seat[event.username] = None 
+            self.chat_line("%s left table." % event.username) 
             if self.my_seat == None:
                 self.gui_seats[event.seat_num].sit_button_enable()
 
         elif isinstance(event, PlayerPrompted):
-            self.chat_line("Waiting for %s to act." % event.player_name)
+            self.chat_line("Waiting for %s to act." % event.username)
             # If our deal button is enabled this is likely the initial
             # prompt to post blinds and we can disable the button as the
             # hand will soon be underway. If the server is unable to find
             # player's willing to post blinds a HandCancelled event will
             # be sent out.
             self.deal_button.set_sensitive(False)
-            seat = self.__username_to_seat[event.player_name]
+            seat = self.__username_to_seat[event.username]
             seat.prompted()
 
         elif isinstance(event, HandCancelled):
@@ -283,27 +283,27 @@ class TableWindow(Table):
             self.deal_button.set_sensitive(False)
 
         elif isinstance(event, PlayerPostedBlind):
-            self.chat_line("%s posts blind: $%s" % (event.player_name,
+            self.chat_line("%s posts blind: $%s" % (event.username,
                 event.amount))
-            seat = self.__username_to_seat[event.player_name]
+            seat = self.__username_to_seat[event.username]
             seat.posted_blind(event.amount)
 
         elif isinstance(event, PlayerCalled):
-            self.chat_line("%s calls: $%s" % (event.player_name,
+            self.chat_line("%s calls: $%s" % (event.username,
                 event.amount))
-            seat = self.__username_to_seat[event.player_name]
+            seat = self.__username_to_seat[event.username]
             seat.called(event.amount)
 
         elif isinstance(event, PlayerRaised):
-            self.chat_line("%s raises: $%s" % (event.player_name,
+            self.chat_line("%s raises: $%s" % (event.username,
                 event.amount))
-            seat = self.__username_to_seat[event.player_name]
+            seat = self.__username_to_seat[event.username]
             seat.raised(event.amount)
 
         elif isinstance(event, PlayerFolded):
-            self.chat_line("%s folds." % (event.player_name,
+            self.chat_line("%s folds." % (event.username,
                 event.amount))
-            seat = self.__username_to_seat[event.player_name]
+            seat = self.__username_to_seat[event.username]
             seat.folded()
 
         elif isinstance(event, HoleCardsDealt):
@@ -337,8 +337,9 @@ class TableWindow(Table):
 
             if state.seats[i] != None:
                 player_state = state.seats[i]
-                self.__username_to_seat[player_state.name] = seat
-                seat.set_username(player_state.name)
+                username = player_state.username
+                self.__username_to_seat[username] = seat
+                seat.set_username(username)
                 seat.sit_button_disable()
 
                 # Render player cards:

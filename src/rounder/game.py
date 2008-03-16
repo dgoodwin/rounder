@@ -307,13 +307,13 @@ class TexasHoldemGame(Game):
         # -1 is used as the pre-betting round
         self.small_blind.bet(self.limit.small_blind, -1)
         logger.info("Table %s: %s posts the small blind: %s",
-            self.__get_table_id(), self.small_blind.name,
+            self.__get_table_id(), self.small_blind.username,
             self.limit.small_blind)
 
         # -1 is used as the pre-betting round
         self.big_blind.bet(self.limit.big_blind, -1)
         logger.info("Table %s: %s posts the big blind: %s",
-            self.__get_table_id(), self.big_blind.name, self.limit.big_blind)
+            self.__get_table_id(), self.big_blind.username, self.limit.big_blind)
 
         self.__last_actor = self.big_blind
         self.__current_bet = self.limit.big_blind
@@ -333,7 +333,7 @@ class TexasHoldemGame(Game):
         # send one event containing both cards:
         for p in self.players:
             hole_card_event = HoleCardsDealt(self.table, p.cards)
-            self.table.notify(p.name, hole_card_event)
+            self.table.notify(p.username, hole_card_event)
 
     def __continue_betting_round(self):
         """
@@ -429,7 +429,7 @@ class TexasHoldemGame(Game):
             fold = find_action_in_list(Fold, actions_list)
             self.process_action(player, fold)
         else:
-            logger.debug("Prompting %s with actions: %s" % (player.name,
+            logger.debug("Prompting %s with actions: %s" % (player.username,
                 actions_list))
             # TODO: Two prompt calls here, should probably be one:
             player.prompt(actions_list)
@@ -447,7 +447,7 @@ class TexasHoldemGame(Game):
         """
         # If the player sitting out is the one we were currently awaiting a
         # response from, simulate a fold:
-        logger.debug("Player sitting out: %s" % player.name)
+        logger.debug("Player sitting out: %s" % player.username)
         if self.pending_actions.has_key(player):
             logger.debug("   player had pending actions, simulating fold.")
             fold = find_action_in_list(Fold, self.pending_actions[player])
@@ -465,8 +465,8 @@ class TexasHoldemGame(Game):
             player.bet(req_amount, self.__raise_count)
 
             if action.amount == 0:
-                logger.debug("Table %s: %s checks" % (self.table.id, player.name))
-            event = PlayerCalled(self.table, player.name, action.amount)
+                logger.debug("Table %s: %s checks" % (self.table.id, player.username))
+            event = PlayerCalled(self.table, player.username, action.amount)
             self.table.notify_all(event)
 
         if isinstance(action, Raise):
@@ -480,13 +480,13 @@ class TexasHoldemGame(Game):
             self.__current_bet += action.amount
             player.bet(req_amount, self.__raise_count)
 
-            event = PlayerRaised(self.table, player.name, action.amount)
+            event = PlayerRaised(self.table, player.username, action.amount)
             self.table.notify_all(event)
 
         if isinstance(action, Fold):
             player.folded = True
             self.pot_mgr.fold(player)
-            event = PlayerFolded(self. table, player.name)
+            event = PlayerFolded(self. table, player.username)
             self.table.notify_all(event)
 
         # Remove this player from the pending actions map:
@@ -511,7 +511,7 @@ class TexasHoldemGame(Game):
         else:
             logger.debug("Actions still pending:")
             for p in self.pending_actions.keys():
-                logger.debug("   " + p.name + " " +
+                logger.debug("   " + p.username + " " +
                         str(self.pending_actions[p]))
 
     def game_over(self):
@@ -575,7 +575,7 @@ class TexasHoldemGame(Game):
                     remainder -= 0.01
 
                 player.add_chips(winnings)
-                logger.info(   "%s won %s" % (player.name, winnings))
+                logger.info(   "%s won %s" % (player.username, winnings))
 
     def __cards_for_players(self, players):
         pockets = []

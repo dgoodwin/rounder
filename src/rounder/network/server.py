@@ -99,16 +99,16 @@ class RounderNetworkServer:
         TableState snapshot the client can use to draw the current table
         state.
         """
-        logger.debug("Opening table %s for user %s" % (table_id, user.name))
+        logger.debug("Opening table %s for user %s" % (table_id, user.username))
         # TODO: check if user should be allowed to observe this table.
         table = self.table_views[table_id].table
-        table.add_observer(user.name)
+        table.add_observer(user.username)
         state = TableState(table)
         return (self.table_views[table_id], dumps(state))
 
     def seat_player(self, user, table, seat_num):
         """ Seat a player at a table in a specific seat. """
-        player = Player(user.name, chips=Currency(1000))
+        player = Player(user.username, chips=Currency(1000))
         # TODO: error handling, what if seat already taken?
         try:
             table.seat_player(player, seat_num)
@@ -118,7 +118,7 @@ class RounderNetworkServer:
 
     def sit_out_player(self, table, user):
         """ Sit out a player. """
-        player = table.seats.players_by_username[user.name]
+        player = table.seats.players_by_username[user.username]
         table.sit_out(player)
 
     def game_over(self, table):
@@ -142,8 +142,8 @@ class RounderNetworkServer:
     def process_action(self, table, user, action_index, params):
         """ Process an incoming action from a player. """
         logger.debug("Table %s: Received action index %s from %s." %
-            (table.id, action_index, user.name))
-        table.process_action(user.name, action_index, params)
+            (table.id, action_index, user.username))
+        table.process_action(user.username, action_index, params)
 
 
 
@@ -167,10 +167,10 @@ class User(pb.Avatar):
 
     """ An authenticated user's perspective. """
 
-    def __init__(self, name, server):
-        self.name = name
+    def __init__(self, username, server):
+        self.username = username
         self.server = server
-        self.server.add_user(name, self)
+        self.server.add_user(username, self)
         self.remote = None
         self.table_views = {}
 
@@ -179,10 +179,10 @@ class User(pb.Avatar):
 
     def detached(self, mind):
         self.remote = None
-        self.server.remove_user(self.name)
+        self.server.remove_user(self.username)
 
         for tv in self.table_views.values():
-            tv.table.remove_observer(self.name)
+            tv.table.remove_observer(self.username)
 
     def send(self, message):
         self.remote.callRemote("print", message)
@@ -260,7 +260,7 @@ class TableView(pb.Viewable):
 
     def view_leave(self, from_user):
         """ Leave the table. """
-        self.table.remove_observer(from_user.name)
+        self.table.remove_observer(from_user.username)
         from_user.table_views.pop(self.table.id)
 
     def view_start_game(self, from_user):

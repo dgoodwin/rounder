@@ -203,19 +203,19 @@ class EventTests(BaseServerFixture):
         user1_events = filter_event_type(self.user1, PlayerCalled)
         self.assertEquals(2, len(user1_events))
         user1_call = user1_events[0]
-        self.assertEquals(self.user1.name, user1_call.player_name)
+        self.assertEquals(self.user1.username, user1_call.username)
         self.assertEquals(Currency(0.5), user1_call.amount)
         user2_call = user1_events[1]
-        self.assertEquals(self.user2.name, user2_call.player_name)
+        self.assertEquals(self.user2.username, user2_call.username)
         self.assertEquals(Currency(0), user2_call.amount)
 
         user2_events = filter_event_type(self.user2, PlayerCalled)
         self.assertEquals(2, len(user2_events))
         user1_call = user2_events[0]
-        self.assertEquals(self.user1.name, user1_call.player_name)
+        self.assertEquals(self.user1.username, user1_call.username)
         self.assertEquals(Currency(0.5), user1_call.amount)
         user2_call = user2_events[1]
-        self.assertEquals(self.user2.name, user2_call.player_name)
+        self.assertEquals(self.user2.username, user2_call.username)
         self.assertEquals(Currency(0), user2_call.amount)
 
     def test_player_raised(self):
@@ -232,13 +232,13 @@ class EventTests(BaseServerFixture):
         user1_events = filter_event_type(self.user1, PlayerRaised)
         self.assertEquals(1, len(user1_events))
         user2_raise = user1_events[0]
-        self.assertEquals(self.user2.name, user2_raise.player_name)
+        self.assertEquals(self.user2.username, user2_raise.username)
         self.assertEquals(Currency(1), user2_raise.amount)
 
         user2_events = filter_event_type(self.user2, PlayerRaised)
         self.assertEquals(1, len(user2_events))
         user2_raise = user2_events[0]
-        self.assertEquals(self.user2.name, user2_raise.player_name)
+        self.assertEquals(self.user2.username, user2_raise.username)
         self.assertEquals(Currency(1), user2_raise.amount)
 
     def test_player_folded(self):
@@ -255,12 +255,12 @@ class EventTests(BaseServerFixture):
         user1_events = filter_event_type(self.user1, PlayerFolded)
         self.assertEquals(1, len(user1_events))
         user2_fold = user1_events[0]
-        self.assertEquals(self.user2.name, user2_fold.player_name)
+        self.assertEquals(self.user2.username, user2_fold.username)
 
         user2_events = filter_event_type(self.user2, PlayerFolded)
         self.assertEquals(1, len(user2_events))
         user2_fold = user2_events[0]
-        self.assertEquals(self.user2.name, user2_fold.player_name)
+        self.assertEquals(self.user2.username, user2_fold.username)
 
 
 

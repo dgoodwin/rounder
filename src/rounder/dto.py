@@ -97,7 +97,7 @@ class PlayerState:
     """
 
     def __init__(self, player):
-        self.name = player.name
+        self.username = player.username
         self.chips = player.chips
         self.seat = player.seat
         self.sitting_out = player.sitting_out
@@ -106,4 +106,4 @@ class PlayerState:
         self.num_cards = len(player.cards)
 
     def __str__(self):
-        return "%s - %s" % (self.name, self.chips)
+        return "%s - %s" % (self.username, self.chips)

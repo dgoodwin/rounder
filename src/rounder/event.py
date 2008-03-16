@@ -57,13 +57,13 @@ class PlayerJoinedTable(Event):
     Player sat down at the table.
     """
 
-    def __init__(self, table, player_name, seat_num):
+    def __init__(self, table, username, seat_num):
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
         self.seat_num = seat_num
 
     def __repr__(self):
-        return "PlayerJoinedTable: %s took seat %s" % (self.player_name,
+        return "PlayerJoinedTable: %s took seat %s" % (self.username,
             self.seat_num)
 
 
@@ -74,13 +74,13 @@ class PlayerLeftTable(Event):
     Player left the table.
     """
 
-    def __init__(self, table, player_name, seat_num):
+    def __init__(self, table, username, seat_num):
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
         self.seat_num = seat_num
 
     def __repr__(self):
-        return "PlayerLeftTable: %s left seat %s" % (self.player_name,
+        return "PlayerLeftTable: %s left seat %s" % (self.username,
             self.seat_num)
 
 
@@ -91,12 +91,12 @@ class PlayerSatOut(Event):
     Player sat out. (but did not leave the table)
     """
 
-    def __init__(self, table, player_name):
+    def __init__(self, table, username):
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
 
     def __repr__(self):
-        return "PlayerSatOut: %s" % (self.player_name)
+        return "PlayerSatOut: %s" % (self.username)
 
 
 
@@ -106,10 +106,10 @@ class PlayerPrompted(Event):
     Player has been prompted with actions.
     """
 
-    def __init__(self, table, player_name):
+    def __init__(self, table, username):
 
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
 
 
 
@@ -148,9 +148,9 @@ class PlayerPostedBlind(Event):
     enter the pot.
     """
 
-    def __init__(self, table, player_name, amount):
+    def __init__(self, table, username, amount):
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
         self.amount = amount
 
 
@@ -192,10 +192,10 @@ class PlayerCalled(Event):
     previously committed to the pot on previous action.
     """
 
-    def __init__(self, table, player_name, amount):
+    def __init__(self, table, username, amount):
 
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
         self.amount = amount
 
 
@@ -208,10 +208,10 @@ class PlayerRaised(Event):
     Amount is the amount raised over the existing bet.
     """
 
-    def __init__(self, table, player_name, amount):
+    def __init__(self, table, username, amount):
 
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
         self.amount = amount
 
 
@@ -222,10 +222,10 @@ class PlayerFolded(Event):
     Player folded.
     """
 
-    def __init__(self, table, player_name):
+    def __init__(self, table, username):
 
         Event.__init__(self, table)
-        self.player_name = player_name
+        self.username = username
 
 
 

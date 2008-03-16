@@ -69,20 +69,20 @@ class Seats(object):
         # Ensure a player can't get seated twice at one table:
         for seat in self.__seats:
             if seat != None:
-                if seat.name == player.name:
+                if seat.username == player.username:
                     raise RounderException("%s already seated at table" %
-                        (player.name))
+                        (player.username))
 
         self.__seats[seat_number] = player
         player.seat = seat_number
 
-        self.players_by_username[player.name] = player
+        self.players_by_username[player.username] = player
 
     def remove_player(self, username):
         player = self.players_by_username[username]
         index = self.__seats.index(player)
         self.__seats[index] = None
-        self.players_by_username.pop(player.name)
+        self.players_by_username.pop(player.username)
 
     def has_username(self, username):
         """
@@ -96,7 +96,7 @@ class Seats(object):
     def get_seat_number(self, username):
         i = 0
         for p in self.__seats:
-            if p != None and p.name == username:
+            if p != None and p.username == username:
                 return i
             i = i + 1
         raise RounderException("Unable to find seated user: %s" % username)
@@ -236,7 +236,7 @@ class Table(object):
         """ This needs to go... """
         i = 0
         for p in player_list:
-            if p.name == player.name:
+            if p.username == player.username:
                 return i
             i += 1
         return None
@@ -309,9 +309,9 @@ class Table(object):
     def seat_player(self, player, seat_num):
         self.seats.seat_player(player, seat_num)
         player.table = self
-        logger.debug("Table %s: %s took seat %s" % (self.id, player.name,
+        logger.debug("Table %s: %s took seat %s" % (self.id, player.username,
             seat_num))
-        event = PlayerJoinedTable(self, player.name, seat_num)
+        event = PlayerJoinedTable(self, player.username, seat_num)
         self.notify_all(event)
 
     def prompt_small_blind(self):
@@ -323,7 +323,7 @@ class Table(object):
         """
         sb = self.seats.small_blind_to_prompt()
         logger.debug("Table %s: Requesting small blind from: %s" % (self.id,
-            sb.name))
+            sb.username))
         post_sb = PostBlind(self.limit.small_blind)
         self.prompt_player(sb, [post_sb])
 
@@ -334,11 +334,11 @@ class Table(object):
         # Doesn't actually prompt the player.
         player.prompt(actions_list)
 
-        event = PlayerPrompted(self, player.name)
+        event = PlayerPrompted(self, player.username)
         self.notify_all(event)
 
         if self.server != None:
-            self.server.prompt_player(self, player.name, actions_list)
+            self.server.prompt_player(self, player.username, actions_list)
 
     def prompt_big_blind(self):
         """
@@ -351,7 +351,7 @@ class Table(object):
         # If heads-up, non-dealer becomes the big blind:
         bb = self.seats.big_blind_to_prompt()
         logger.debug("Table %s: Requesting big blind from: %s" % (self.id,
-            bb.name))
+            bb.username))
         post_bb = PostBlind(self.limit.big_blind)
         self.prompt_player(bb, [post_bb])
 
@@ -367,11 +367,11 @@ class Table(object):
         pending_actions_copy.extend(player.pending_actions)
         player.sit_out()
 
-        event = PlayerSatOut(self, player.name)
+        event = PlayerSatOut(self, player.username)
         if left_table:
-            seat_num = self.seats.get_seat_number(player.name)
-            self.seats.remove_player(player.name)
-            event = PlayerLeftTable(self, player.name, seat_num) 
+            seat_num = self.seats.get_seat_number(player.username)
+            self.seats.remove_player(player.username)
+            event = PlayerLeftTable(self, player.username, seat_num) 
 
         if self.hand_underway():
             self.game_over_event_queue.append(event)
@@ -436,13 +436,13 @@ class Table(object):
                 # Game actually collects the blinds, but it makes more sense
                 # for the client to see the event as soon as they agree to post,
                 # as they already saw that they were prompted.
-                blind_event = PlayerPostedBlind(self, p.name,
+                blind_event = PlayerPostedBlind(self, p.username,
                     self.limit.small_blind)
                 self.notify_all(blind_event)
                 self.gsm.advance()
             elif self.gsm.get_current_state() == STATE_BIG_BLIND:
                 self.big_blind = p
-                blind_event = PlayerPostedBlind(self, p.name,
+                blind_event = PlayerPostedBlind(self, p.username,
                     self.limit.big_blind)
                 self.notify_all(blind_event)
                 self.gsm.advance()
