@@ -309,17 +309,11 @@ class TexasHoldemGame(Game):
         logger.info("Table %s: %s posts the small blind: %s",
             self.__get_table_id(), self.small_blind.name,
             self.limit.small_blind)
-        blind_event = PlayerPostedBlind(self.table, self.small_blind.name,
-            self.limit.small_blind)
-        self.table.notify_all(blind_event)
 
         # -1 is used as the pre-betting round
         self.big_blind.bet(self.limit.big_blind, -1)
         logger.info("Table %s: %s posts the big blind: %s",
             self.__get_table_id(), self.big_blind.name, self.limit.big_blind)
-        blind_event = PlayerPostedBlind(self.table, self.big_blind.name,
-            self.limit.big_blind)
-        self.table.notify_all(blind_event)
 
         self.__last_actor = self.big_blind
         self.__current_bet = self.limit.big_blind

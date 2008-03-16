@@ -94,6 +94,8 @@ class TableWindow(Table):
         # Will be a pointer to our GuiSeat:
         self.my_seat = None
         self.my_seat_num = None
+        # Map usernames to seats for dealing with incoming actions:
+        self.__username_to_seat = {}
 
         # Signal handling:
         # TODO: Replace these all with one signal?
@@ -248,10 +250,18 @@ class TableWindow(Table):
         """
 
         if isinstance(event, PlayerJoinedTable):
+            self.__username_to_seat[event.player_name] = \
+                self.gui_seats[event.seat_num]
             self.chat_line("%s took seat %s." % (event.player_name, 
                     event.seat_num))
             if self.my_seat == None:
                 self.gui_seats[event.seat_num].sit_button_disable()
+
+        if isinstance(event, PlayerLeftTable):
+            self.__username_to_seat[event.player_name] = None 
+            self.chat_line("%s left table." % event.player_name) 
+            if self.my_seat == None:
+                self.gui_seats[event.seat_num].sit_button_enable()
 
         elif isinstance(event, PlayerPrompted):
             self.chat_line("Waiting for %s to act." % event.player_name)
@@ -261,6 +271,8 @@ class TableWindow(Table):
             # player's willing to post blinds a HandCancelled event will
             # be sent out.
             self.deal_button.set_sensitive(False)
+            seat = self.__username_to_seat[event.player_name]
+            seat.prompted()
 
         elif isinstance(event, HandCancelled):
             self.chat_line("Hand cancelled.")
@@ -271,8 +283,28 @@ class TableWindow(Table):
             self.deal_button.set_sensitive(False)
 
         elif isinstance(event, PlayerPostedBlind):
-            self.chat_line("%s posted blind: $%s" % (event.player_name,
+            self.chat_line("%s posts blind: $%s" % (event.player_name,
                 event.amount))
+            seat = self.__username_to_seat[event.player_name]
+            seat.posted_blind(event.amount)
+
+        elif isinstance(event, PlayerCalled):
+            self.chat_line("%s calls: $%s" % (event.player_name,
+                event.amount))
+            seat = self.__username_to_seat[event.player_name]
+            seat.called(event.amount)
+
+        elif isinstance(event, PlayerRaised):
+            self.chat_line("%s raises: $%s" % (event.player_name,
+                event.amount))
+            seat = self.__username_to_seat[event.player_name]
+            seat.raised(event.amount)
+
+        elif isinstance(event, PlayerFolded):
+            self.chat_line("%s folds." % (event.player_name,
+                event.amount))
+            seat = self.__username_to_seat[event.player_name]
+            seat.folded()
 
         elif isinstance(event, HoleCardsDealt):
             self.chat_line("Dealt hole cards: %s %s" % (event.cards[0], 
@@ -286,7 +318,7 @@ class TableWindow(Table):
 
     def __render_table_state(self, state):
         logger.debug("Rendering table state:")
-        #state.print_state()
+        state.print_state()
     
         # Render board cards:
         if len(state.community_cards) == 0:
@@ -305,6 +337,7 @@ class TableWindow(Table):
 
             if state.seats[i] != None:
                 player_state = state.seats[i]
+                self.__username_to_seat[player_state.name] = seat
                 seat.set_username(player_state.name)
                 seat.sit_button_disable()
 
@@ -343,11 +376,17 @@ class GuiSeat:
         label_name = "seat%s-cards-label" % self.seat_number
         self.cards_label = self.glade_xml.get_widget(label_name)
 
+        label_name = "seat%s-action-label" % self.seat_number
+        self.__action_label = self.glade_xml.get_widget(label_name)
+
     def set_username(self, username):
         self.__player_label.set_text(username)
 
     def sit_button_disable(self):
         self.__sit_button.set_sensitive(False)
+
+    def sit_button_enable(self):
+        self.__sit_button.set_sensitive(True)
 
     def show_hole_cards(self, cards):
         """
@@ -362,5 +401,26 @@ class GuiSeat:
     def set_hole_cards(self, msg):
         """ Hole cards field also used to indicate status in the hand. """
         self.cards_label.set_text(msg)
+
+    def prompted(self):
+        """ Indicate in the UI that this seat has been prompted to act. """
+        self.__action_label.set_text("<<<")
+
+    def posted_blind(self, amount):
+        """ Indicate that this player has posted a blind. """
+        self.__action_label.set_text("post blind $%s" % amount)
+
+    def folded(self):
+        """ Indicate that this player has folded. """
+        self.__action_label.set_text("fold")
+
+    def called(self, amount):
+        """ Indicate that this player has called. """
+        self.__action_label.set_text("call")
+
+    def raised(self, amount):
+        """ Indicate that this player has raised. """
+        self.__action_label.set_text("raise $%s" % amount)
+
 
 

@@ -107,7 +107,6 @@ class EventTests(BaseServerFixture):
         self.user2_table.view_sit(self.user2, 1)
         self.user1_table.view_start_game(self.user1)
         self.user1.act_randomly(self.table.id)
-        self.clear_player_events()
         self.user2.act_randomly(self.table.id)
 
         user1_events = filter_event_type(self.user1, PlayerPostedBlind)
@@ -160,18 +159,13 @@ class EventTests(BaseServerFixture):
         self.user1_table.view_sit_out(self.user1)
 
         # Events should have gone out immediately:
-        self.assertEquals(2, len(self.user1.events))
-        self.assertEquals(2, len(self.user2.events))
+        self.assertEquals(1, len(self.user1.events))
+        self.assertEquals(1, len(self.user2.events))
 
         self.assertTrue(isinstance(self.user1.events[0],
             PlayerSatOut))
         self.assertTrue(isinstance(self.user2.events[0],
             PlayerSatOut))
-
-        self.assertTrue(isinstance(self.user1.events[1],
-            HandCancelled))
-        self.assertTrue(isinstance(self.user2.events[1],
-            HandCancelled))
 
     def test_player_sits_out_during_hand(self):
         self.user1_table.view_sit(self.user1, 0)

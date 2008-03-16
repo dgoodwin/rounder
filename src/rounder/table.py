@@ -297,8 +297,9 @@ class Table(object):
         a hand is already underway.
         """
         logger.info("Table %s: Waiting for more players." % (self.id))
-        event = HandCancelled(self)
-        self.notify_all(event)
+        if self.gsm.current != None:
+            event = HandCancelled(self)
+            self.notify_all(event)
 
         self.gsm.reset()
         self.small_blind = None
@@ -369,6 +370,7 @@ class Table(object):
         event = PlayerSatOut(self, player.name)
         if left_table:
             seat_num = self.seats.get_seat_number(player.name)
+            self.seats.remove_player(player.name)
             event = PlayerLeftTable(self, player.name, seat_num) 
 
         if self.hand_underway():
@@ -397,10 +399,6 @@ class Table(object):
                     # if down to heads up, we need a different small blind:
                     self.__restart()
                 self.prompt_big_blind()
-
-            # Remove the player if they left the table completely.
-            if left_table:
-                self.seats.remove_player(player.name)
 
     def process_action(self, username, action_index, params):
         """
@@ -435,9 +433,18 @@ class Table(object):
         if isinstance(action, PostBlind):
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 self.small_blind = p
+                # Game actually collects the blinds, but it makes more sense
+                # for the client to see the event as soon as they agree to post,
+                # as they already saw that they were prompted.
+                blind_event = PlayerPostedBlind(self, p.name,
+                    self.limit.small_blind)
+                self.notify_all(blind_event)
                 self.gsm.advance()
             elif self.gsm.get_current_state() == STATE_BIG_BLIND:
                 self.big_blind = p
+                blind_event = PlayerPostedBlind(self, p.name,
+                    self.limit.big_blind)
+                self.notify_all(blind_event)
                 self.gsm.advance()
         else:
             self.game.process_action(p, action)
