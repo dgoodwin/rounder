@@ -315,8 +315,7 @@ class TableWindow(Table):
             seat.raised(event.amount)
 
         elif isinstance(event, PlayerFolded):
-            self.chat_line("%s folds." % (event.username,
-                event.amount))
+            self.chat_line("%s folds." % event.username)
             seat = self.__username_to_seat[event.username]
             seat.folded()
 

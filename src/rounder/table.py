@@ -265,6 +265,8 @@ class Table(object):
         """ Called by a game when it has finished. """
         logger.info("Table %s: Game over" % self.id)
 
+        self.small_blind = None
+        self.big_blind = None
         self.game = None
         self.gsm.reset()
 
