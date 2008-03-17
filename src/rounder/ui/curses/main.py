@@ -174,6 +174,14 @@ class RounderScreen(CursesStdIO):
         elif c == 10: # Enter
             self.stdscr.deleteln()
             self.handle_input()
+        elif c == 9: # Tab
+            if len(self.input):
+                completions = [x.name for x in self.commands \
+                        if x.name.startswith(self.input)]
+                if len(completions) == 1:
+                    self.input = completions[0]
+                    self.stdscr.deleteln()
+                    self.stdscr.addstr(self.rows - 1, 0, self.input)
         elif c == 259: # Up arrow
             if self.history_pos < len(self.history):
                 self.history_pos += 1
