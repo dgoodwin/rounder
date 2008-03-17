@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 import string
-import StringIO
 import traceback
 import sys
-import csv
 
 from curses.wrapper import wrapper
 import curses
