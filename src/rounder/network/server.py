@@ -20,10 +20,13 @@
 
 """ The Rounder Server Module """
 
+import md5
+
 from zope.interface import implements
 from twisted.spread import pb
-from twisted.cred import checkers, portal
-from twisted.internet import reactor
+from twisted.cred import checkers, portal, credentials, error
+from twisted.internet import reactor, defer
+from twisted.python import failure
 
 from logging import getLogger
 logger = getLogger("rounder.network.server")
@@ -285,24 +288,55 @@ class TableView(pb.Viewable):
 
 
 
+class OnDemandCredentialsChecker:
+    """
+    Our temporary credential checker.
+
+    Checks if an incoming username exists in the in-memory hash and if so
+    validate that it's password matches. If not, add the username and the
+    current password. First come, first serve.
+
+    Problems storing the md5 passwords we receive and using them to compare 
+    directly. All accounts are assumed to use "password" for now.
+    """
+    implements(checkers.ICredentialsChecker)
+
+    credentialInterfaces = (credentials.IUsernamePassword,
+        credentials.IUsernameHashedPassword)
+
+    def __init__(self):
+        self.users = {}
+
+    def addUser(self, username, password):
+        logger.info("Creating user account: %s" % (username))
+        self.users[username] = password
+
+    def _cbPasswordMatch(self, matched, username):
+        if matched:
+            logger.info("User authenticated: %s" % username)
+            return username
+        else:
+            logger.warn("Authentication failed for: %s" % username)
+            return failure.Failure(error.UnauthorizedLogin())
+
+    def requestAvatarId(self, credentials):
+
+        if credentials.username not in self.users:
+            self.addUser(credentials.username, "password")
+        return defer.maybeDeferred(
+            credentials.checkPassword,
+            self.users[credentials.username]).addCallback(
+            self._cbPasswordMatch, str(credentials.username))
+
+
+
 def run_server():
     logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
     register_message_classes()
     
     realm = RounderRealm()
     realm.server = RounderNetworkServer()
-    checker = checkers.InMemoryUsernamePasswordDatabaseDontUse()
-    checker.addUser("joe", "password")
-    checker.addUser("player0", "password")
-    checker.addUser("player1", "password")
-    checker.addUser("player2", "password")
-    checker.addUser("player3", "password")
-    checker.addUser("player4", "password")
-    checker.addUser("player5", "password")
-    checker.addUser("player6", "password")
-    checker.addUser("player7", "password")
-    checker.addUser("player8", "password")
-    checker.addUser("player9", "password")
+    checker = OnDemandCredentialsChecker()
     p = portal.Portal(realm, [checker])
 
     realm.server.create_table("Table 1")
