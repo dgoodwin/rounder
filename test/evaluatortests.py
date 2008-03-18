@@ -76,6 +76,14 @@ class FullHandTests(unittest.TestCase):
         hand = FullHand(('as', '3s'), ('2d', '4c', '5c'))
         self.assertTrue(hand.is_straight())
 
+    def testIsStraightFlush(self):
+        hand = FullHand(('9s', 'js'), ('10s', 'ks', 'qs'))
+        self.assertTrue(hand.is_straight())
+
+    def testIsNotStraightFlush(self):
+        hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
+        self.assertFalse(hand.is_straight())
+
 
 
 

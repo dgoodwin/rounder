@@ -42,6 +42,9 @@ class FullHand(object):
                 return True
         return False
 
+    def is_straight_flush(self):
+        return self.is_flush() and self.is_straight()
+
     def is_quads(self):
         ranks = {}
         for card in self.cards:
