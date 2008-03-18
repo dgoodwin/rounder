@@ -37,6 +37,17 @@ from rounder.ui.client import Client
 from rounder.ui.gtk.util import find_file_on_path
 from rounder.ui.gtk.table import TableWindow
 
+def connect(host, port, username, password, app):
+        # Attempt to connect to the specified server by creating a client
+        # object. If successful pass the client back to the main application,
+        # otherwise display an error status message and let the user try
+        # again:
+        client = RounderNetworkClient(app)
+        try:
+            client.connect(host, port, username, password)
+        except Exception, e:
+            logger.error("Unable to login to %s as %s" % (host, username))
+
 class RounderGtk(Client):
     """ 
     The Rounder GTK Client 
@@ -45,7 +56,7 @@ class RounderGtk(Client):
     available tables, and join them. (opening a separate window)
     """
 
-    def __init__(self):
+    def __init__(self, host=None, port=None, username=None, password=None):
 
         logger.info("Starting application.")
         register_message_classes()
@@ -77,7 +88,13 @@ class RounderGtk(Client):
         self.set_status("Connect to a server to begin playing.")
 
         main_window.show_all()
-        self.show_connect_dialog(None)
+
+        # Autoconnect if given details, otherwise show connect dialog:
+        if host != None and port != None and username != None and \
+                password != None:
+            connect(host, port, username, password, self)
+        else:
+            self.show_connect_dialog(None)
 
     def main(self):
         """ Launch the GTK main loop. """
@@ -125,7 +142,8 @@ class RounderGtk(Client):
         self.client = client
 
         # Call also sets our reference to None:
-        self.connect_dialog.destroy(None, None, None)
+        if self.connect_dialog != None:
+            self.connect_dialog.destroy(None, None, None)
 
         self.set_status("Connected to server: %s" % client.host)
 
@@ -223,15 +241,7 @@ class ConnectDialog:
         logger.debug("Connecting to %s on port %s" % (host, port))
         logger.debug("   as: %s / %s" % (username, password))
 
-        # Attempt to connect to the specified server by creating a client
-        # object. If successful pass the client back to the main application,
-        # otherwise display an error status message and let the user try
-        # again:
-        client = RounderNetworkClient(self.app)
-        try:
-            client.connect(host, port, username, password)
-        except Exception, e:
-            logger.error("Unable to login to %s as %s" % (host, username))
+        connect(host, port, username, password, self.app)
 
     def set_status(self, message):
         """ Display a message in the connect dialog's status bar. """

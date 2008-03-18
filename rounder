@@ -23,6 +23,12 @@
 """
 Thin script to run rounder from the source directory. (and not the installed
 version)
+
+Can be run with no arguments, or as:
+
+    ./rounder host port username password
+
+to shortcut server connection. (useful for development)
 """
 
 import sys
@@ -38,6 +44,17 @@ setup_logging(log_conf_locations)
 from rounder.ui.gtk.main import RounderGtk
 
 if __name__ == "__main__":
-    rounderApp = RounderGtk()
+    # Implement optparse here:
+    host = None
+    port = None
+    username = None
+    password = None
+    if len(sys.argv) > 4:
+        host = sys.argv[1]
+        port = int(sys.argv[2])
+        username = sys.argv[3]
+        password = sys.argv[4]
+
+    rounderApp = RounderGtk(host, port, username, password)
     rounderApp.main()
 
