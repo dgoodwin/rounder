@@ -74,7 +74,8 @@ class RounderNetworkClient(pb.Referenceable):
             client=self)
         def1.addCallbacks(self.connect_success_cb, self.connect_failure_cb)
         def1.addErrback(self.log_error)
-        reactor.run()
+        if not reactor.running:
+            reactor.run()
 
     @staticmethod
     def shutdown():
