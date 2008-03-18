@@ -21,12 +21,6 @@
 PyPokerEval compatible hand ranker.
 """
 
-suits = ('s', 'c', 'h', 'd')
-ranks = [str(x) for x in range(2, 11)] + ['j', 'q', 'k', 'a']
-
-royals = [[r + s for r in ranks[-5:]] for s in suits]
-for hand in royals:
-    hand.sort()
 
 class FullHand(object):
 
@@ -37,10 +31,12 @@ class FullHand(object):
         self.cards = fullhand
 
     def is_royal(self):
-        for hand in royals:
-            if hand == self.cards:
-                return True
-        return False
+       has_ace_high = False
+       for card in self.cards:
+           if card[:-1] == 'a':
+               has_ace_high = True
+               break
+       return has_ace_high and self.is_straight_flush()
 
     def is_straight_flush(self):
         return self.is_flush() and self.is_straight()
@@ -123,7 +119,6 @@ class FullHand(object):
         for card in self.cards:
             ranks.add(card[:-1])
         return len(ranks) == 4
-
 
 
 
