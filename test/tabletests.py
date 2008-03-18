@@ -111,6 +111,22 @@ class SeatsTests(unittest.TestCase):
         self.seats.new_dealer()
         self.assertEquals(self.player1, self.seats.dealer)
 
+    def test_dealer_wraparound_blind_selection(self):
+        seats = Seats(4)
+        player0 = Player("Player 0")
+        player1 = Player("Player 1")
+        player2 = Player("Player 2")
+        seats.seat_player(player0, 0)
+        seats.seat_player(player1, 1)
+        seats.seat_player(player2, 2)
+
+        seats.new_dealer()
+        seats.new_dealer()
+        seats.new_dealer()
+        self.assertEquals(player2, seats.dealer)
+        self.assertEquals(player0, seats.small_blind_to_prompt())
+        self.assertEquals(player1, seats.big_blind_to_prompt())
+
 
 
 class TableTests(unittest.TestCase):
@@ -186,6 +202,12 @@ class TableTests(unittest.TestCase):
         self.table.process_action(self.players[2].username, 0, [])
         self.assertEquals(0, len(self.players[2].pending_actions))
         self.assertEquals(self.players[2], self.table.big_blind)
+
+    #def test_dealer_wraparound_blind_selection(self):
+    #    self.__create_table(3, 0)
+
+    #    self.table.new_dealer()
+    #    self.assertEquals(self.players[0], self.table.dealer)
 
     def test_big_blind_sitout_three_handed(self):
         self.__create_table(3, 0)

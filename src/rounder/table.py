@@ -171,12 +171,14 @@ class Seats(object):
         if self.dealer == None:
             raise RounderException("Need a dealer before big blind.")
 
-        if len(self.active_players) == 2:
-            start_at = (self.dealer.seat + 1) % len(self.__seats)
-        else:
-            start_at = (self.dealer.seat + 2) % len(self.__seats)
+        start_at = (self.dealer.seat + 1) % len(self.__seats)
 
-        return self.__seats[self.__get_first_active_seat(start_at)]
+        # Technically looking for the second active seat behind the dealer:
+        seat_index = self.__get_first_active_seat(start_at)
+        if len(self.active_players) != 2:
+            seat_index = self.__get_first_active_seat(seat_index + 1)
+
+        return self.__seats[seat_index]
 
 
 
