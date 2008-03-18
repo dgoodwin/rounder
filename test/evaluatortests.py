@@ -48,6 +48,9 @@ class FullHandTests(unittest.TestCase):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
         self.assertFalse(hand.is_quads())
 
+        hand = FullHand(('9c', '9s'), ('qs', 'qd', 'qh'))
+        self.assertFalse(hand.is_quads())
+
     def testIsTwoPair(self):
         hand = FullHand(('as', 'ks'), ('ad', 'kc', '9h'))
         self.assertTrue(hand.is_two_pair())
@@ -84,12 +87,70 @@ class FullHandTests(unittest.TestCase):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
         self.assertFalse(hand.is_straight())
 
+    def testRoyalGreaterThanStraightFlush(self):
+        board = ('qs', 'js', '10s')
+        hand1 = FullHand(('as', 'ks'), board)
+        hand2 = FullHand(('9s', '8s'), board)
 
+        self.assertTrue(hand1 > hand2)
 
+    def testStraightFlushGreaterThanQuads(self):
+        hand1 = FullHand(('as', 'ks'), ('qs', 'js', '10s'))
+        hand2 = FullHand(('9s', '8s'), ('9d', '9h', '9c'))
 
+        self.assertTrue(hand1 > hand2)
 
+    def testQuadsGreaterThanFullHouse(self):
+        board = ('ks', 'kd', 'kh')
+        hand1 = FullHand(('as', 'kc'), board)
+        hand2 = FullHand(('9s', '9d'), board)
 
+        self.assertTrue(hand1.is_quads())
+        self.assertTrue(hand2.is_full_house())
+        self.assertFalse(hand2.is_quads())
+        self.assertTrue(hand1 > hand2)
 
+    def testFullHouseGreaterThanFlush(self):
+        board = ('ks', 'kd', 'kh')
+        hand1 = FullHand(('9s', '9d'), board)
+        hand2 = FullHand(('as', '9s'), ('7s', '4s', '2s'))
+        
+        self.assertTrue(hand1 > hand2)
+
+    def testFlushGreaterThanStraight(self):
+        board = ('6s', '4s', '2s')
+        hand1 = FullHand(('as', '9s'), board) 
+        hand2 = FullHand(('3s', '5d'), board)
+        
+        self.assertTrue(hand1 > hand2)
+
+    def testStraightGreaterThanTrips(self):
+        board = ('6s', '4s', '2s')
+        hand1 = FullHand(('3s', '5d'), board)
+        hand2 = FullHand(('4h', '4d'), board) 
+        
+        self.assertTrue(hand1 > hand2)
+
+    def testTripsGreaterThanTwoPair(self):
+        board = ('6s', '4s', '2s')
+        hand1 = FullHand(('4h', '4d'), board) 
+        hand2 = FullHand(('6d', '4h'), board)
+        
+        self.assertTrue(hand1 > hand2)
+
+    def testTwoPairGreaterThanOnePair(self):
+        board = ('6s', '4s', '2s')
+        hand1 = FullHand(('6d', '4h'), board)
+        hand2 = FullHand(('4h', '7d'), board) 
+        
+        self.assertTrue(hand1 > hand2)
+
+    def testOnePairGreaterThanHighCard(self):
+        board = ('6s', '4s', '2s')
+        hand1 = FullHand(('4h', '7d'), board) 
+        hand2 = FullHand(('7d', 'kh'), board)
+        
+        self.assertTrue(hand1 > hand2)
 
 
 def suite():
