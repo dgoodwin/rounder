@@ -42,24 +42,6 @@ class FullHand(object):
                 return True
         return False
 
-    def is_flush(self):
-        suits = set()
-        for card in self.cards:
-            suits.add(card[-1])
-        return len(suits) == 1
-
-    def is_one_pair(self):
-        ranks = set()
-        for card in self.cards:
-            ranks.add(card[:-1])
-        return len(ranks) == 4
-
-    def is_full_house(self):
-        ranks = set()
-        for card in self.cards:
-            ranks.add(card[:-1])
-        return len(ranks) == 2
-
     def is_quads(self):
         ranks = {}
         for card in self.cards:
@@ -68,6 +50,18 @@ class FullHand(object):
                 ranks[rank] = []
             ranks[rank] = card[-1]
         return len(ranks) == 2 and len(ranks.values()[0]) in [1, 4]
+
+    def is_full_house(self):
+        ranks = set()
+        for card in self.cards:
+            ranks.add(card[:-1])
+        return len(ranks) == 2
+
+    def is_flush(self):
+        suits = set()
+        for card in self.cards:
+            suits.add(card[-1])
+        return len(suits) == 1
 
     def is_two_pair(self):
         ranks = {}
@@ -79,6 +73,12 @@ class FullHand(object):
         values = [len(x) for x in ranks.values()]
         values.sort()
         return len(ranks) == 3 and values == [1, 2, 2]
+
+    def is_one_pair(self):
+        ranks = set()
+        for card in self.cards:
+            ranks.add(card[:-1])
+        return len(ranks) == 4
 
 
 
