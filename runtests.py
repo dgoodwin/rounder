@@ -55,6 +55,7 @@ import gametests
 import limittests
 import actiontests
 import pypokerevaltests
+import evaluatortests
 import serializetests
 import pottests
 import server.servertests
@@ -75,6 +76,7 @@ def suite():
         limittests.suite(),
         actiontests.suite(),
         pypokerevaltests.suite(),
+        evaluatortests.suite(),
         serializetests.suite(),
         pottests.suite(),
         server.servertests.suite(),
