@@ -221,7 +221,10 @@ class TableWindow(Table):
                         self.handle_call_button, (index, action))
 
             elif isinstance(action, Call):
-                self.call_button.set_label("Call: $%s" % action.amount)
+                if action.amount == 0:
+                    self.call_button.set_label("Check" % action.amount)
+                else:
+                    self.call_button.set_label("Call: $%s" % action.amount)
                 self.call_button.set_sensitive(True)
                 if self.__call_handler_id != None:
                     self.call_button.disconnect(self.__call_handler_id)
@@ -230,7 +233,10 @@ class TableWindow(Table):
 
             elif isinstance(action, Raise):
                 # TODO: Note this is only for limit holdem currently:
-                self.raise_button.set_label("Raise: $%s" % action.min_bet)
+                if action.current_bet == 0:
+                    self.raise_button.set_label("Bet: $%s" % action.min_bet)
+                else:
+                    self.raise_button.set_label("Raise: $%s" % action.min_bet)
                 self.raise_button.set_sensitive(True)
                 if self.__raise_handler_id != None:
                     self.raise_button.disconnect(self.__raise_handler_id)
@@ -278,7 +284,6 @@ class TableWindow(Table):
                 self.gui_seats[event.seat_num].sit_button_enable()
 
         elif isinstance(event, PlayerPrompted):
-            self.chat_line("Waiting for %s to act." % event.username)
             # If our deal button is enabled this is likely the initial
             # prompt to post blinds and we can disable the button as the
             # hand will soon be underway. If the server is unable to find
@@ -303,8 +308,11 @@ class TableWindow(Table):
             seat.posted_blind(event.amount)
 
         elif isinstance(event, PlayerCalled):
-            self.chat_line("%s calls: $%s" % (event.username,
-                event.amount))
+            if event.amount == 0:
+                self.chat_line("%s checks." % (event.username))
+            else:
+                self.chat_line("%s calls: $%s" % (event.username,
+                    event.amount))
             seat = self.__username_to_seat[event.username]
             seat.called(event.amount)
 
@@ -474,7 +482,10 @@ class GuiSeat:
 
     def called(self, amount):
         """ Indicate that this player has called. """
-        self.__action_label.set_text("call")
+        if amount == 0:
+            self.__action_label.set_text("check")
+        else:
+            self.__action_label.set_text("call")
 
     def raised(self, amount):
         """ Indicate that this player has raised. """
