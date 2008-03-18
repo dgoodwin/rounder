@@ -40,6 +40,24 @@ class FullHandTests(unittest.TestCase):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
         self.assertFalse(hand.is_full_house())
 
+    def testIsQuads(self):
+        hand = FullHand(('as', 'ks'), ('ad', 'ac', 'ah'))
+        self.assertTrue(hand.is_quads())
+
+    def testIsNotQuads(self):
+        hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
+        self.assertFalse(hand.is_quads())
+
+    def testIsTwoPair(self):
+        hand = FullHand(('as', 'ks'), ('ad', 'kc', '9h'))
+        self.assertTrue(hand.is_two_pair())
+
+    def testIsNotTwoPair(self):
+        hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
+        self.assertFalse(hand.is_two_pair())
+
+
+
 
 
 

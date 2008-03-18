@@ -60,6 +60,28 @@ class FullHand(object):
             ranks.add(card[:-1])
         return len(ranks) == 2
 
+    def is_quads(self):
+        ranks = {}
+        for card in self.cards:
+            rank = card[:-1]
+            if not ranks.has_key(rank):
+                ranks[rank] = []
+            ranks[rank] = card[-1]
+        return len(ranks) == 2 and len(ranks.values()[0]) in [1, 4]
+
+    def is_two_pair(self):
+        ranks = {}
+        for card in self.cards:
+            rank = card[:-1]
+            if not ranks.has_key(rank):
+                ranks[rank] = []
+            ranks[rank].append(card[-1])
+        values = [len(x) for x in ranks.values()]
+        values.sort()
+        return len(ranks) == 3 and values == [1, 2, 2]
+
+
+
 
 
 class PokerEval(object):
