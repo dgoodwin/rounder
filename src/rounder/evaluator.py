@@ -21,12 +21,6 @@
 PyPokerEval compatible hand ranker.
 """
 
-suits = ('s', 'c', 'h', 'd')
-ranks = [str(x) for x in range(2, 11)] + ['j', 'q', 'k', 'a']
-
-royals = [[r + s for r in ranks[-5:]] for s in suits]
-for hand in royals:
-    hand.sort()
 
 class FullHand(object):
 
@@ -36,11 +30,15 @@ class FullHand(object):
         fullhand.sort()
         self.cards = fullhand
 
+        self._relative_value = self._get_relative_value()
+
     def is_royal(self):
-        for hand in royals:
-            if hand == self.cards:
-                return True
-        return False
+       has_ace_high = False
+       for card in self.cards:
+           if card[:-1] == 'a':
+               has_ace_high = True
+               break
+       return has_ace_high and self.is_straight_flush()
 
     def is_straight_flush(self):
         return self.is_flush() and self.is_straight()
@@ -51,7 +49,7 @@ class FullHand(object):
             rank = card[:-1]
             if not ranks.has_key(rank):
                 ranks[rank] = []
-            ranks[rank] = card[-1]
+            ranks[rank].append(card[-1])
         return len(ranks) == 2 and len(ranks.values()[0]) in [1, 4]
 
     def is_full_house(self):
@@ -124,8 +122,33 @@ class FullHand(object):
             ranks.add(card[:-1])
         return len(ranks) == 4
 
+    def _get_relative_value(self):
+        """
+        Arbitrary numeric weights assigned to hands for comparing
+        """
+        if self.is_royal():
+            return 1000
+        elif self.is_straight_flush():
+            return 900
+        elif self.is_quads():
+            return 800
+        elif self.is_full_house():
+            return 700
+        elif self.is_flush():
+            return 600
+        elif self.is_straight():
+            return 500
+        elif self.is_trips():
+            return 400
+        elif self.is_two_pair():
+            return 300
+        elif self.is_one_pair():
+            return 200
+        else:
+            return 0
 
-
+    def __gt__(self, other):
+        return self._relative_value > other._relative_value
 
 
 class PokerEval(object):
