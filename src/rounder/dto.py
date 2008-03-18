@@ -43,6 +43,9 @@ class TableState:
         self.limit = table.limit
         self.hand_underway = (table.gsm.current != None)
         self.community_cards = []
+        self.dealer_seat = None
+        if table.dealer != None:
+            self.dealer_seat = table.dealer.seat
         self.pots = []
         self.round_bets = Currency(0.00)
         if table.game != None:

@@ -389,7 +389,11 @@ class TableWindow(Table):
             if state.seats[i] != None:
                 player_state = state.seats[i]
                 username = player_state.username
-                seat.set_username("%s $%s" % (username, player_state.chips))
+                dealer_indicator = ""
+                if state.dealer_seat == i:
+                    dealer_indicator = " D"
+                seat.set_username("%s $%s%s" % (username, player_state.chips,
+                    dealer_indicator))
                 seat.sit_button_disable()
 
                 # Render player cards:
