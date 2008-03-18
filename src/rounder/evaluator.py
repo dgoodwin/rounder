@@ -63,6 +63,17 @@ class FullHand(object):
             suits.add(card[-1])
         return len(suits) == 1
 
+    def is_trips(self):
+        ranks = {}
+        for card in self.cards:
+            rank = card[:-1]
+            if not ranks.has_key(rank):
+                ranks[rank] = []
+            ranks[rank].append(card[-1])
+        values = [len(x) for x in ranks.values()]
+        values.sort()
+        return len(ranks) == 3 and values == [1, 1, 3]
+   
     def is_two_pair(self):
         ranks = {}
         for card in self.cards:

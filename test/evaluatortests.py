@@ -56,6 +56,15 @@ class FullHandTests(unittest.TestCase):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
         self.assertFalse(hand.is_two_pair())
 
+    def testIsTrips(self):
+        hand = FullHand(('as', 'js'), ('ad', 'kc', 'ac'))
+        self.assertTrue(hand.is_trips())
+
+    def testIsNotTrips(self):
+        hand = FullHand(('as', '9s'), ('qs', 'jd', '4s'))
+        self.assertFalse(hand.is_trips())
+
+
 
 
 
