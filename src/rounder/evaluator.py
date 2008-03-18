@@ -63,6 +63,36 @@ class FullHand(object):
             suits.add(card[-1])
         return len(suits) == 1
 
+    def is_straight(self):
+        ranks = [card[:-1] for card in self.cards]
+        for i in range(len(ranks)):
+            if ranks[i] == 'j':
+                ranks[i] = 11
+            elif ranks[i] == 'q':
+                ranks[i] = 12
+            elif ranks[i] == 'k':
+                ranks[i] = 13
+            elif ranks[i] == 'a':
+                ranks[i] = 14
+
+            ranks[i] = int(ranks[i])
+
+        ranks.sort()
+
+        last = ranks[0]
+
+        # Check for Ace being low case
+        if last == 2:
+            if ranks[-1] == 14:
+                last = 1
+                ranks = [1] + ranks[:-1]
+
+        for i in range(1, len(ranks)):
+            if last + 1 != ranks[i]:
+                return False
+            last += 1
+        return True
+
     def is_trips(self):
         ranks = {}
         for card in self.cards:
