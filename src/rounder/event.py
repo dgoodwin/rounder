@@ -230,6 +230,8 @@ class PlayerFolded(Event):
         Event.__init__(self, table)
         self.username = username
 
+    def __repr__(self):
+        return "PlayerFolded: %s" % self.username
 
 
 class GameEnding(Event):
