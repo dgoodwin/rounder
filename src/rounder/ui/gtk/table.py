@@ -43,6 +43,22 @@ SEAT_BUTTON_INDEX = {
     'seat8-sit-button': 8,
     'seat9-sit-button': 9,
 }
+# Map seat numbers and other labels to their location in the main GtkFixed 
+# widget:
+GUI_SEAT_COORDS = {
+    0: (0, 115),
+    1: (55, 35),
+    2: (135, 0),
+    3: (215, 0),
+    4: (295, 35),
+    5: (375, 115),
+    6: (295, 195),
+    7: (215, 230),
+    8: (135, 230),
+    9: (55, 195),
+    "board-label": (130, 115),
+    "pot-label": (130, 135),
+}
 
 class TableWindow(Table):
     """ Dialog for a poker table. """
@@ -63,18 +79,11 @@ class TableWindow(Table):
         glade_file = 'rounder/ui/gtk/data/table.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         self.table_window = self.glade_xml.get_widget('table-window')
-        self.table_window.set_title(client_table.state.name)
-
-        table_name = self.glade_xml.get_widget('table-label')
-        table_name.set_text(client_table.state.name)
+        table_title = "%s: %s %s" % (client_table.state.name, 
+                client_table.state.limit, "Texas Hold'em")
+        self.table_window.set_title(table_title)
 
         self.chat_textview = self.glade_xml.get_widget('chat-textview')
-
-        limit = self.glade_xml.get_widget('limit-label')
-        limit.set_text(str(client_table.state.limit))
-
-        self.board_label = self.glade_xml.get_widget('board-label')
-        self.pot_label = self.glade_xml.get_widget('pot-label')
 
         self.deal_button = self.glade_xml.get_widget('deal-button')
         self.deal_button.set_sensitive(False)
@@ -88,9 +97,18 @@ class TableWindow(Table):
         self.__fold_handler_id = None
         self.__disable_action_buttons()
 
+        # Setup and display the player seats:
+        self.fixed_table = self.glade_xml.get_widget('fixed-table')
+        self.board_label = gtk.Label("Board:")
+        coords = GUI_SEAT_COORDS['board-label']
+        self.fixed_table.put(self.board_label, coords[0], coords[1])
+        self.pot_label = gtk.Label("Pot:")
+        coords = GUI_SEAT_COORDS['pot-label']
+        self.fixed_table.put(self.pot_label, coords[0], coords[1])
+        
         self.gui_seats = []
-        for i in range(0, 4):
-            seat = GuiSeat(self.glade_xml, i)
+        for i in range(0, 10):
+            seat = GuiSeat(self, i)
             self.gui_seats.append(seat)
         # Will be a pointer to our GuiSeat:
         self.my_seat = None
@@ -152,7 +170,7 @@ class TableWindow(Table):
         if not self.client_table.state.hand_underway:
             self.deal_button.set_sensitive(True)
         for seat in self.gui_seats:
-            seat.sit_button_disable()
+            seat.disable_sit_button()
 
     def chat_line(self, msg):
         """ Append a line to the chat area on the table. """
@@ -274,14 +292,12 @@ class TableWindow(Table):
                 self.gui_seats[event.seat_num]
             self.chat_line("%s took seat %s." % (event.username, 
                     event.seat_num))
-            if self.my_seat == None:
-                self.gui_seats[event.seat_num].sit_button_disable()
 
         if isinstance(event, PlayerLeftTable):
             self.__username_to_seat.pop(event.username)
             self.chat_line("%s left table." % event.username) 
-            if self.my_seat == None:
-                self.gui_seats[event.seat_num].sit_button_enable()
+            self.gui_seats[event.seat_num].player_left(self.my_seat 
+                    != None)
 
         elif isinstance(event, PlayerPrompted):
             # If our deal button is enabled this is likely the initial
@@ -298,8 +314,10 @@ class TableWindow(Table):
             self.deal_button.set_sensitive(True)
 
         elif isinstance(event, NewHandStarted):
-            #self.deal_button.set_sensitive(False)
-            pass
+            # TODO: Show who's dealing better:
+            self.chat_line("New hand!")
+            self.chat_line("%s is dealing." % self.gui_seats[
+                event.table_state.dealer_seat].name_label.get_text())
 
         elif isinstance(event, PlayerPostedBlind):
             self.chat_line("%s posts blind: $%s" % (event.username,
@@ -337,12 +355,14 @@ class TableWindow(Table):
             self.chat_line("Community cards: %s" % event.cards)
             # Implicit new round of betting, clear actions from the last one.
             for seat in self.gui_seats:
-                seat.clear_action()
+                if seat.is_occupied():
+                    seat.clear_action()
 
         elif isinstance(event, GameEnding):
             self.chat_line("End of hand.")
             for seat in self.gui_seats:
-                seat.clear_action()
+                if seat.is_occupied():
+                    seat.clear_action()
 
         elif isinstance(event, PlayerShowedCards):
             self.chat_line("%s shows: %s" % (event.username, event.cards))
@@ -359,6 +379,10 @@ class TableWindow(Table):
                     self.chat_line("%s wins $%s from %s pot" %
                             (pot_winner.username, pot_winner.amount, 
                                 pot_type))
+            # TODO: Show who has cards properly:
+            for seat in self.gui_seats:
+                if seat.is_occupied():
+                    seat.clear_hole_cards()
             self.deal_button.set_sensitive(True)
 
 
@@ -374,12 +398,9 @@ class TableWindow(Table):
         state.print_state()
     
         # Render board cards:
-        cards_string = ""
+        cards_string = "Board:"
         for c in state.community_cards:
-            if len(cards_string) == 0:
-                cards_string = str(c)
-            else:
-                cards_string = "%s %s" % (cards_string, c)
+            cards_string = "%s %s" % (cards_string, c)
         self.board_label.set_text(cards_string)
 
         # Render pot size:
@@ -389,34 +410,22 @@ class TableWindow(Table):
         for pot_state in state.pots:
             pots = pots + pot_state.amount
         pots = pots + state.round_bets
-        self.pot_label.set_text("$%s" % pots)
+        self.pot_label.set_text("Pot: $%s" % pots)
 
-        for i in range(0, 4):
+        for i in range(0, 10):
             seat = self.gui_seats[i]
 
             if state.seats[i] != None:
                 player_state = state.seats[i]
-                username = player_state.username
-                dealer_indicator = ""
-                if state.dealer_seat == i:
-                    dealer_indicator = " D"
-                seat.set_username("%s $%s%s" % (username, player_state.chips,
-                    dealer_indicator))
-                seat.sit_button_disable()
-
-                # Render player cards:
-                if player_state.folded:
-                    seat.set_hole_cards("Folded")
-                elif player_state.sitting_out:
-                    seat.set_hole_cards("Sitting Out")
-                elif player_state.num_cards == 0:
-                    seat.set_hole_cards("")
-                # Using this to only set cards display once:
-                elif not seat.is_showing_hole_cards():
-                    seat.set_hole_cards("XX XX")
-
-            else:
-                seat.set_username("")
+                if not seat.is_occupied():
+                    # First time we've seen this seat occupied:
+                    seat.display_player_state(player_state)
+                else:
+                    assert(seat.name_label.get_text() == 
+                            player_state.username)
+                    # Set only what we need to frequently update:
+                    # TODO: get updated player chip counts from events!
+                    seat.set_chips(player_state.chips)
 
 
 
@@ -425,71 +434,157 @@ class GuiSeat:
     Tiny object to encapsulate hard coded assumptions about the widgets
     that compose a seat.
     """
-    def __init__(self, glade_xml, seat_number):
-        self.glade_xml = glade_xml
+    def __init__(self, parent_table, seat_number):
+        self.parent_table = parent_table
         self.seat_number = seat_number
+        self.__fixed = parent_table.fixed_table # GtkFixed widget
+        logger.debug("Creating GuiSeat %s" % seat_number)
 
-        self.__player_label = self.glade_xml.get_widget("seat%s-player-label"
-                % seat_number)
+        # Set if we're displaying a button:
+        self.sit_button = None
 
-        button_name = "seat%s-sit-button" % seat_number
-        self.__sit_button = self.glade_xml.get_widget(button_name)
+        # These get set when someone takes the seat:
+        self.cards_label = None
+        self.name_label = None
+        self.chips_label = None
+        self.action_label = None
 
-        label_name = "seat%s-cards-label" % self.seat_number
-        self.cards_label = self.glade_xml.get_widget(label_name)
+        # Initially create the seat as a Sit button, will change to a player
+        # the first time we render the table state, or when someone grabs
+        # the seat.
+        self.vbox = gtk.VBox(homogeneous=True)
+        coords = GUI_SEAT_COORDS[self.seat_number]
+        self.__fixed.put(self.vbox, coords[0], coords[1])
+        self.display_button()
+        self.vbox.show_all()
 
-        label_name = "seat%s-action-label" % self.seat_number
-        self.__action_label = self.glade_xml.get_widget(label_name)
+    def is_occupied(self):
+        if self.sit_button == None:
+            return True
+        return False
 
-    def set_username(self, username):
-        self.__player_label.set_text(username)
+    def display_button(self):
 
-    def sit_button_disable(self):
-        self.__sit_button.set_sensitive(False)
+        for c in self.vbox.get_children():
+            c.destroy()
 
-    def sit_button_enable(self):
-        self.__sit_button.set_sensitive(True)
+        # Destroy any fields displaying player info:
+        self.cards_label = None
+        self.name_label = None
+        self.chips_label = None
+        self.action_label = None
+
+        self.sit_button = gtk.Button(label="Sit")
+        self.sit_button.set_name("seat%s-sit-button" % self.seat_number)
+        self.sit_button.connect("clicked", 
+                self.parent_table.handle_sit_button)
+        self.vbox.pack_start(self.sit_button)
+
+        self.vbox.show_all()
+
+    def display_player_state(self, player_state):
+        """
+        Switch this seat to display actual player info.
+
+        Called only once per player occupation. If a player leaves we 
+        must switch back to Sit button mode. Otherwise we just update
+        the fields we need to change.
+        """
+
+        # Throw an exception if we're already displaying player state:
+        if self.name_label != None or self.sit_button == None:
+            raise Exception("Don't re-call display_player_state")
+
+        for c in self.vbox.get_children():
+            c.destroy()
+
+        self.sit_button = None
+
+        cards = ""
+        if len(cards) > 0:
+            cards = "XX XX"
+        self.cards_label = gtk.Label(cards)
+        #self.cards_label.set_name("seat%s-cards-label" % self.seat_number)
+
+        self.name_label = gtk.Label(player_state.username)
+        #self.name_label.set_name("seat%s-player-label" % self.seat_number)
+
+        self.chips_label = gtk.Label(player_state.chips)
+        self.action_label = gtk.Label("")
+
+        self.vbox.pack_start(self.cards_label)
+        self.vbox.pack_start(self.name_label)
+        self.vbox.pack_start(self.chips_label)
+        self.vbox.pack_start(self.action_label)
+
+        self.vbox.show_all()
+
+    def set_chips(self, chips):
+        logger.debug("updating chips")
+        self.chips_label.set_text("$%s" % chips)
+
+    def player_left(self, i_am_seated=True):
+        """
+        Player left the table, render their spot as a sit button again.
+        """
+        self.display_button()
+        if i_am_seated:
+            self.disable_sit_button()
+
+    def disable_sit_button(self):
+        """
+        Disable our Sit button if we're displaying one.
+        """
+        if self.sit_button != None:
+            self.sit_button.set_sensitive(False)
+
+
+    #def set_username(self, username):
+    #    self.__player_label.set_text(username)
+
+    #def sit_button_disable(self):
+    #    self.__sit_button.set_sensitive(False)
+
+    #def sit_button_enable(self):
+    #    self.__sit_button.set_sensitive(True)
 
     def show_hole_cards(self, cards):
         """
         Display hole cards.
+
+        Called when we receive our hole cards, or someone else shows theirs.
         """
         self.cards_label.set_text("%s %s" % (cards[0], cards[1]))
 
-    def set_hole_cards(self, msg):
-        """ Hole cards field also used to indicate status in the hand. """
-        self.cards_label.set_text(msg)
-
-    def is_showing_hole_cards(self):
-        """ Return the current text from the hole cards field. """
-        return len(self.cards_label.get_text()) > 0
+    def clear_hole_cards(self):
+        self.cards_label.set_text("")
 
     def clear_action(self):
         """ Clear the action column. """
-        self.__action_label.set_text("")
+        self.action_label.set_text("")
 
     def prompted(self):
         """ Indicate in the UI that this seat has been prompted to act. """
-        self.__action_label.set_text("<<<")
+        self.action_label.set_text("><")
 
     def posted_blind(self, amount):
         """ Indicate that this player has posted a blind. """
-        self.__action_label.set_text("post blind $%s" % amount)
+        self.action_label.set_text("posts")
 
     def folded(self):
         """ Indicate that this player has folded. """
-        self.__action_label.set_text("fold")
+        self.action_label.set_text("fold")
 
     def called(self, amount):
         """ Indicate that this player has called. """
         if amount == 0:
-            self.__action_label.set_text("check")
+            self.action_label.set_text("check")
         else:
-            self.__action_label.set_text("call")
+            self.action_label.set_text("call")
 
     def raised(self, amount):
         """ Indicate that this player has raised. """
-        self.__action_label.set_text("raise $%s" % amount)
+        self.action_label.set_text("raise $%s" % amount)
 
 
 
