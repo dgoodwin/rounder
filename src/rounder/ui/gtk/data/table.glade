@@ -4,14 +4,12 @@
 <glade-interface>
 
 <widget class="GtkWindow" id="table-window">
-  <property name="width_request">600</property>
-  <property name="height_request">600</property>
   <property name="visible">True</property>
   <property name="title" translatable="yes">Table Name</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_MOUSE</property>
   <property name="modal">False</property>
-  <property name="resizable">False</property>
+  <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="decorated">True</property>
   <property name="skip_taskbar_hint">False</property>
@@ -207,14 +205,13 @@
 	</widget>
 	<packing>
 	  <property name="padding">5</property>
-	  <property name="expand">True</property>
+	  <property name="expand">False</property>
 	  <property name="fill">True</property>
 	</packing>
       </child>
 
       <child>
 	<widget class="GtkTable" id="table3">
-	  <property name="border_width">5</property>
 	  <property name="visible">True</property>
 	  <property name="n_rows">2</property>
 	  <property name="n_columns">2</property>
@@ -338,7 +335,7 @@
 	</widget>
 	<packing>
 	  <property name="padding">0</property>
-	  <property name="expand">True</property>
+	  <property name="expand">False</property>
 	  <property name="fill">True</property>
 	</packing>
       </child>
@@ -346,13 +343,13 @@
       <child>
 	<widget class="GtkTable" id="table2">
 	  <property name="border_width">5</property>
-	  <property name="width_request">600</property>
+	  <property name="width_request">500</property>
 	  <property name="visible">True</property>
 	  <property name="n_rows">5</property>
 	  <property name="n_columns">4</property>
 	  <property name="homogeneous">False</property>
 	  <property name="row_spacing">5</property>
-	  <property name="column_spacing">125</property>
+	  <property name="column_spacing">20</property>
 
 	  <child>
 	    <widget class="GtkLabel" id="seat0-player-label">
@@ -828,7 +825,7 @@
 	</widget>
 	<packing>
 	  <property name="padding">3</property>
-	  <property name="expand">True</property>
+	  <property name="expand">False</property>
 	  <property name="fill">True</property>
 	</packing>
       </child>
@@ -873,7 +870,7 @@
       <child>
 	<widget class="GtkHBox" id="hbox1">
 	  <property name="border_width">5</property>
-	  <property name="height_request">100</property>
+	  <property name="height_request">60</property>
 	  <property name="visible">True</property>
 	  <property name="homogeneous">True</property>
 	  <property name="spacing">0</property>
