@@ -121,7 +121,8 @@ class PlayerState:
         self.num_cards = len(player.cards)
 
     def __str__(self):
-        return "%s - %s" % (self.username, self.chips)
+        return "%s - %s - cards: %s" % (self.username, self.chips, 
+                self.num_cards)
 
 
 

@@ -156,7 +156,7 @@ class Game(object):
         self.pot_mgr = PotManager()
 
         # Create a new hand starting event and send to each player:
-        new_hand_event = NewHandStarted(self.table)
+        new_hand_event = NewHandStarted(self.table, self.players)
         self.table.notify_all(new_hand_event)
 
     def process_action(self, action):

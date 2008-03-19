@@ -318,6 +318,8 @@ class TableWindow(Table):
             self.chat_line("New hand!")
             self.chat_line("%s is dealing." % self.gui_seats[
                 event.table_state.dealer_seat].name_label.get_text())
+            for seat_num in event.seats_dealt_in:
+                self.gui_seats[seat_num].show_hole_cards(None)
 
         elif isinstance(event, PlayerPostedBlind):
             self.chat_line("%s posts blind: $%s" % (event.username,
@@ -379,10 +381,6 @@ class TableWindow(Table):
                     self.chat_line("%s wins $%s from %s pot" %
                             (pot_winner.username, pot_winner.amount, 
                                 pot_type))
-            # TODO: Show who has cards properly:
-            for seat in self.gui_seats:
-                if seat.is_occupied():
-                    seat.clear_hole_cards()
             self.deal_button.set_sensitive(True)
 
 
@@ -501,7 +499,7 @@ class GuiSeat:
         self.sit_button = None
 
         cards = ""
-        if len(cards) > 0:
+        if player_state.num_cards > 0:
             cards = "XX XX"
         self.cards_label = gtk.Label(cards)
         #self.cards_label.set_name("seat%s-cards-label" % self.seat_number)
@@ -538,23 +536,18 @@ class GuiSeat:
         if self.sit_button != None:
             self.sit_button.set_sensitive(False)
 
-
-    #def set_username(self, username):
-    #    self.__player_label.set_text(username)
-
-    #def sit_button_disable(self):
-    #    self.__sit_button.set_sensitive(False)
-
-    #def sit_button_enable(self):
-    #    self.__sit_button.set_sensitive(True)
-
     def show_hole_cards(self, cards):
         """
         Display hole cards.
 
         Called when we receive our hole cards, or someone else shows theirs.
+        If the hole cards are unknown (i.e. indicating player is in hand only),
+        cards will be None.
         """
-        self.cards_label.set_text("%s %s" % (cards[0], cards[1]))
+        if cards == None:
+            self.cards_label.set_text("XX XX")
+        else:
+            self.cards_label.set_text("%s %s" % (cards[0], cards[1]))
 
     def clear_hole_cards(self):
         self.cards_label.set_text("")
