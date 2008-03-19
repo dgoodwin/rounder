@@ -524,11 +524,19 @@ class GuiSeat:
         self.cards_label.set_use_markup(True)
         #self.cards_label.set_name("seat%s-cards-label" % self.seat_number)
 
-        self.name_label = gtk.Label(player_state.username)
+        self.name_label = gtk.Label()
+        uname = '<span size="large">%s</span>' % player_state.username
+        self.name_label.set_use_markup(True)
+        self.name_label.set_markup(uname)
         #self.name_label.set_name("seat%s-player-label" % self.seat_number)
 
-        self.chips_label = gtk.Label(player_state.chips)
-        self.action_label = gtk.Label("")
+        self.chips_label = gtk.Label()
+        self.chips_label.set_use_markup(True)
+        self.set_chips(player_state.chips)
+
+        self.action_label = gtk.Label()
+        self.action_label.set_use_markup(True)
+        self.__set_action("")
 
         self.vbox.pack_start(self.cards_label)
         self.vbox.pack_start(self.name_label)
@@ -539,7 +547,8 @@ class GuiSeat:
 
     def set_chips(self, chips):
         logger.debug("updating chips")
-        self.chips_label.set_text("$%s" % chips)
+        chips = '<span size="small">$%s</span>' % chips
+        self.chips_label.set_markup(chips)
 
     def player_left(self, i_am_seated=True):
         """
@@ -573,9 +582,13 @@ class GuiSeat:
     def clear_hole_cards(self):
         self.cards_label.set_text("")
 
+    def __set_action(self, txt):
+        text = '<span size="small">%s</span>' % txt
+        self.action_label.set_markup(text)
+
     def clear_action(self):
         """ Clear the action column. """
-        self.action_label.set_text("")
+        self.__set_action("")
 
     def prompted(self):
         """ Indicate in the UI that this seat has been prompted to act. """
@@ -583,22 +596,22 @@ class GuiSeat:
 
     def posted_blind(self, amount):
         """ Indicate that this player has posted a blind. """
-        self.action_label.set_text("posts")
+        self.__set_action("posts")
 
     def folded(self):
         """ Indicate that this player has folded. """
-        self.action_label.set_text("fold")
+        self.__set_action("fold")
 
     def called(self, amount):
         """ Indicate that this player has called. """
         if amount == 0:
-            self.action_label.set_text("check")
+            self.__set_action("check")
         else:
-            self.action_label.set_text("call")
+            self.__set_action("call")
 
     def raised(self, amount):
         """ Indicate that this player has raised. """
-        self.action_label.set_text("raise $%s" % amount)
+        self.__set_action("raise $%s" % amount)
 
 
 
