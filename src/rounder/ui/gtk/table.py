@@ -60,6 +60,24 @@ GUI_SEAT_COORDS = {
     "pot-label": (130, 135),
 }
 
+def colored_card(card):
+    """
+    Return a colored representation of the given card's suit.
+    Uses red for hearts, black for spades, blue for diamonds, and green 
+    for clubs.
+    """
+    suit_char = str(card)[1]
+    color = ""
+    if suit_char == "h":
+        color = "red"
+    elif suit_char == "s":
+        color = "black"
+    elif suit_char == "d":
+        color = "blue"
+    elif suit_char == "c":
+        color = "green"
+    return '<span foreground="%s">%s</span>' % (color, str(card))
+
 class TableWindow(Table):
     """ Dialog for a poker table. """
 
@@ -100,6 +118,7 @@ class TableWindow(Table):
         # Setup and display the player seats:
         self.fixed_table = self.glade_xml.get_widget('fixed-table')
         self.board_label = gtk.Label("Board:")
+        self.board_label.set_use_markup(True)
         coords = GUI_SEAT_COORDS['board-label']
         self.fixed_table.put(self.board_label, coords[0], coords[1])
         self.pot_label = gtk.Label("Pot:")
@@ -398,8 +417,8 @@ class TableWindow(Table):
         # Render board cards:
         cards_string = "Board:"
         for c in state.community_cards:
-            cards_string = "%s %s" % (cards_string, c)
-        self.board_label.set_text(cards_string)
+            cards_string = "%s %s" % (cards_string, colored_card(c))
+        self.board_label.set_markup(cards_string)
 
         # Render pot size:
         # TODO: Rendering all side pots + pending round bets as one
@@ -502,6 +521,7 @@ class GuiSeat:
         if player_state.num_cards > 0:
             cards = "XX XX"
         self.cards_label = gtk.Label(cards)
+        self.cards_label.set_use_markup(True)
         #self.cards_label.set_name("seat%s-cards-label" % self.seat_number)
 
         self.name_label = gtk.Label(player_state.username)
@@ -547,7 +567,8 @@ class GuiSeat:
         if cards == None:
             self.cards_label.set_text("XX XX")
         else:
-            self.cards_label.set_text("%s %s" % (cards[0], cards[1]))
+            self.cards_label.set_markup("%s %s" % (colored_card(cards[0]), 
+                colored_card(cards[1])))
 
     def clear_hole_cards(self):
         self.cards_label.set_text("")
