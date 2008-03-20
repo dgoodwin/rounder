@@ -18,25 +18,6 @@
           </widget>
         </child>
         <child>
-          <widget class="GtkScrolledWindow" id="scrolledwindow1">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">GTK_SHADOW_IN</property>
-            <child>
-              <widget class="GtkTextView" id="chat-textview">
-                <property name="height_request">5</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="border_width">1</property>
-                <property name="editable">False</property>
-              </widget>
-            </child>
-          </widget>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkHBox" id="hbox1">
             <property name="height_request">60</property>
             <property name="visible">True</property>
@@ -84,7 +65,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">2</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -100,7 +81,37 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkScrolledWindow" id="scrolledwindow1">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+            <property name="shadow_type">GTK_SHADOW_IN</property>
+            <child>
+              <widget class="GtkTextView" id="chat-textview">
+                <property name="height_request">5</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="border_width">1</property>
+                <property name="editable">False</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
             <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEntry" id="chat-entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+          </widget>
+          <packing>
+            <property name="position">4</property>
           </packing>
         </child>
       </widget>

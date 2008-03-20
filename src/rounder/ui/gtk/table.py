@@ -46,18 +46,18 @@ SEAT_BUTTON_INDEX = {
 # Map seat numbers and other labels to their location in the main GtkFixed 
 # widget:
 GUI_SEAT_COORDS = {
-    0: (0, 115),
-    1: (55, 35),
-    2: (135, 0),
-    3: (215, 0),
-    4: (295, 35),
-    5: (375, 115),
-    6: (295, 195),
-    7: (215, 230),
-    8: (135, 230),
-    9: (55, 195),
-    "board-label": (130, 115),
-    "pot-label": (130, 135),
+    0: (5, 115),
+    1: (70, 35),
+    2: (150, 0),
+    3: (240, 0),
+    4: (320, 35),
+    5: (400, 115),
+    6: (320, 195),
+    7: (240, 230),
+    8: (150, 230),
+    9: (70, 195),
+    "board-label": (150, 115),
+    "pot-label": (150, 135),
 }
 
 def colored_card(card):
@@ -117,7 +117,7 @@ class TableWindow(Table):
 
         # Setup and display the player seats:
         self.fixed_table = self.glade_xml.get_widget('fixed-table')
-        self.board_label = gtk.Label("Board:")
+        self.board_label = gtk.Label()
         self.board_label.set_use_markup(True)
         coords = GUI_SEAT_COORDS['board-label']
         self.fixed_table.put(self.board_label, coords[0], coords[1])
@@ -415,7 +415,7 @@ class TableWindow(Table):
         state.print_state()
     
         # Render board cards:
-        cards_string = "Board:"
+        cards_string = ""
         for c in state.community_cards:
             cards_string = "%s %s" % (cards_string, colored_card(c))
         self.board_label.set_markup(cards_string)
