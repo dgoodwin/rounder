@@ -531,15 +531,17 @@ class TexasHoldemGame(Game):
         event = GameEnding(self.table)
         self.table.notify_all(event)
 
-        # Show hole cards for anyone who hasn't folded:
-        # TODO: Implement optional showing of cards before we process hand
-        # winners here?
-        # TODO: Start with last player to push the action, or small blind, and
-        # loop through from there:
-        for p in self.players:
-            if p.in_hand:
-                event = PlayerShowedCards(self.table, p.username, p.cards)
-                self.table.notify_all(event)
+        players = filter(lambda x: x.folded == False, self.players)
+        if len(players) > 1:
+            # Show hole cards for anyone who hasn't folded:
+            # TODO: Implement optional showing of cards before we process hand
+            # winners here?
+            # TODO: Start with last player to push the action, or small blind, and
+            # loop through from there:
+            for p in self.players:
+                if p.in_hand:
+                    event = PlayerShowedCards(self.table, p.username, p.cards)
+                    self.table.notify_all(event)
 
         board = []
         for c in self.community_cards:
