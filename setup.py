@@ -4,7 +4,8 @@
 
 __revision__ = "$Revision$"
 
-from setuptools import setup
+#from setuptools import setup
+from distutils.core import setup
 
 setup(name="rounder",
     version='0.0.1b',
@@ -14,13 +15,23 @@ setup(name="rounder",
     url='http://dangerouslyinc.com',
     license='GPL',
 #    install_requires=['Cerealizer', 'Twisted'],
-    packages=['rounder'],
-    package_dir={'rounder': 'src/rounder'},
-    package_data={'rounder': ['data/*.xml', 'data/*.glade', 'data/*.png']},
-    scripts=['bin/rounder'],
+    packages=['rounder', 'rounder.network', 'rounder.ui', 'rounder.ui.gtk',
+        'rounder.ui.curses'],
+    package_dir={
+        'rounder': 'src/rounder',
+        'rounder.network': 'src/rounder/network',
+        'rounder.ui': 'src/rounder/ui',
+        'rounder.ui.gtk': 'src/rounder/ui/gtk',
+        'rounder.ui.curses': 'src/rounder/ui/curses',
+    },
+    package_data={'rounder.ui.gtk': ['data/*.glade']},
+    scripts=['bin/rounder', 'bin/rounder-server', 'bin/rounder-txt'],
     # TODO: This sucks.
-    data_files=[('../etc/gconf/schemas', ['data/rounder.schema'])],
-    test_suite='runtests.suite'
+    #data_files=[('../etc/gconf/schemas', ['data/rounder.schema'])],
+
+    # Only valid if we're using setuptools, which we're not due to problems
+    # loading glade files inside eggs:
+    #test_suite='runtests.suite'
 )
 
 print "rounder installation complete"

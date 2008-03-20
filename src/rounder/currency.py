@@ -20,7 +20,7 @@
 
 """ The Rounder Currency Module """
 
-from fixedpoint import FixedPoint, DEFAULT_PRECISION
+from rounder.fixedpoint import FixedPoint, DEFAULT_PRECISION
 
 class Currency(FixedPoint):
 
