@@ -237,6 +237,13 @@ class RounderScreen(CursesStdIO):
         pass
 
 class RounderCurses:
+
+    def __init__(self, host=None, port=None, username=None, password=None):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+
     def main(self):
         # TODO: why do I have to do this?
         register_message_classes()
@@ -249,4 +256,9 @@ class RounderCurses:
         screen.set_command(state.commands)
 
         reactor.addReader(screen)
+        if (self.host and self.port and self.username and self.password):
+            client = RounderNetworkClient(state.servercb)
+            reactor.callWhenRunning(client.connect, self.host, self.port,
+                    self.username, self.password)
+
         reactor.run()

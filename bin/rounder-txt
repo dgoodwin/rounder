@@ -27,8 +27,14 @@ version)
 import sys
 
 from rounder.ui.curses.main import RounderCurses
+from rounder.utils import build_cli_option_parser
+
 
 if __name__ == "__main__":
-    rounderApp = RounderCurses()
-    rounderApp.main()
 
+    parser = build_cli_option_parser()
+    (options, args) = parser.parse_args()
+
+    rounderApp = RounderCurses(options.host, options.port, options.username,
+            options.password)
+    rounderApp.main()
