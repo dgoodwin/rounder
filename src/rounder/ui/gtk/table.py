@@ -192,6 +192,7 @@ class TableWindow(ClientTable):
         logger.debug("Sending chat message")
 
         chat_message = widget.get_text()
+        widget.set_text("")
         self.table_uplink.send_chat(chat_message)
 
     def sit_success(self, seat):
