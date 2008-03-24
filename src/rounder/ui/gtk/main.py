@@ -37,6 +37,8 @@ from rounder.ui.client import Client
 from rounder.ui.gtk.util import find_file_on_path
 from rounder.ui.gtk.table import TableWindow
 
+ROUNDER_LOGO_FILE = "rounder/ui/gtk/data/rounder-logo.png"
+
 def connect(host, port, username, password, app):
         # Attempt to connect to the specified server by creating a client
         # object. If successful pass the client back to the main application,
@@ -71,6 +73,8 @@ class RounderGtk(Client):
         main_window = self.glade_xml.get_widget('main-window')
         self.table_list = self.glade_xml.get_widget('table-list')
         self.statusbar = self.glade_xml.get_widget('statusbar')
+        logo = self.glade_xml.get_widget("rounder-logo-image")
+        logo.set_from_file(find_file_on_path(ROUNDER_LOGO_FILE))
 
         signals = {
             'on_connect_activate': self.show_connect_dialog,
