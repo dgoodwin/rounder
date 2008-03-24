@@ -141,6 +141,9 @@ class TableWindow(ClientTable):
             self.__username_to_seat[player_state.username] = \
                     self.gui_seats[player_state.seat]
 
+
+        self.clean_actions = False
+
         # Signal handling:
         # TODO: Replace these all with one signal?
         signals = {
@@ -341,8 +344,16 @@ class TableWindow(ClientTable):
                 self.gui_seats[seat_num].show_hole_cards(None)
 
         elif isinstance(event, PlayerPostedBlind):
+            # Happens before NewHandStarted, clear actions from the last hand:
+            if self.clean_actions:
+                self.clean_actions = False
+                for seat in self.gui_seats:
+                    if seat.is_occupied():
+                        seat.clear_action()
+
             self.chat_line("%s posts blind: $%s" % (event.username,
                 event.amount))
+
             seat = self.__username_to_seat[event.username]
             seat.posted_blind(event.amount)
 
@@ -381,9 +392,6 @@ class TableWindow(ClientTable):
 
         elif isinstance(event, GameEnding):
             self.chat_line("End of hand.")
-            for seat in self.gui_seats:
-                if seat.is_occupied():
-                    seat.clear_action()
 
         elif isinstance(event, PlayerShowedCards):
             self.chat_line("%s shows: %s" % (event.username, event.cards))
@@ -391,6 +399,11 @@ class TableWindow(ClientTable):
             seat.show_hole_cards(event.cards)
 
         elif isinstance(event, GameOver):
+
+            # Used so we know to clean out player actions at the first
+            # sign of someone posting their blinds:
+            self.clean_actions = True
+
             for tuple in event.results:
                 pot_state = tuple[0]
                 for pot_winner in tuple[1]:
@@ -521,13 +534,11 @@ class GuiSeat:
             cards = "XX XX"
         self.cards_label = gtk.Label(cards)
         self.cards_label.set_use_markup(True)
-        #self.cards_label.set_name("seat%s-cards-label" % self.seat_number)
 
         self.name_label = gtk.Label()
         uname = '<span size="large">%s</span>' % player_state.username
         self.name_label.set_use_markup(True)
         self.name_label.set_markup(uname)
-        #self.name_label.set_name("seat%s-player-label" % self.seat_number)
 
         self.chips_label = gtk.Label()
         self.chips_label.set_use_markup(True)
@@ -600,6 +611,7 @@ class GuiSeat:
     def folded(self):
         """ Indicate that this player has folded. """
         self.__set_action("fold")
+        self.cards_label.set_text("")
 
     def called(self, amount):
         """ Indicate that this player has called. """

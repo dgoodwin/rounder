@@ -115,10 +115,16 @@ class PlayerState:
         self.username = player.username
         self.chips = player.chips
         self.seat = player.seat
+
+        # TODO: Don't show sitting out here if player sat out mid-hand,
+        # this needs a test.
         self.sitting_out = player.sitting_out
+
         self.folded = player.folded
 
         self.num_cards = len(player.cards)
+        if self.folded:
+            self.num_cards = 0
 
     def __str__(self):
         return "%s - %s - cards: %s" % (self.username, self.chips, 
