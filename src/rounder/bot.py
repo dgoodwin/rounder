@@ -18,13 +18,14 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
+import time
 import random
 
 from logging import getLogger
 logger = getLogger("rounder.ui.bot")
 
 from rounder.ui.client import Client, ClientTable
-from rounder.action import Raise
+from rounder.action import *
 from rounder.network.client import RounderNetworkClient
 from rounder.network.server import DEFAULT_SERVER_PORT
 
@@ -75,6 +76,10 @@ class RandomBotTable(ClientTable):
     def __init__(self, table_uplink):
         self.table_uplink = table_uplink
 
+    def sleep(self):
+        """ Don't act too fast. Disorienting for teh humans. """
+        time.sleep(1.5)
+
     def sit_success(self, seat_num):
         pass
 
@@ -85,11 +90,39 @@ class RandomBotTable(ClientTable):
         """ 
         Choose one of the actions in the given list, return it's index and any
         parameters required.
+
+        More likely to call and raise than fold, and will check rather than
+        fold.
         """
-        r = random.randint(0, len(actions) - 1)
-        random_action = actions[r]
-        params = []
-        if isinstance(random_action, Raise):
-            params.append(str(random_action.min_bet))
+
+        self.sleep()
+
+        while 1:
+            r = random.randint(0, len(actions) - 1)
+            random_action = actions[r]
+            params = []
+            if isinstance(random_action, Raise):
+                params.append(str(random_action.min_bet))
+            elif isinstance(random_action, Fold):
+                one_in_five = random.randint(0, 5)
+                if one_in_five != 0:
+                    continue # keep trying
+                else:
+                    call_index = find_action_index(actions, Call)
+                    if actions[call_index].amount == 0:
+                        logger.debug("Checking instead of folding.")
+                        r = call_index
+            break
+
         self.table_uplink.act(r, params)
 
+
+
+def find_action_index(actions, type):
+    """ Return the index of the given action type. """
+    i = 0
+    for action in actions:
+        if isinstance(action, type):
+            return i
+        i = i + 1
+    raise Exception("Couldn't find %s action" % type)
