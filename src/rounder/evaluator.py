@@ -50,19 +50,32 @@ class FullHand(object):
             if not ranks.has_key(rank):
                 ranks[rank] = []
             ranks[rank].append(card[-1])
-        return len(ranks) == 2 and len(ranks.values()[0]) in [1, 4]
+        counts = [len(x) for x in ranks.values()]
+        counts.sort()
+        return counts[-1] == 4
 
     def is_full_house(self):
-        ranks = set()
+        ranks = {}
         for card in self.cards:
-            ranks.add(card[:-1])
-        return len(ranks) == 2
+            rank = card[:-1]
+            if not ranks.has_key(rank):
+                ranks[rank] = []
+            ranks[rank].append(card[-1])
+        counts = [len(x) for x in ranks.values()]
+        counts.sort()
+
+        return counts in [[1, 1, 2, 3], [2, 2, 3], [1, 3, 3]]
 
     def is_flush(self):
-        suits = set()
+        suits = {}
         for card in self.cards:
-            suits.add(card[-1])
-        return len(suits) == 1
+            suit = card[-1]
+            if not suits.has_key(suit):
+                suits[suit] = 0
+            suits[suit] += 1
+        counts = suits.values()
+        counts.sort()
+        return len(suits) in [1, 2, 3] and counts[-1] >= 5
 
     def is_straight(self):
         ranks = [card[:-1] for card in self.cards]
@@ -80,19 +93,28 @@ class FullHand(object):
 
         ranks.sort()
 
-        last = ranks[0]
+        # Clear out and dupes we might have
+        tmp_ranks = []
+        for rank in ranks:
+            if rank not in tmp_ranks:
+                tmp_ranks.append(rank)
+        ranks = tmp_ranks
 
         # Check for Ace being low case
-        if last == 2:
-            if ranks[-1] == 14:
-                last = 1
+        if ranks[0] == 2 and ranks[-1] == 14:
                 ranks = [1] + ranks[:-1]
 
-        for i in range(1, len(ranks)):
-            if last + 1 != ranks[i]:
-                return False
-            last += 1
-        return True
+        # The len math is here for dupes we removed and the low ace we
+        # may have added
+        for j in range(len(ranks) - 4):
+            last = ranks[j]
+            for i in range(j + 1, 4 + j):
+                if last + 1 != ranks[i]:
+                    break
+                last += 1
+            else:
+                return True
+        return False
 
     def is_trips(self):
         ranks = {}
@@ -103,7 +125,7 @@ class FullHand(object):
             ranks[rank].append(card[-1])
         values = [len(x) for x in ranks.values()]
         values.sort()
-        return len(ranks) == 3 and values == [1, 1, 3]
+        return values == [1, 1, 1, 1, 3]
    
     def is_two_pair(self):
         ranks = {}
@@ -114,13 +136,13 @@ class FullHand(object):
             ranks[rank].append(card[-1])
         values = [len(x) for x in ranks.values()]
         values.sort()
-        return len(ranks) == 3 and values == [1, 2, 2]
+        return values in [[1, 1, 1, 2, 2], [1, 2, 2, 2]]
 
     def is_one_pair(self):
         ranks = set()
         for card in self.cards:
             ranks.add(card[:-1])
-        return len(ranks) == 4
+        return len(ranks) == 6
 
     def _get_relative_value(self):
         """
