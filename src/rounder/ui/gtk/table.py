@@ -61,6 +61,8 @@ GUI_SEAT_COORDS = {
     "pot-label": (150, 135),
 }
 
+ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
+
 def colored_card(card):
     """
     Return a colored representation of the given card's suit.
@@ -118,6 +120,12 @@ class TableWindow(ClientTable):
 
         # Setup and display the player seats:
         self.fixed_table = self.glade_xml.get_widget('fixed-table')
+
+        # Display the table background image:
+        img = gtk.Image()
+        img.set_from_file(find_file_on_path(ROUNDER_TABLE_FILE))
+        self.fixed_table.put(img, 0, 0)
+
         self.board_label = gtk.Label()
         self.board_label.set_use_markup(True)
         coords = GUI_SEAT_COORDS['board-label']
@@ -125,7 +133,7 @@ class TableWindow(ClientTable):
         self.pot_label = gtk.Label("Pot:")
         coords = GUI_SEAT_COORDS['pot-label']
         self.fixed_table.put(self.pot_label, coords[0], coords[1])
-        
+
         self.gui_seats = []
         for i in range(0, 10):
             seat = GuiSeat(self, i)
