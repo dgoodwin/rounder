@@ -21,6 +21,7 @@
 
 import gtk
 import gtk.glade
+from gtk.gdk import beep
 
 from logging import getLogger
 logger = getLogger("rounder.ui.gtk.table")
@@ -250,6 +251,7 @@ class TableWindow(ClientTable):
         """ Prompt player to act. """
         index = 0
         logger.debug("Prompting with actions:")
+        beep()
         for action in actions:
             logger.debug("   %s" % action)
             if isinstance(action, PostBlind):
