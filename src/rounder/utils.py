@@ -35,7 +35,7 @@ def build_cli_option_parser():
     """
     parser = OptionParser()
     parser.add_option("--host", dest="host", help="host to connect to")
-    parser.add_option("--port", dest="port", type="int",
+    parser.add_option("--port", dest="port", default=35100, type="int",
         help="port the rounder server is running on (default: 35100)")
     parser.add_option("-u", "--username", dest="username",
         help="username to play as")
