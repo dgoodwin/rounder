@@ -1,7 +1,7 @@
 #   Rounder - Poker for the GNOME Desktop
 #
-#   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
-#   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2008 James Bowes <jbowes@dangerouslyinc.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -58,7 +58,11 @@ class RounderGtk(Client):
 
     def __init__(self, host=None, port=None, username=None, password=None):
 
-        logger.info("Starting application.")
+        logger.info("Starting rounder.")
+        logger.debug("   host = %s" % host)
+        logger.debug("   port = %s" % port)
+        logger.debug("   username = %s" % username)
+        logger.debug("   password = %s" % password)
         register_message_classes()
 
         glade_file = 'rounder/ui/gtk/data/rounder.glade'
@@ -122,7 +126,7 @@ class RounderGtk(Client):
         logger.debug("   table name: %s" % model[row][1])
         self.client.open_table(model[row][0])
 
-    def open_table_success_cb(self, client_table):
+    def open_table_success(self, client_table):
         table_win = TableWindow(self, client_table)
 
     def show_connect_dialog(self, widget):
@@ -159,7 +163,7 @@ class RounderGtk(Client):
         logger.warn("Connect failed")
         self.connect_dialog.set_status("Login failed.")
 
-    def got_table_list(self, table_listings):
+    def list_tables_success(self, table_listings):
         """ 
         Populate the list of tables in the main server window. 
 

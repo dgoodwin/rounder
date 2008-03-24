@@ -20,8 +20,6 @@
 
 """ The Rounder Server Module """
 
-import md5
-
 from zope.interface import implements
 from twisted.spread import pb
 from twisted.cred import checkers, portal, credentials, error
@@ -39,7 +37,7 @@ from rounder.player import Player
 from rounder.core import RounderException
 from rounder.network.serialize import register_message_classes, dumps
 
-SERVER_PORT = 35100
+DEFAULT_SERVER_PORT = 35100
 
 class RounderNetworkServer:
 
@@ -80,7 +78,7 @@ class RounderNetworkServer:
     def create_table(self, name):
         """ Create a new table. """
         # TODO: stop hard coding everything :)
-        limit = FixedLimit(small_bet=Currency(1), big_bet=Currency(2))
+        limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
         table = Table(name=name, limit=limit, seats=10, server=self)
 
         view = TableView(table, self)
@@ -331,7 +329,7 @@ class OnDemandCredentialsChecker:
 
 
 def run_server():
-    logger.info("Starting Rounder server on port %s" % (SERVER_PORT))
+    logger.info("Starting Rounder server on port %s" % (DEFAULT_SERVER_PORT))
     register_message_classes()
     
     realm = RounderRealm()
@@ -340,10 +338,7 @@ def run_server():
     p = portal.Portal(realm, [checker])
 
     realm.server.create_table("Table 1")
-    realm.server.create_table("Table 2")
-    realm.server.create_table("Table 3")
-    realm.server.create_table("Table 4")
 
-    reactor.listenTCP(SERVER_PORT, pb.PBServerFactory(p))
+    reactor.listenTCP(DEFAULT_SERVER_PORT, pb.PBServerFactory(p))
     reactor.run()
 

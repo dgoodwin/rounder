@@ -1,3 +1,24 @@
+#   Rounder - Poker for the GNOME Desktop
+#
+#   Copyright (C) 2008 Kenny MacDermid <kenny@kmdconsulting.ca>
+#   Copyright (C) 2008 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#   02110-1301  USA
+
 #!/usr/bin/env python
 
 import string
@@ -65,12 +86,12 @@ class TxtRounderClientServerCallback(Client):
         # TODO: would we have a reason?
         self.screen.write("Login Failed")
 
-    def got_table_list(self, tables):
+    def list_tables_success(self, tables):
         self.screen.write("Table List:")
         for table in tables:
             self.screen.write(str(table))
 
-    def open_table_success_cb(self, table):
+    def open_table_success(self, table):
         self.screen.write("Joined Table")
         self.state.table = table
 

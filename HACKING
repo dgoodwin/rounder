@@ -1,8 +1,60 @@
 Want to hack on Rounder? Here's everything you should need to know.
 
-=============
-GENERAL NOTES
-=============
+============
+DEPENDENCIES
+============
+
+Rounder currently has the following dependencies: (NOTE: these must currently
+be manually installed until we have packages and distutils setup properly)
+
+* Twisted: http://twistedmatrix.com/trac/
+Python Network library used for all of Rounder's networking.
+
+* Cerealizer: http://home.gna.org/oomadness/en/cerealizer/index.html
+Python module for serializing objects for transmission. Used instead of
+Twisted's capabilities which didn't seem to actually do much of the heavy
+lifting for you.
+
+* PyPokerEval: http://pokersource.sourceforge.net/
+Part of the Poker Source project, this will hopefully be removed as a
+dependency someday. It depends on C code which is going to pose nothing but
+problems particularly if Rounder is ever to run on Windows. Using for hand
+ranking only temporarily.
+
+===============
+GETTING STARTED
+===============
+
+Best to start with running the tests, this will give you a pretty good idea if
+you have all the dependencies installed:
+
+    ./runtests
+
+Various executables installed with rounder can be found in the bin/ directory.
+If you would like to run them from your source checkout, without actually
+installing rounder (or perhaps just from the source checkout instead of the
+installed version) you'll need to adjust your PYTHONPATH.
+
+    PYTHONPATH=/home/YOU/src/rounder/src ./rounder-server 
+
+-or-
+
+   export PYTHONPATH=/home/YOU/src/rounder/src
+   ./rounder-server
+
+To fire up a local test server do the following:
+
+    1. export PYTHONPATH=/home/YOU/src/rounder/src
+    2. bin/rounder-server
+    3. bin/rounder-randombot --host localhost --port 35100 -u bot0 -p password
+        - Repeat for as many bots as you like, but only enough that will
+          fit at a single table. (for now)
+    4. bin/rounder --host localhost --port 35100 -u yourname -p password
+        - Launches the actual client.
+
+===========
+DEVELOPMENT
+===========
 
 We'll do everything in our power to get contributed patches into the codebase.
 We're attempting to keep the code as clean, logical, and maintainable as
@@ -27,39 +79,4 @@ important for allowing us to refactor problem areas down the road. Tests
 included in the default suite must be "pure" and lightning fast, no disk
 access, no network access, and test the components as fine grained as
 possible.
-
-============
-ARCHITECTURE
-============
-
-See the doc sub-directory. (COMING SOON)
-
-============
-DEPENDENCIES
-============
-
-Rounder currently has the following dependencies: (NOTE: these must currently
-be manually installed until we have packages and distutils setup properly)
-
-* Twisted: http://twistedmatrix.com/trac/
-Python Network library used for all of Rounder's networking.
-
-* Cerealizer: http://home.gna.org/oomadness/en/cerealizer/index.html
-Python module for serializing objects for transmission. Used instead of
-Twisted's capabilities which didn't seem to actually do much of the heavy
-lifting for you.
-
-* PyPokerEval: http://pokersource.sourceforge.net/
-Part of the Poker Source project, this will hopefully be removed as a
-dependency someday. It depends on C code which is going to pose nothing but
-problems particularly if Rounder is ever to run on Windows. Using for hand
-ranking only temporarily.
-
-============
-RUNNNG TESTS
-============
-
-From the root of the source directory:
-
-    ./runtests.py               Runs all the pure unit tests. (very fast)
 

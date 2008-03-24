@@ -25,7 +25,8 @@ setup(name="rounder",
         'rounder.ui.curses': 'src/rounder/ui/curses',
     },
     package_data={'rounder.ui.gtk': ['data/*.glade']},
-    scripts=['bin/rounder', 'bin/rounder-server', 'bin/rounder-txt'],
+    scripts=['bin/rounder', 'bin/rounder-server', 'bin/rounder-txt',
+        'bin/rounder-randombot'],
     # TODO: This sucks.
     #data_files=[('../etc/gconf/schemas', ['data/rounder.schema'])],
 

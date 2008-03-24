@@ -204,7 +204,7 @@ class EventTests(BaseServerFixture):
         self.assertEquals(2, len(user1_events))
         user1_call = user1_events[0]
         self.assertEquals(self.user1.username, user1_call.username)
-        self.assertEquals(Currency(0.5), user1_call.amount)
+        self.assertEquals(Currency(1), user1_call.amount)
         user2_call = user1_events[1]
         self.assertEquals(self.user2.username, user2_call.username)
         self.assertEquals(Currency(0), user2_call.amount)
@@ -213,7 +213,7 @@ class EventTests(BaseServerFixture):
         self.assertEquals(2, len(user2_events))
         user1_call = user2_events[0]
         self.assertEquals(self.user1.username, user1_call.username)
-        self.assertEquals(Currency(0.5), user1_call.amount)
+        self.assertEquals(Currency(1), user1_call.amount)
         user2_call = user2_events[1]
         self.assertEquals(self.user2.username, user2_call.username)
         self.assertEquals(Currency(0), user2_call.amount)
@@ -227,19 +227,19 @@ class EventTests(BaseServerFixture):
         self.user2.act_randomly(self.table.id)
         # Preflop action:
         self.user1.act(self.table.id, Call)
-        self.user2.act(self.table.id, Raise, [1])
+        self.user2.act(self.table.id, Raise, [2])
 
         user1_events = filter_event_type(self.user1, PlayerRaised)
         self.assertEquals(1, len(user1_events))
         user2_raise = user1_events[0]
         self.assertEquals(self.user2.username, user2_raise.username)
-        self.assertEquals(Currency(1), user2_raise.amount)
+        self.assertEquals(Currency(2), user2_raise.amount)
 
         user2_events = filter_event_type(self.user2, PlayerRaised)
         self.assertEquals(1, len(user2_events))
         user2_raise = user2_events[0]
         self.assertEquals(self.user2.username, user2_raise.username)
-        self.assertEquals(Currency(1), user2_raise.amount)
+        self.assertEquals(Currency(2), user2_raise.amount)
 
     def test_player_folded(self):
         self.user1_table.view_sit(self.user1, 0)

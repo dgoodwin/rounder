@@ -26,7 +26,7 @@ from logging import getLogger
 logger = getLogger("rounder.ui.gtk.table")
 
 from rounder.ui.gtk.util import find_file_on_path
-from rounder.ui.client import Table
+from rounder.ui.client import ClientTable
 from rounder.currency import Currency
 from rounder.event import *
 from rounder.action import *
@@ -78,10 +78,10 @@ def colored_card(card):
         color = "green"
     return '<span foreground="%s">%s</span>' % (color, str(card))
 
-class TableWindow(Table):
+class TableWindow(ClientTable):
     """ Dialog for a poker table. """
 
-    def __init__(self, app, client_table):
+    def __init__(self, app, table_uplink):
         """
         Create a new table window with a reference to the parent application
         window, as well as the client table we can use to perform actions.
@@ -90,15 +90,15 @@ class TableWindow(Table):
         logger.debug("Opening table window.")
 
         self.app = app
-        self.client_table = client_table
+        self.table_uplink = table_uplink
         # TODO: Chicken and egg problem here, probably easy to solve:
-        self.client_table.ui = self
+        self.table_uplink.ui = self
 
         glade_file = 'rounder/ui/gtk/data/table.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         self.table_window = self.glade_xml.get_widget('table-window')
-        table_title = "%s: %s %s" % (client_table.state.name, 
-                client_table.state.limit, "Texas Hold'em")
+        table_title = "%s: %s %s" % (table_uplink.state.name, 
+                table_uplink.state.limit, "Texas Hold'em")
         self.table_window.set_title(table_title)
 
         self.chat_textview = self.glade_xml.get_widget('chat-textview')
@@ -135,7 +135,7 @@ class TableWindow(Table):
 
         # Map usernames to seats for dealing with incoming actions:
         self.__username_to_seat = {}
-        for player_state in self.client_table.state.seats:
+        for player_state in self.table_uplink.state.seats:
             if player_state == None:
                 continue
             self.__username_to_seat[player_state.username] = \
@@ -160,7 +160,7 @@ class TableWindow(Table):
         self.table_window.connect("delete_event", self.confirm_window_close)
 
         # Render the initial table state:
-        self.__render_table_state(self.client_table.state)
+        self.__render_table_state(self.table_uplink.state)
 
         # Clear these when a hand ends:
         self.my_hole_cards = None
@@ -171,22 +171,22 @@ class TableWindow(Table):
         logger.debug("Confirming window close.")
         # NOTE: Just closing the window here for now, confirmation comes 
         # later:
-        self.client_table.leave()
+        self.table_uplink.leave()
         return False # set to true for confirm screen
 
     def handle_sit_button(self, widget):
         seat = SEAT_BUTTON_INDEX[widget.get_name()]
         logger.info("Requesting seat %s" % seat)
-        self.client_table.sit(seat)
+        self.table_uplink.sit(seat)
 
     def handle_deal_button(self, widget):
         logger.info("Requesting to start a hand.")
-        self.client_table.start_game()
+        self.table_uplink.start_game()
 
     def sit_success(self, seat):
         self.my_seat = self.gui_seats[seat]
         self.my_seat_num = seat
-        if not self.client_table.state.hand_underway:
+        if not self.table_uplink.state.hand_underway:
             self.deal_button.set_sensitive(True)
         for seat in self.gui_seats:
             seat.disable_sit_button()
@@ -217,7 +217,7 @@ class TableWindow(Table):
         self.__disable_action_buttons()
 
         logger.debug("Calling $%s." % action.amount)
-        self.client_table.act(action_index, [])
+        self.table_uplink.act(action_index, [])
 
     def handle_raise_button(self, widget, data):
         """ Handle a raise button press. """
@@ -230,7 +230,7 @@ class TableWindow(Table):
         self.__disable_action_buttons()
 
         logger.debug("Raising $%s." % raise_amount)
-        self.client_table.act(action_index, [raise_amount])
+        self.table_uplink.act(action_index, [raise_amount])
 
     def handle_fold_button(self, widget, data):
         """ Handle a fold press. """
@@ -241,7 +241,7 @@ class TableWindow(Table):
         self.__disable_action_buttons()
 
         logger.debug("Folding.")
-        self.client_table.act(action_index, [])
+        self.table_uplink.act(action_index, [])
 
     def prompt(self, actions):
         """ Prompt player to act. """
@@ -455,7 +455,6 @@ class GuiSeat:
         self.parent_table = parent_table
         self.seat_number = seat_number
         self.__fixed = parent_table.fixed_table # GtkFixed widget
-        logger.debug("Creating GuiSeat %s" % seat_number)
 
         # Set if we're displaying a button:
         self.sit_button = None

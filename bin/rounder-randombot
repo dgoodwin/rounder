@@ -2,8 +2,8 @@
 
 #   Rounder - Poker for the GNOME Desktop
 #
-#   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
-#   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2008 James Bowes <jbowes@dangerouslyinc.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -20,41 +20,30 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-"""
-Thin script to run rounder from the source directory. (and not the installed
-version)
-
-Can be run with no arguments, or as:
-
-    ./rounder host port username password
-
-to shortcut server connection. (useful for development)
-"""
-
+import random
 import sys
-sys.path.insert(0, './src/')
 
 from rounder.log import setup_logging
-import logging
-
 # Configure logging: (needs to be done before importing our modules)
-log_conf_locations = ["./logging.conf"]
+log_conf_locations = ["~/.rounder/logging.conf", "./logging.conf"]
 setup_logging(log_conf_locations)
 
-from rounder.ui.gtk.main import RounderGtk
+from rounder.bot import RandomBot
+from rounder.network.serialize import register_message_classes
+from rounder.utils import build_cli_option_parser
 
-if __name__ == "__main__":
-    # Implement optparse here:
-    host = None
-    port = None
-    username = None
-    password = None
-    if len(sys.argv) > 4:
-        host = sys.argv[1]
-        port = int(sys.argv[2])
-        username = sys.argv[3]
-        password = sys.argv[4]
+if __name__ == '__main__':
+    parser = build_cli_option_parser()
 
-    rounderApp = RounderGtk(host, port, username, password)
-    rounderApp.main()
+    (options, args) = parser.parse_args()
+    required = [options.host, options.port, options.username,
+            options.password]
+    for option in required:
+        if option == None:
+            parser.print_help()
+            sys.exit(1)
+            
+    register_message_classes()
+    bot = RandomBot(options.host, options.port, options.username,
+            options.password)
 

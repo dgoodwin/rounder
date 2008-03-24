@@ -1,7 +1,7 @@
 #   Rounder - Poker for the GNOME Desktop
 #
-#   Copyright (C) 2006 Devan Goodwin <dgoodwin@dangerouslyinc.com>
-#   Copyright (C) 2006 James Bowes <jbowes@dangerouslyinc.com>
+#   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2008 James Bowes <jbowes@dangerouslyinc.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ logger = getLogger("rounder.network.client")
 from rounder.network.serialize import loads
 
 class RounderNetworkClient(pb.Referenceable):
-
     """
     Focal point for all client side network communication.
 
@@ -58,7 +57,7 @@ class RounderNetworkClient(pb.Referenceable):
                 responses on to.
         """
         self.ui = ui
-        self.tables = {} # Hash of table id's to ClientTable objects
+        self.tables = {} # Hash of table id's to TableUplink objects
         self.username = None
         self.host = None
         self.port = None
@@ -88,6 +87,8 @@ class RounderNetworkClient(pb.Referenceable):
         """ Callback for successful connection. """
         logger.debug("connected!")
         self.perspective = perspective
+        # TODO: Need to give a reference to myself? Somebody had a reference to
+        # call connect with in the first place...
         self.ui.connect_success(self)
 
     def connect_failure_cb(self, failure):
@@ -111,7 +112,7 @@ class RounderNetworkClient(pb.Referenceable):
             temp = loads(t)
             logger.debug("   %s" % temp)
             table_listings.append(temp)
-        self.ui.got_table_list(table_listings)
+        self.ui.list_tables_success(table_listings)
 
     def get_table_list_failure_cb(self, failure):
         """ Callback for a failed get tables attempt. """
@@ -129,17 +130,17 @@ class RounderNetworkClient(pb.Referenceable):
         table_state = loads(data[1])
         logger.debug("Table opened successfully: %s" % table_state.name)
 
-        table = ClientTable(table_view, table_state)
+        table = TableUplink(table_view, table_state)
         table.ui = self.ui
         self.tables[table_state.id] = table
-        self.ui.open_table_success_cb(table)
+        self.ui.open_table_success(table)
 
     def remote_prompt(self, table_id, actions):
         """
         Prompt player to choose one of the given actions for a table.
         """
         # TODO: I don't yet see a way to get the server a reference to the 
-        # ClientTables, but I'm sure there's a way. Until this is adressed,
+        # TableUplink, but I'm sure there's a way. Until this is adressed,
         # will delegate the call there manually:
         self.tables[table_id].prompt(actions)
 
@@ -158,12 +159,12 @@ class RounderNetworkClient(pb.Referenceable):
 
 
 
-class ClientTable(pb.Referenceable):
+class TableUplink(pb.Referenceable):
     """
     A client side table object maintaining state of the table and exposing
     remote methods the UI can call to interact with the table on the server.
 
-    Thin wrapper over the Rounder server's TableView object.
+    Thin wrapper over the Rounder server's Twisted TableView object.
     """
 
     def __init__(self, table_view, table_state):
