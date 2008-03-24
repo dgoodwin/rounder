@@ -518,3 +518,9 @@ class Table(object):
     def hand_underway(self):
         """ Return True if a hand is currently underway. """
         return self.gsm.get_current_state() == HAND_UNDERWAY
+
+    def chat_message(self, player, message):
+        logger.debug("Table %s: Chat Message: <%s> %s" %
+                (self.id, player, message))
+        chat_event = PlayerSentChatMessage(self, player, message)
+        self.notify_all(chat_event)

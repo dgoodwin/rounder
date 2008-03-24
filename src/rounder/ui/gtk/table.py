@@ -159,6 +159,7 @@ class TableWindow(ClientTable):
             'on_seat8_sit_button_clicked': self.handle_sit_button,
             'on_seat9_sit_button_clicked': self.handle_sit_button,
             'on_deal_button_clicked': self.handle_deal_button,
+            'on_chat_entry_activate': self.handle_chat_entry,
         }
         self.glade_xml.signal_autoconnect(signals)
         self.table_window.connect("delete_event", self.confirm_window_close)
@@ -186,6 +187,12 @@ class TableWindow(ClientTable):
     def handle_deal_button(self, widget):
         logger.info("Requesting to start a hand.")
         self.table_uplink.start_game()
+
+    def handle_chat_entry(self, widget):
+        logger.debug("Sending chat message")
+
+        chat_message = widget.get_text()
+        self.table_uplink.send_chat(chat_message)
 
     def sit_success(self, seat):
         self.my_seat = self.gui_seats[seat]
@@ -416,6 +423,12 @@ class TableWindow(ClientTable):
                             (pot_winner.username, pot_winner.amount, 
                                 pot_type))
             self.deal_button.set_sensitive(True)
+
+        elif isinstance(event, PlayerSentChatMessage):
+            self.chat_line("<%s> %s" % (event.username, event.message))
+
+        else:
+            logger.info("Recived unknown event type: %s" % event)
 
 
     def __render_table_state(self, state):

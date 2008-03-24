@@ -284,6 +284,11 @@ class TableView(pb.Viewable):
         self.server.process_action(self.table, from_user, action_index, 
                 params)
 
+    def view_chat_message(self, from_user, message):
+        """
+        Callled by clients to send a chat message to the table.
+        """
+        self.table.chat_message(from_user.username, message)
 
 
 class OnDemandCredentialsChecker:

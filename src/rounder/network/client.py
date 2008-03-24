@@ -246,4 +246,10 @@ class TableUplink(pb.Referenceable):
         self.state = event.table_state
         self.ui.process_event(event)
 
-
+    def send_chat(self, message):
+        """
+        Send a text message to the other players at the table.
+        """
+        logger.debug("Table %s: Sending chat message '%s'" %
+            (self.table_id, message))
+        self.__view.callRemote("chat_message", message)

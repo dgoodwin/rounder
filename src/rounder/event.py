@@ -286,6 +286,17 @@ class PlayerShowedCards(Event):
         return "PlayerShowedCards: %s - %s" % (self.username, self.cards)
 
 
+class PlayerSentChatMessage(Event):
+
+    def __init__(self, table, username, message):
+        Event.__init__(self, table)
+        self.username = username
+        self.message = message
+
+    def __repr__(self):
+        return "PlayerSentChatMessage: %s - %s" % (self.username, self.message)
+
+
 # All events should be added to this list for automatic serialization:
 ALL_EVENTS = [
     Event,
@@ -304,5 +315,6 @@ ALL_EVENTS = [
     GameEnding,
     PlayerShowedCards,
     GameOver,
+    PlayerSentChatMessage,
 ]
 
