@@ -159,6 +159,9 @@ class PlayerPostedBlind(Event):
         self.username = username
         self.amount = amount
 
+    def __repr__(self):
+        return "PlayerPostedBlind: %s posted %s" % (self.username, self.amount)
+
 
 
 class HoleCardsDealt(Event):
@@ -174,6 +177,8 @@ class HoleCardsDealt(Event):
         Event.__init__(self, table)
         self.cards = cards
 
+    def __repr__(self):
+        return "HoleCardsDealt: %s" % self.cards
 
 
 class CommunityCardsDealt(Event):
@@ -249,6 +254,9 @@ class GameEnding(Event):
     def __init__(self, table):
         Event.__init__(self, table)
 
+    def __repr__(self):
+        return "GameEnding"
+
 
 
 class GameOver(Event):
@@ -264,6 +272,9 @@ class GameOver(Event):
 
         # A list of tuples, (PotState, [PotWinner, ...]):
         self.results = results
+
+    def __repr__(self):
+        return "GameOver"
 
 
 
