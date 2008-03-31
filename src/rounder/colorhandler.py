@@ -65,6 +65,6 @@ class ColorStreamHandler(StreamHandler):
         header = self._colorize(color_green, header)
 
         color = self._select_color(record.levelno)
-        msg = self._colorize(color, ' - ' + record.msg)
+        msg = self._colorize(color, ' - ' + record.msg % record.args)
 
         return "%s\n%s" % (header, msg)
