@@ -448,9 +448,9 @@ class TableWindow(ClientTable):
         initially joining a table. Let individual event handlers change
         only the relevant widgets for incoming events.
         """
-        logger.debug("Rendering table state:")
-        state.print_state()
-    
+        logger.debug("Rendering table state:\n%s",
+                state.print_state_as_string())
+
         # Render board cards:
         cards_string = ""
         for c in state.community_cards:

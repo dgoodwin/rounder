@@ -61,10 +61,11 @@ class RounderGtk(Client):
     def __init__(self, host=None, port=None, username=None, password=None):
 
         logger.info("Starting rounder.")
-        logger.debug("   host = %s" % host)
-        logger.debug("   port = %s" % port)
-        logger.debug("   username = %s" % username)
-        logger.debug("   password = %s" % password)
+        logger.debug("Initial connection Info:\n"
+                     "   host = %s\n"
+                     "   port = %s\n"
+                     "   username = %s\n"
+                     "   password = %s", host, port, username, password)
         register_message_classes()
 
         glade_file = 'rounder/ui/gtk/data/rounder.glade'
@@ -125,9 +126,9 @@ class RounderGtk(Client):
         logger.info("Opening table window")
 
         model = treeview.get_model()
-        logger.debug("   row clicked: %s" % row)
-        logger.debug("   table id: %s" % model[row][0])
-        logger.debug("   table name: %s" % model[row][1])
+        logger.debug("row clicked: %s\n"
+                     "table id: %s\n"
+                     "table name: %s", row[0], model[row][0], model[row][1])
         self.client.open_table(model[row][0])
 
     def open_table_success(self, client_table):
@@ -246,8 +247,8 @@ class ConnectDialog:
         username = username_entry.get_text()
         password_entry = self.glade_xml.get_widget('password-entry')
         password = password_entry.get_text()
-        logger.debug("Connecting to %s on port %s" % (host, port))
-        logger.debug("   as: %s / %s" % (username, password))
+        logger.debug("Connecting to %s on port %s"
+                     "\n   as: %s / %s", host, port, username, password)
 
         connect(host, port, username, password, self.app)
 

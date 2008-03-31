@@ -106,12 +106,13 @@ class RounderNetworkClient(pb.Referenceable):
 
     def get_table_list_success_cb(self, data):
         """ Called when a list of tables is received. """
-        logger.debug("got table list")
+        logmsg = "got table list:"
         table_listings = []
         for t in data:
             temp = loads(t)
-            logger.debug("   %s" % temp)
+            logmsg += "\n   %s" % temp
             table_listings.append(temp)
+        logger.debug(logmsg)
         self.ui.list_tables_success(table_listings)
 
     def get_table_list_failure_cb(self, failure):

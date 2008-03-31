@@ -74,15 +74,18 @@ class TableState:
 
     def print_state(self):
         """ Print the table state. """
-        print "Table state for table: %s" % self.name
-        print "   hand underway: %s" % self.hand_underway
+        print self.print_state_as_string()
+
+    def print_state_as_string(self):
+        output = []
+        output.append("Table state for table: %s" % self.name)
+        output.append("   hand underway: %s" % self.hand_underway)
         i = 0
-        print "   seats:"
+        output.append("   seats:")
         for s in self.seats:
-            print "     %s - %s" % (i, s)
+            output.append("     %s - %s" % (i, s))
             i = i + 1
-
-
+        return '\n'.join(output)
 
 class TableListing:
     """
