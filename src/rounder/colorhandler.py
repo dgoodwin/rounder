@@ -57,7 +57,7 @@ class ColorStreamHandler(StreamHandler):
         return '%s%s%s' % (color, text, color_normal)
 
     def format(self, record):
-        logtime = time.strftime("%Y-%m-%d %X", time.localtime(record.created))
+        logtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(record.created))
         # Add on the milliseconds
         logtime += ",%.0f" % ((record.created % 1) * 1000)
         header = "%-23.23s  %-8.8s  %s" % (logtime, record.levelname,
