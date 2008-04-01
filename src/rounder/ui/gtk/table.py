@@ -267,6 +267,15 @@ class TableWindow(ClientTable):
         """ Prompt player to act. """
         index = 0
         logger.debug("Prompting with actions:")
+
+        # Happens before NewHandStarted, clear actions from the last hand:
+        if self.clean_actions:
+            self.clean_actions = False
+            for seat in self.gui_seats:
+                if seat.is_occupied():
+                    seat.clear_action()
+                    seat.clear_hole_cards()
+
         beep()
         for action in actions:
             logger.debug("   %s" % action)
@@ -368,6 +377,7 @@ class TableWindow(ClientTable):
                 for seat in self.gui_seats:
                     if seat.is_occupied():
                         seat.clear_action()
+                        seat.clear_hole_cards()
 
             self.chat_line("%s posts blind: $%s" % (event.username,
                 event.amount))
@@ -448,9 +458,9 @@ class TableWindow(ClientTable):
         initially joining a table. Let individual event handlers change
         only the relevant widgets for incoming events.
         """
-        logger.debug("Rendering table state:\n%s",
-                state.print_state_as_string())
-
+        #logger.debug("Rendering table state:\n%s",
+        #        state.print_state_as_string())
+    
         # Render board cards:
         cards_string = ""
         for c in state.community_cards:
@@ -621,7 +631,7 @@ class GuiSeat:
         self.action_label.set_markup(text)
 
     def clear_action(self):
-        """ Clear the action column. """
+        """ Clear the action and cards. """
         self.__set_action("")
 
     def prompted(self):
