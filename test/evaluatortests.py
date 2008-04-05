@@ -75,6 +75,9 @@ class FullHandTests(unittest.TestCase):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s', '4h', '6c'))
         self.assertFalse(hand.is_straight())
 
+        hand = FullHand(('qh', '4d'), ('as', '5s', 'js', '10c', '9d'))
+        self.assertFalse(hand.is_straight())
+
     def testIsStraightAceLow(self):
         hand = FullHand(('as', '3s'), ('2d', '4c', '5c', 'kd', '6c'))
         self.assertTrue(hand.is_straight())
@@ -152,6 +155,64 @@ class FullHandTests(unittest.TestCase):
         hand1 = FullHand(('4h', '7d'), board) 
         hand2 = FullHand(('7d', 'kh'), board)
         
+        self.assertTrue(hand1 > hand2)
+
+    def testBothOnePairHighestPairWins(self):
+        board = ('6s', '4s', '2s', '3c', '8d')
+        hand1 = FullHand(('kh', 'kd'), board)
+        hand2 = FullHand(('qd', 'qh'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+    def testBothOnePairSamePairHighestSingleWins(self):
+        # Same pair
+        board = ('ks', '4s', '2s', '3c', '10d')
+        hand1 = FullHand(('kh', 'jd'), board)
+        hand2 = FullHand(('kd', '8h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+        # Same pair, same next highest
+        board = ('ks', '4s', '2s', '3c', '10d')
+        hand1 = FullHand(('kh', '9d'), board)
+        hand2 = FullHand(('kd', '8h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+        # Same pair, same two next highest
+        board = ('ks', '4s', '2s', '3c', '10d')
+        hand1 = FullHand(('kh', '9d'), board)
+        hand2 = FullHand(('kd', '8h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+    def testBothDuplicateSingleHighestWins(self):
+        # Same highest
+        board = ('as', '5s', 'js', '10c', '9d')
+        hand1 = FullHand(('qh', '4d'), board)
+        hand2 = FullHand(('2d', '3h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+        # Same first two highest
+        board = ('as', 'qs', '7s', '10c', '9d')
+        hand1 = FullHand(('jh', '4d'), board)
+        hand2 = FullHand(('2d', '3h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+        # Same first three highest
+        board = ('as', 'qs', '7s', '10c', '2d')
+        hand1 = FullHand(('8h', '4d'), board)
+        hand2 = FullHand(('5d', '3h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+        # Same first four highest
+        board = ('as', 'qs', '7s', '10c', '9d')
+        hand1 = FullHand(('8h', '4d'), board)
+        hand2 = FullHand(('5d', '3h'), board)
+
         self.assertTrue(hand1 > hand2)
 
 

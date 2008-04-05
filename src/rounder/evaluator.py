@@ -22,6 +22,11 @@ PyPokerEval compatible hand ranker.
 """
 
 
+import logging
+
+log = logging.getLogger("rounder.evaluator")
+
+
 class FullHand(object):
 
     def __init__(self, hand, table):
@@ -45,6 +50,10 @@ class FullHand(object):
             self.suits[suit].append(card[:-1])
 
         self._relative_value = self._get_relative_value()
+
+        printable_hand = "(%s) (%s)" % (', '.join(hand), ', '.join(table))
+        log.debug("Hand '%s' has relative value 0x%.6X" % (printable_hand,
+            self._relative_value))
 
     def is_royal(self):
        has_ace_high = False
@@ -76,16 +85,7 @@ class FullHand(object):
     def is_straight(self):
         ranks = self.ranks.keys()
         for i in range(len(ranks)):
-            if ranks[i] == 'j':
-                ranks[i] = 11
-            elif ranks[i] == 'q':
-                ranks[i] = 12
-            elif ranks[i] == 'k':
-                ranks[i] = 13
-            elif ranks[i] == 'a':
-                ranks[i] = 14
-
-            ranks[i] = int(ranks[i])
+           ranks[i] = self.as_int(ranks[i])
 
         ranks.sort()
 
@@ -98,13 +98,14 @@ class FullHand(object):
 
         # Check for Ace being low case
         if ranks[0] == 2 and ranks[-1] == 14:
-                ranks = [1] + ranks[:-1]
+            log.debug("Found possible ace low straight")
+            ranks = [1] + ranks[:-1]
 
         # The len math is here for dupes we removed and the low ace we
         # may have added
         for j in range(len(ranks) - 4):
             last = ranks[j]
-            for i in range(j + 1, 4 + j):
+            for i in range(j + 1, 5 + j):
                 if last + 1 != ranks[i]:
                     break
                 last += 1
@@ -125,30 +126,75 @@ class FullHand(object):
     def is_one_pair(self):
         return len(self.ranks) == 6
 
+    def as_int(self, rank):
+        if rank == 'j':
+            return 11
+        elif rank == 'q':
+            return 12
+        elif rank == 'k':
+            return 13
+        elif rank == 'a':
+            return 14
+        else:
+            return int(rank)
+
+    def one_pair_value(self):
+        hand_value = 0x100000
+        singles = []
+        for key, value in self.ranks.iteritems():
+            as_int = self.as_int(key)
+            if len(value) == 2:
+                hand_value += 0x010000 * as_int
+            else:
+                singles.append(as_int)
+
+        scale = 0x001000
+        singles.sort()
+        singles.reverse()
+        for i in range(3):
+            hand_value += scale * singles[i]
+            scale /= 0x10
+
+        return hand_value
+
+    def single_value(self):
+        hand_value = 0x000000
+        singles = [self.as_int(x) for x in self.ranks.keys()]
+
+        scale = 0x010000
+        singles.sort()
+        singles.reverse()
+        for i in range(5):
+            hand_value += scale * singles[i]
+            scale /= 0x10
+
+        return hand_value
+
+
     def _get_relative_value(self):
         """
         Arbitrary numeric weights assigned to hands for comparing
         """
         if self.is_royal():
-            return 1000
+            return 0x900000
         elif self.is_straight_flush():
-            return 900
+            return 0x800000
         elif self.is_quads():
-            return 800
+            return 0x700000
         elif self.is_full_house():
-            return 700
+            return 0x600000
         elif self.is_flush():
-            return 600
+            return 0x500000
         elif self.is_straight():
-            return 500
+            return 0x400000
         elif self.is_trips():
-            return 400
+            return 0x300000
         elif self.is_two_pair():
-            return 300
+            return 0x200000
         elif self.is_one_pair():
-            return 200
+            return self.one_pair_value()
         else:
-            return 0
+            return self.single_value()
 
     def __gt__(self, other):
         return self._relative_value > other._relative_value
