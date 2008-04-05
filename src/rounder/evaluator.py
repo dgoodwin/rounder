@@ -30,6 +30,20 @@ class FullHand(object):
         fullhand.sort()
         self.cards = fullhand
 
+        self.ranks = {}
+        for card in self.cards:
+            rank = card[:-1]
+            if not self.ranks.has_key(rank):
+                self.ranks[rank] = []
+            self.ranks[rank].append(card[-1])
+
+        self.suits = {}
+        for card in self.cards:
+            suit = card[-1]
+            if not self.suits.has_key(suit):
+                self.suits[suit] = []
+            self.suits[suit].append(card[:-1])
+
         self._relative_value = self._get_relative_value()
 
     def is_royal(self):
@@ -44,41 +58,23 @@ class FullHand(object):
         return self.is_flush() and self.is_straight()
 
     def is_quads(self):
-        ranks = {}
-        for card in self.cards:
-            rank = card[:-1]
-            if not ranks.has_key(rank):
-                ranks[rank] = []
-            ranks[rank].append(card[-1])
-        counts = [len(x) for x in ranks.values()]
+        counts = [len(x) for x in self.ranks.values()]
         counts.sort()
         return counts[-1] == 4
 
     def is_full_house(self):
-        ranks = {}
-        for card in self.cards:
-            rank = card[:-1]
-            if not ranks.has_key(rank):
-                ranks[rank] = []
-            ranks[rank].append(card[-1])
-        counts = [len(x) for x in ranks.values()]
+        counts = [len(x) for x in self.ranks.values()]
         counts.sort()
 
         return counts in [[1, 1, 2, 3], [2, 2, 3], [1, 3, 3]]
 
     def is_flush(self):
-        suits = {}
-        for card in self.cards:
-            suit = card[-1]
-            if not suits.has_key(suit):
-                suits[suit] = 0
-            suits[suit] += 1
-        counts = suits.values()
+        counts = [len(x) for x in self.suits.values()]
         counts.sort()
-        return len(suits) in [1, 2, 3] and counts[-1] >= 5
+        return len(self.suits) in [1, 2, 3] and counts[-1] >= 5
 
     def is_straight(self):
-        ranks = [card[:-1] for card in self.cards]
+        ranks = self.ranks.keys()
         for i in range(len(ranks)):
             if ranks[i] == 'j':
                 ranks[i] = 11
@@ -117,32 +113,17 @@ class FullHand(object):
         return False
 
     def is_trips(self):
-        ranks = {}
-        for card in self.cards:
-            rank = card[:-1]
-            if not ranks.has_key(rank):
-                ranks[rank] = []
-            ranks[rank].append(card[-1])
-        values = [len(x) for x in ranks.values()]
+        values = [len(x) for x in self.ranks.values()]
         values.sort()
         return values == [1, 1, 1, 1, 3]
    
     def is_two_pair(self):
-        ranks = {}
-        for card in self.cards:
-            rank = card[:-1]
-            if not ranks.has_key(rank):
-                ranks[rank] = []
-            ranks[rank].append(card[-1])
-        values = [len(x) for x in ranks.values()]
+        values = [len(x) for x in self.ranks.values()]
         values.sort()
         return values in [[1, 1, 1, 2, 2], [1, 2, 2, 2]]
 
     def is_one_pair(self):
-        ranks = set()
-        for card in self.cards:
-            ranks.add(card[:-1])
-        return len(ranks) == 6
+        return len(self.ranks) == 6
 
     def _get_relative_value(self):
         """
