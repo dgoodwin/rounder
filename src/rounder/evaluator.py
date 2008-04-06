@@ -138,6 +138,34 @@ class FullHand(object):
         else:
             return int(rank)
 
+    def two_pair_value(self):
+        hand_value = 0x200000
+        doubles = []
+        singles = []
+        for key, value in self.ranks.iteritems():
+            as_int = self.as_int(key)
+            if len(value) == 2:
+                doubles.append(as_int)
+            else:
+                singles.append(as_int)
+
+        scale = 0x010000
+
+        doubles.sort()
+        doubles.reverse()
+        for card in doubles:
+            hand_value += scale * card
+            scale /= 0x10
+
+        # XXX this is just one card, but we should be able to make a method
+        singles.sort()
+        singles.reverse()
+        for card in singles[:1]:
+            hand_value += scale * card
+            scale /= 0x10
+
+        return hand_value
+
     def one_pair_value(self):
         hand_value = 0x100000
         singles = []
@@ -190,7 +218,7 @@ class FullHand(object):
         elif self.is_trips():
             return 0x300000
         elif self.is_two_pair():
-            return 0x200000
+            return self.two_pair_value()
         elif self.is_one_pair():
             return self.one_pair_value()
         else:

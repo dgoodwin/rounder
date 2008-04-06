@@ -215,6 +215,28 @@ class FullHandTests(unittest.TestCase):
 
         self.assertTrue(hand1 > hand2)
 
+    def testBothTwoPairHighestPairWins(self):
+        board = ('as', 'qs', '7s', '10c', '9d')
+        hand1 = FullHand(('ah', '9d'), board)
+        hand2 = FullHand(('qd', '9h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+    def testBothTwoPairSameHighestPair(self):
+        # Same highest pair
+        board = ('as', 'qs', '7s', '10c', '9d')
+        hand1 = FullHand(('qh', '9d'), board)
+        hand2 = FullHand(('qd', '7h'), board)
+
+        self.assertTrue(hand1 > hand2)
+
+        # Same two pairs
+        board = ('as', '3s', '9s', '10c', '9d')
+        hand1 = FullHand(('ah', 'jc'), board)
+        hand2 = FullHand(('ad', '8d'), board)
+
+        self.assertTrue(hand1 > hand2)
+
 
 def suite():
     suite = unittest.TestSuite()
