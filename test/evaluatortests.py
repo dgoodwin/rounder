@@ -8,6 +8,11 @@ from rounder.evaluator import FullHand
 
 class FullHandTests(unittest.TestCase):
 
+    def assertHandGreaterThan(self, hand1, hand2):
+        if not hand1 > hand2:
+            self.fail("0x%.6X not greater than 0x%.6X" %
+                    (hand1._relative_value, hand2._relative_value))
+
     def testIsRoyal(self):
         hand = FullHand(('ad', 'kd'), ('qd', 'jd', '10d', '10s', '7h'))
         self.assertTrue(hand.is_royal())
@@ -97,13 +102,13 @@ class FullHandTests(unittest.TestCase):
         hand1 = FullHand(('as', 'ks'), board)
         hand2 = FullHand(('9s', '8s'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testStraightFlushGreaterThanQuads(self):
         hand1 = FullHand(('as', 'ks'), ('qs', 'js', '10s', 'kh', '6d'))
         hand2 = FullHand(('9s', '8s'), ('9d', '9h', '9c', 'kh', '6d'))
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testQuadsGreaterThanFullHouse(self):
         board = ('ks', 'kd', 'kh', '6s', '6c')
@@ -113,56 +118,56 @@ class FullHandTests(unittest.TestCase):
         self.assertTrue(hand1.is_quads())
         self.assertTrue(hand2.is_full_house())
         self.assertFalse(hand2.is_quads())
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testFullHouseGreaterThanFlush(self):
         board = ('ks', 'kd', 'kh', '3c', '5d')
         hand1 = FullHand(('9s', '9d'), board)
         hand2 = FullHand(('as', '9s'), ('7s', '4s', '2s', '8h', '6c'))
         
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testFlushGreaterThanStraight(self):
         board = ('6s', '4s', '2s', '9c', 'kh')
         hand1 = FullHand(('as', '9s'), board) 
         hand2 = FullHand(('3s', '5d'), board)
         
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testStraightGreaterThanTrips(self):
         board = ('6s', '4s', '2s', 'kh', 'jd')
         hand1 = FullHand(('3s', '5d'), board)
         hand2 = FullHand(('4h', '4d'), board) 
         
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testTripsGreaterThanTwoPair(self):
         board = ('6s', '4s', '2s', '3c', 'kh')
         hand1 = FullHand(('4h', '4d'), board) 
         hand2 = FullHand(('6d', '4h'), board)
         
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testTwoPairGreaterThanOnePair(self):
         board = ('6s', '4s', '2s', 'kh', 'jd')
         hand1 = FullHand(('6d', '4h'), board)
         hand2 = FullHand(('4h', '7d'), board) 
         
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testOnePairGreaterThanHighCard(self):
         board = ('6s', '4s', '2s', '3c', '8d')
         hand1 = FullHand(('4h', '7d'), board) 
         hand2 = FullHand(('7d', 'kh'), board)
         
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothOnePairHighestPairWins(self):
         board = ('6s', '4s', '2s', '3c', '8d')
         hand1 = FullHand(('kh', 'kd'), board)
         hand2 = FullHand(('qd', 'qh'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothOnePairSamePairHighestSingleWins(self):
         # Same pair
@@ -170,21 +175,21 @@ class FullHandTests(unittest.TestCase):
         hand1 = FullHand(('kh', 'jd'), board)
         hand2 = FullHand(('kd', '8h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same pair, same next highest
         board = ('ks', '4s', '2s', '3c', '10d')
         hand1 = FullHand(('kh', '9d'), board)
         hand2 = FullHand(('kd', '8h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same pair, same two next highest
         board = ('ks', '4s', '2s', '3c', '10d')
         hand1 = FullHand(('kh', '9d'), board)
         hand2 = FullHand(('kd', '8h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothDuplicateSingleHighestWins(self):
         # Same highest
@@ -192,35 +197,35 @@ class FullHandTests(unittest.TestCase):
         hand1 = FullHand(('qh', '4d'), board)
         hand2 = FullHand(('2d', '3h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same first two highest
         board = ('as', 'qs', '7s', '10c', '9d')
         hand1 = FullHand(('jh', '4d'), board)
         hand2 = FullHand(('2d', '3h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same first three highest
         board = ('as', 'qs', '7s', '10c', '2d')
         hand1 = FullHand(('8h', '4d'), board)
         hand2 = FullHand(('5d', '3h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same first four highest
         board = ('as', 'qs', '7s', '10c', '9d')
         hand1 = FullHand(('8h', '4d'), board)
         hand2 = FullHand(('5d', '3h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothTwoPairHighestPairWins(self):
         board = ('as', 'qs', '7s', '10c', '9d')
         hand1 = FullHand(('ah', '9d'), board)
         hand2 = FullHand(('qd', '9h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothTwoPairSameHighestPair(self):
         # Same highest pair
@@ -228,21 +233,21 @@ class FullHandTests(unittest.TestCase):
         hand1 = FullHand(('qh', '9d'), board)
         hand2 = FullHand(('qd', '7h'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same two pairs
         board = ('as', '3s', '9s', '10c', '9d')
         hand1 = FullHand(('ah', 'jc'), board)
         hand2 = FullHand(('ad', '8d'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothTripsHighestWins(self):
         board = ('as', 'qs', '7s', '10c', '9d')
         hand1 = FullHand(('ah', 'ad'), board)
         hand2 = FullHand(('qd', 'qh'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
     def testBothTripsSameTrips(self):
         # Same trips, first single wins
@@ -250,14 +255,28 @@ class FullHandTests(unittest.TestCase):
         hand1 = FullHand(('ah', 'qd'), board)
         hand2 = FullHand(('ad', 'jh'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
 
         # Same trips, same highest single
         board = ('as', 'ac', 'ks', '10c', '9d')
         hand1 = FullHand(('ah', 'qd'), board)
         hand2 = FullHand(('ad', 'jh'), board)
 
-        self.assertTrue(hand1 > hand2)
+        self.assertHandGreaterThan(hand1, hand2)
+
+    def testBothStraightsHighestCardWins(self):
+        board = ('ks', 'jc', '7s', '10c', '9d')
+        hand1 = FullHand(('ah', 'qd'), board)
+        hand2 = FullHand(('6d', 'qh'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
+    def testBothStraightsAceLowLoses(self):
+        board = ('2s', '3c', '4s', '5c', '8d')
+        hand1 = FullHand(('kh', '6d'), board)
+        hand2 = FullHand(('ad', 'qh'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
 
 
 def suite():

@@ -138,6 +138,26 @@ class FullHand(object):
         else:
             return int(rank)
 
+    def straight_value(self):
+        hand_value = 0x400000
+
+        singles = []
+        for key, value in self.ranks.iteritems():
+            as_int = self.as_int(key)
+            if len(value) == 1:
+                singles.append(as_int)
+
+        singles.sort()
+
+        if singles[-1] == self.as_int('a') and singles[-2] != self.as_int('k'):
+            highest = singles[-2]
+        else:
+            highest = singles[-1]
+
+        hand_value += highest * 0x010000
+
+        return hand_value
+
     def trips_value(self):
         hand_value = 0x300000
         triples = []
@@ -241,7 +261,7 @@ class FullHand(object):
         elif self.is_flush():
             return 0x500000
         elif self.is_straight():
-            return 0x400000
+            return self.straight_value()
         elif self.is_trips():
             return self.trips_value()
         elif self.is_two_pair():
