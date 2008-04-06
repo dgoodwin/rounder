@@ -138,6 +138,33 @@ class FullHand(object):
         else:
             return int(rank)
 
+    def trips_value(self):
+        hand_value = 0x300000
+        triples = []
+        singles = []
+        for key, value in self.ranks.iteritems():
+            as_int = self.as_int(key)
+            if len(value) == 3:
+                triples.append(as_int)
+            else:
+                singles.append(as_int)
+
+        scale = 0x010000
+
+        triples.sort()
+        triples.reverse()
+        for card in triples[:1]:
+            hand_value += scale * card
+            scale /= 0x10
+
+        singles.sort()
+        singles.reverse()
+        for card in singles[:2]:
+            hand_value += scale * card
+            scale /= 0x10
+
+        return hand_value
+
     def two_pair_value(self):
         hand_value = 0x200000
         doubles = []
@@ -216,7 +243,7 @@ class FullHand(object):
         elif self.is_straight():
             return 0x400000
         elif self.is_trips():
-            return 0x300000
+            return self.trips_value()
         elif self.is_two_pair():
             return self.two_pair_value()
         elif self.is_one_pair():
