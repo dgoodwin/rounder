@@ -150,6 +150,7 @@ class FullHand(object):
         return hand_value
 
     def straight_flush_value(self):
+        # XXX Implement me
         hand_value = 0x800000
         return hand_value
 
@@ -182,10 +183,12 @@ class FullHand(object):
         return hand_value
 
     def full_house_value(self):
+        # XXX Implement me
         hand_value = 0x600000
         return hand_value
 
     def flush_value(self):
+        # XXX Implement me
         hand_value = 0x500000
         return hand_value
 
