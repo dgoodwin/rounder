@@ -144,6 +144,26 @@ class FullHand(object):
         else:
             return int(rank)
 
+    def royal_value(self):
+        hand_value = 0x900000
+        return hand_value
+
+    def straight_flush_value(self):
+        hand_value = 0x800000
+        return hand_value
+
+    def quads_value(self):
+        hand_value = 0x700000
+        return hand_value
+
+    def full_house_value(self):
+        hand_value = 0x600000
+        return hand_value
+
+    def flush_value(self):
+        hand_value = 0x500000
+        return hand_value
+
     def straight_value(self):
         hand_value = 0x400000
 
@@ -257,15 +277,15 @@ class FullHand(object):
         Arbitrary numeric weights assigned to hands for comparing
         """
         if self.is_royal():
-            return 0x900000
+            return self.royal_value()
         elif self.is_straight_flush():
-            return 0x800000
+            return self.straight_flush_value()
         elif self.is_quads():
-            return 0x700000
+            return self.quads_value()
         elif self.is_full_house():
-            return 0x600000
+            return self.full_house_value()
         elif self.is_flush():
-            return 0x500000
+            return self.flush_value()
         elif self.is_straight():
             return self.straight_value()
         elif self.is_trips():
