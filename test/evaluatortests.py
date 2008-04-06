@@ -93,6 +93,14 @@ class FullHandTests(unittest.TestCase):
         self.assertTrue(hand.is_flush())
         self.assertTrue(hand.is_straight_flush())
 
+    def testComplicatedIsStraightFlush(self):
+        # Possible to have cards that compose a flush and a straight, but not
+        # a straight flush:
+        hand = FullHand(('9s', '10c'), ('js', 'qs', 'ks', '5d', '2s'))
+        self.assertTrue(hand.is_straight())
+        self.assertTrue(hand.is_flush())
+        self.assertFalse(hand.is_straight_flush())
+
     def testIsNotStraightFlush(self):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s', '10h', '9c'))
         self.assertFalse(hand.is_straight_flush())
