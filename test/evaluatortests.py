@@ -286,6 +286,21 @@ class FullHandTests(unittest.TestCase):
 
         self.assertHandGreaterThan(hand1, hand2)
 
+    def testBothQuadsHighestWins(self):
+        board = ('as', 'qs', 'ac', '10c', 'qc')
+        hand1 = FullHand(('ah', 'ad'), board)
+        hand2 = FullHand(('qd', 'qh'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
+    def testBothQuadsSameTrips(self):
+        # Same trips, first single wins
+        board = ('as', 'ac', 'ad', 'ah', '9d')
+        hand1 = FullHand(('kh', 'qd'), board)
+        hand2 = FullHand(('8d', 'jh'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
 
 def suite():
     suite = unittest.TestSuite()

@@ -145,6 +145,7 @@ class FullHand(object):
             return int(rank)
 
     def royal_value(self):
+        # Only one royal flush, so only one value
         hand_value = 0x900000
         return hand_value
 
@@ -154,6 +155,30 @@ class FullHand(object):
 
     def quads_value(self):
         hand_value = 0x700000
+
+        quads = []
+        singles = []
+        for key, value in self.ranks.iteritems():
+            as_int = self.as_int(key)
+            if len(value) == 4:
+                quads.append(as_int)
+            else:
+                singles.append(as_int)
+
+        scale = 0x010000
+
+        quads.sort()
+        quads.reverse()
+        for card in quads[:1]:
+            hand_value += scale * card
+            scale /= 0x10
+
+        singles.sort()
+        singles.reverse()
+        for card in singles[:1]:
+            hand_value += scale * card
+            scale /= 0x10
+
         return hand_value
 
     def full_house_value(self):
