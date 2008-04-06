@@ -64,7 +64,7 @@ class FullHand(object):
        return has_ace_high and self.is_straight_flush()
 
     def is_straight_flush(self):
-        return self.is_flush() and self.is_straight()
+        return self.is_straight(suit_matters=True)
 
     def is_quads(self):
         counts = [len(x) for x in self.ranks.values()]
@@ -82,35 +82,41 @@ class FullHand(object):
         counts.sort()
         return len(self.suits) in [1, 2, 3] and counts[-1] >= 5
 
-    def is_straight(self):
-        ranks = self.ranks.keys()
-        for i in range(len(ranks)):
-           ranks[i] = self.as_int(ranks[i])
+    def is_straight(self, suit_matters=False):
+        ranks = []
+        for key, value in self.ranks.iteritems():
+           ranks.append((self.as_int(key), value))
 
-        ranks.sort()
-
-        # Clear out and dupes we might have
-        tmp_ranks = []
-        for rank in ranks:
-            if rank not in tmp_ranks:
-                tmp_ranks.append(rank)
-        ranks = tmp_ranks
+        ranks.sort(cmp=lambda x, y: cmp(x[0], y[0]))
 
         # Check for Ace being low case
-        if ranks[0] == 2 and ranks[-1] == 14:
+        if ranks[0][0] == 2 and ranks[-1][0] == 14:
             log.debug("Found possible ace low straight")
-            ranks = [1] + ranks[:-1]
+            ranks = [(1, ranks[-1][1])] + ranks[:-1]
 
         # The len math is here for dupes we removed and the low ace we
         # may have added
         for j in range(len(ranks) - 4):
             last = ranks[j]
+            suit_hash = {'s' : 0, 'c' : 0, 'd' : 0, 'h' : 0}
+            for suit in last[1]:
+                suit_hash[suit] += 1
+
             for i in range(j + 1, 5 + j):
-                if last + 1 != ranks[i]:
+                if last[0] + 1 != ranks[i][0]:
                     break
-                last += 1
+                for suit in ranks[i][1]:
+                    suit_hash[suit] += 1
+                last = ranks[i]
             else:
-                return True
+                if suit_matters:
+                    for value in suit_hash.itervalues():
+                        if value == 5:
+                            return True
+                    else:
+                        return False
+                else:
+                    return True
         return False
 
     def is_trips(self):
