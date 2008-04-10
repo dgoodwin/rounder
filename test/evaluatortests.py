@@ -20,6 +20,11 @@ class RoyalTests(FullHandTest):
         hand = FullHand(('ad', 'kd'), ('qd', 'jd', '10d', '10s', '7h'))
         self.assertTrue(hand.is_royal())
 
+    def testIsStraightFlushButNotRoyal(self):
+        # This'll start failing once the straight flush test is fixed:
+        hand = FullHand(('as', '6d'), ('5d', '4d', '3d', '2d'))
+        self.assertFalse(hand.is_royal())
+
     def testIsRoyalNotRoyal(self):
         hand = FullHand(('as', 'kd'), ('qd', 'jd', '10d', '10s', '7h'))
         self.assertFalse(hand.is_royal())
@@ -238,6 +243,10 @@ class StraightFlushTests(FullHandTest):
         hand2 = FullHand(('9s', '8s'), board)
 
         self.assertHandGreaterThan(hand1, hand2)
+
+    def testLowStraightFlush(self):
+        hand = FullHand(('as', '6d'), ('5d', '4d', '3d', '2d'))
+        self.assertTrue(hand.is_straight_flush())
 
 
 class SinglesTests(FullHandTest):
