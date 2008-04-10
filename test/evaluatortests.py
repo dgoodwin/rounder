@@ -21,7 +21,6 @@ class RoyalTests(FullHandTest):
         self.assertTrue(hand.is_royal())
 
     def testIsStraightFlushButNotRoyal(self):
-        # This'll start failing once the straight flush test is fixed:
         hand = FullHand(('as', '6d'), ('5d', '4d', '3d', '2d'))
         self.assertFalse(hand.is_royal())
 

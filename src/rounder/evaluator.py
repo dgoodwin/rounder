@@ -56,12 +56,7 @@ class FullHand(object):
             self._relative_value))
 
     def is_royal(self):
-       has_ace_high = False
-       for card in self.cards:
-           if card[:-1] == 'a':
-               has_ace_high = True
-               break
-       return has_ace_high and self.is_straight_flush()
+       return self.is_straight(suit_matters=True, ace_high_matters=True)
 
     def is_straight_flush(self):
         return self.is_straight(suit_matters=True)
@@ -82,7 +77,8 @@ class FullHand(object):
         counts.sort()
         return len(self.suits) in [1, 2, 3] and counts[-1] >= 5
 
-    def is_straight(self, suit_matters=False):
+    def is_straight(self, suit_matters=False, ace_high_matters=False):
+        # XXX This needs cleanup, esp for these extra arguments
         ranks = []
         for key, value in self.ranks.iteritems():
            ranks.append((self.as_int(key), value))
@@ -109,12 +105,12 @@ class FullHand(object):
                     suit_hash[suit] += 1
                 last = ranks[i]
             else:
+                if ace_high_matters and last[0] != 14:
+                    continue
                 if suit_matters:
                     for value in suit_hash.itervalues():
                         if value == 5:
                             return True
-                    else:
-                        return False
                 else:
                     return True
         return False
