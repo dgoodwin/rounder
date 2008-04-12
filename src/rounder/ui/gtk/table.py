@@ -44,9 +44,10 @@ SEAT_BUTTON_INDEX = {
     'seat8-sit-button': 8,
     'seat9-sit-button': 9,
 }
-# Map seat numbers and other labels to their location in the main GtkFixed 
-# widget:
-GUI_SEAT_COORDS = {
+
+# Most of the table UI is built on top of a GtkFixed where we must manually
+# place components:
+GUI_FIXED_COORDS = {
     0: (5, 115),
     1: (80, 35),
     2: (170, 0),
@@ -59,6 +60,7 @@ GUI_SEAT_COORDS = {
     9: (80, 195),
     "board-label": (150, 115),
     "pot-label": (150, 135),
+    "action-buttons": (500, 400),
 }
 
 ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
@@ -104,36 +106,58 @@ class TableWindow(ClientTable):
                 table_uplink.state.limit, "Texas Hold'em")
         self.table_window.set_title(table_title)
 
+        # GtkFixed where we render almost everything:
+        self.fixed_table = self.glade_xml.get_widget('fixed-table')
+        # Display the table background image:
+        img = gtk.Image()
+        img.set_from_file(find_file_on_path(ROUNDER_TABLE_FILE))
+        self.fixed_table.put(img, 0, 0)
+
         self.chat_textview = self.glade_xml.get_widget('chat-textview')
 
-        self.deal_button = self.glade_xml.get_widget('deal-button')
-        self.deal_button.set_sensitive(False)
+        # Create the "Fold" button:
+        self.fold_button = gtk.Button(label="Fold")
+        self.fold_button.set_name("fold-button")
+        self.fold_button.connect("clicked", self.handle_fold_button)
+        #self.fold_button = self.glade_xml.get_widget('fold-button')
 
-        self.call_button = self.glade_xml.get_widget('call-button')
-        self.raise_button = self.glade_xml.get_widget('raise-button')
-        self.fold_button = self.glade_xml.get_widget('fold-button')
+        # Create the "Call" button:
+        self.call_button = gtk.Button(label="Call")
+        self.call_button.set_name("call-button")
+        self.call_button.connect("clicked", self.handle_call_button)
+        #self.call_button = self.glade_xml.get_widget('call-button')
+
+        # Create the "Raise" button:
+        self.raise_button = gtk.Button(label="Raise")
+        self.raise_button.set_name("raise-button")
+        self.raise_button.connect("clicked", self.handle_raise_button)
+        #self.raise_button = self.glade_xml.get_widget('raise-button')
+
+        actions_hbox = gtk.HBox()
+        actions_hbox.add(self.fold_button)
+        actions_hbox.add(self.call_button)
+        actions_hbox.add(self.raise_button)
+        coords = GUI_FIXED_COORDS["action-buttons"]
+        self.fixed_table.put(actions_hbox, coords[0], coords[1])
+
         # Signal handlers we reuse:
         self.__call_handler_id = None
         self.__raise_handler_id = None
         self.__fold_handler_id = None
         self.__disable_action_buttons()
 
-        # Setup and display the player seats:
-        self.fixed_table = self.glade_xml.get_widget('fixed-table')
-
-        # Display the table background image:
-        img = gtk.Image()
-        img.set_from_file(find_file_on_path(ROUNDER_TABLE_FILE))
-        self.fixed_table.put(img, 0, 0)
+        self.deal_button = self.glade_xml.get_widget('deal-button')
+        self.deal_button.set_sensitive(False)
 
         self.board_label = gtk.Label()
         self.board_label.set_use_markup(True)
-        coords = GUI_SEAT_COORDS['board-label']
+        coords = GUI_FIXED_COORDS['board-label']
         self.fixed_table.put(self.board_label, coords[0], coords[1])
         self.pot_label = gtk.Label("Pot:")
-        coords = GUI_SEAT_COORDS['pot-label']
+        coords = GUI_FIXED_COORDS['pot-label']
         self.fixed_table.put(self.pot_label, coords[0], coords[1])
 
+        # Setup and display the player seats:
         self.gui_seats = []
         for i in range(0, 10):
             seat = GuiSeat(self, i)
@@ -154,18 +178,17 @@ class TableWindow(ClientTable):
         self.clean_actions = False
 
         # Signal handling:
-        # TODO: Replace these all with one signal?
         signals = {
-            'on_seat0_sit_button_clicked': self.handle_sit_button,
-            'on_seat1_sit_button_clicked': self.handle_sit_button,
-            'on_seat2_sit_button_clicked': self.handle_sit_button,
-            'on_seat3_sit_button_clicked': self.handle_sit_button,
-            'on_seat4_sit_button_clicked': self.handle_sit_button,
-            'on_seat5_sit_button_clicked': self.handle_sit_button,
-            'on_seat6_sit_button_clicked': self.handle_sit_button,
-            'on_seat7_sit_button_clicked': self.handle_sit_button,
-            'on_seat8_sit_button_clicked': self.handle_sit_button,
-            'on_seat9_sit_button_clicked': self.handle_sit_button,
+            #'on_seat0_sit_button_clicked': self.handle_sit_button,
+            #'on_seat1_sit_button_clicked': self.handle_sit_button,
+            #'on_seat2_sit_button_clicked': self.handle_sit_button,
+            #'on_seat3_sit_button_clicked': self.handle_sit_button,
+            #'on_seat4_sit_button_clicked': self.handle_sit_button,
+            #'on_seat5_sit_button_clicked': self.handle_sit_button,
+            #'on_seat6_sit_button_clicked': self.handle_sit_button,
+            #'on_seat7_sit_button_clicked': self.handle_sit_button,
+            #'on_seat8_sit_button_clicked': self.handle_sit_button,
+            #'on_seat9_sit_button_clicked': self.handle_sit_button,
             'on_deal_button_clicked': self.handle_deal_button,
             'on_chat_entry_activate': self.handle_chat_entry,
         }
@@ -178,6 +201,7 @@ class TableWindow(ClientTable):
         # Clear these when a hand ends:
         self.my_hole_cards = None
 
+        self.fixed_table.show_all()
         self.table_window.show_all()
 
     def confirm_window_close(self, widget, event, data=None):
@@ -516,7 +540,7 @@ class GuiSeat:
         # the first time we render the table state, or when someone grabs
         # the seat.
         self.vbox = gtk.VBox(homogeneous=True)
-        coords = GUI_SEAT_COORDS[self.seat_number]
+        coords = GUI_FIXED_COORDS[self.seat_number]
         self.__fixed.put(self.vbox, coords[0], coords[1])
         self.display_button()
         self.vbox.show_all()
