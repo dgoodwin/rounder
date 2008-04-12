@@ -61,6 +61,7 @@ GUI_FIXED_COORDS = {
     "board-label": (150, 115),
     "pot-label": (150, 135),
     "action-buttons": (500, 400),
+    "chat": (0, 400),
 }
 
 ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
@@ -113,41 +114,62 @@ class TableWindow(ClientTable):
         img.set_from_file(find_file_on_path(ROUNDER_TABLE_FILE))
         self.fixed_table.put(img, 0, 0)
 
-        self.chat_textview = self.glade_xml.get_widget('chat-textview')
-
         # Create the "Fold" button:
         self.fold_button = gtk.Button(label="Fold")
         self.fold_button.set_name("fold-button")
         self.fold_button.connect("clicked", self.handle_fold_button)
-        #self.fold_button = self.glade_xml.get_widget('fold-button')
 
         # Create the "Call" button:
         self.call_button = gtk.Button(label="Call")
         self.call_button.set_name("call-button")
         self.call_button.connect("clicked", self.handle_call_button)
-        #self.call_button = self.glade_xml.get_widget('call-button')
 
         # Create the "Raise" button:
         self.raise_button = gtk.Button(label="Raise")
         self.raise_button.set_name("raise-button")
         self.raise_button.connect("clicked", self.handle_raise_button)
-        #self.raise_button = self.glade_xml.get_widget('raise-button')
 
+        # Create the "Deal" button:
+        self.deal_button = gtk.Button(label="Deal")
+        self.deal_button.set_sensitive(False)
+        self.deal_button.connect("clicked", self.handle_deal_button)
+
+        # Place the action buttons on the background image:
+        actions_vbox = gtk.VBox()
         actions_hbox = gtk.HBox()
         actions_hbox.add(self.fold_button)
         actions_hbox.add(self.call_button)
         actions_hbox.add(self.raise_button)
+        actions_vbox.add(actions_hbox)
+        actions_vbox.add(self.deal_button)
         coords = GUI_FIXED_COORDS["action-buttons"]
-        self.fixed_table.put(actions_hbox, coords[0], coords[1])
+        self.fixed_table.put(actions_vbox, coords[0], coords[1])
+
+        # Create the chat textview:
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+        sw.set_size_request(400, 125)
+        self.chat_textview = gtk.TextView()
+        self.chat_textview.set_name("chat-textview")
+        self.chat_textview.set_wrap_mode(gtk.WRAP_WORD)
+        sw.add(self.chat_textview)
+
+        # Create the chat entry:
+        self.chat_entry = gtk.Entry()
+        self.chat_entry.set_name("chat-entry")
+        self.chat_entry.connect("activate", self.handle_chat_entry)
+
+        chat_vbox = gtk.VBox()
+        chat_vbox.add(sw)
+        chat_vbox.add(self.chat_entry)
+        coords = GUI_FIXED_COORDS["chat"]
+        self.fixed_table.put(chat_vbox, coords[0], coords[1])
 
         # Signal handlers we reuse:
         self.__call_handler_id = None
         self.__raise_handler_id = None
         self.__fold_handler_id = None
         self.__disable_action_buttons()
-
-        self.deal_button = self.glade_xml.get_widget('deal-button')
-        self.deal_button.set_sensitive(False)
 
         self.board_label = gtk.Label()
         self.board_label.set_use_markup(True)
@@ -174,25 +196,8 @@ class TableWindow(ClientTable):
             self.__username_to_seat[player_state.username] = \
                     self.gui_seats[player_state.seat]
 
-
         self.clean_actions = False
 
-        # Signal handling:
-        signals = {
-            #'on_seat0_sit_button_clicked': self.handle_sit_button,
-            #'on_seat1_sit_button_clicked': self.handle_sit_button,
-            #'on_seat2_sit_button_clicked': self.handle_sit_button,
-            #'on_seat3_sit_button_clicked': self.handle_sit_button,
-            #'on_seat4_sit_button_clicked': self.handle_sit_button,
-            #'on_seat5_sit_button_clicked': self.handle_sit_button,
-            #'on_seat6_sit_button_clicked': self.handle_sit_button,
-            #'on_seat7_sit_button_clicked': self.handle_sit_button,
-            #'on_seat8_sit_button_clicked': self.handle_sit_button,
-            #'on_seat9_sit_button_clicked': self.handle_sit_button,
-            'on_deal_button_clicked': self.handle_deal_button,
-            'on_chat_entry_activate': self.handle_chat_entry,
-        }
-        self.glade_xml.signal_autoconnect(signals)
         self.table_window.connect("delete_event", self.confirm_window_close)
 
         # Render the initial table state:

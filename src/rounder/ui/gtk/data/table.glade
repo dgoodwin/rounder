@@ -4,7 +4,7 @@
 <glade-interface>
   <widget class="GtkWindow" id="table-window">
     <property name="width_request">800</property>
-    <property name="height_request">850</property>
+    <property name="height_request">600</property>
     <property name="visible">True</property>
     <property name="title" translatable="yes">Table Name</property>
     <property name="resizable">False</property>
@@ -27,53 +27,6 @@
               </widget>
             </child>
           </widget>
-        </child>
-        <child>
-          <widget class="GtkButton" id="deal-button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="border_width">5</property>
-            <property name="label" translatable="yes">Deal Hand</property>
-            <property name="use_underline">True</property>
-            <property name="response_id">0</property>
-            <signal name="clicked" handler="on_deal_button_clicked"/>
-          </widget>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="GtkScrolledWindow" id="scrolledwindow1">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-            <property name="shadow_type">GTK_SHADOW_IN</property>
-            <child>
-              <widget class="GtkTextView" id="chat-textview">
-                <property name="height_request">5</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="border_width">1</property>
-                <property name="editable">False</property>
-              </widget>
-            </child>
-          </widget>
-          <packing>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="GtkEntry" id="chat-entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <signal name="activate" handler="on_chat_entry_activate"/>
-          </widget>
-          <packing>
-            <property name="position">3</property>
-          </packing>
         </child>
       </widget>
     </child>
