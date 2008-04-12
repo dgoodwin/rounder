@@ -164,14 +164,12 @@ class FullHand(object):
 
         scale = 0x010000
 
-        quads.sort()
-        quads.reverse()
+        quads.sort(reverse=True)
         for card in quads[:1]:
             hand_value += scale * card
             scale /= 0x10
 
-        singles.sort()
-        singles.reverse()
+        singles.sort(reverse=True)
         for card in singles[:1]:
             hand_value += scale * card
             scale /= 0x10
@@ -230,14 +228,12 @@ class FullHand(object):
 
         scale = 0x010000
 
-        triples.sort()
-        triples.reverse()
+        triples.sort(reverse=True)
         for card in triples[:1]:
             hand_value += scale * card
             scale /= 0x10
 
-        singles.sort()
-        singles.reverse()
+        singles.sort(reverse=True)
         for card in singles[:2]:
             hand_value += scale * card
             scale /= 0x10
@@ -257,15 +253,13 @@ class FullHand(object):
 
         scale = 0x010000
 
-        doubles.sort()
-        doubles.reverse()
+        doubles.sort(reverse=True)
         for card in doubles:
             hand_value += scale * card
             scale /= 0x10
 
         # XXX this is just one card, but we should be able to make a method
-        singles.sort()
-        singles.reverse()
+        singles.sort(reverse=True)
         for card in singles[:1]:
             hand_value += scale * card
             scale /= 0x10
@@ -283,8 +277,7 @@ class FullHand(object):
                 singles.append(as_int)
 
         scale = 0x001000
-        singles.sort()
-        singles.reverse()
+        singles.sort(reverse=True)
         for i in range(3):
             hand_value += scale * singles[i]
             scale /= 0x10
@@ -296,8 +289,7 @@ class FullHand(object):
         singles = [self.as_int(x) for x in self.ranks.keys()]
 
         scale = 0x010000
-        singles.sort()
-        singles.reverse()
+        singles.sort(reverse=True)
         for i in range(5):
             hand_value += scale * singles[i]
             scale /= 0x10
