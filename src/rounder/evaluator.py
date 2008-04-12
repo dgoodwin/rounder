@@ -186,6 +186,15 @@ class FullHand(object):
     def flush_value(self):
         # XXX Implement me
         hand_value = 0x500000
+        for suit, ranks in self.suits.iteritems():
+            if len(ranks) >= 5:
+                new_ranks = [self.as_int(rank) for rank in ranks]
+                new_ranks.sort(reverse=True)
+                scale = 0x010000
+                for i in range(5):
+                    hand_value += new_ranks[i] * scale
+                    scale /= 0x10
+                break
         return hand_value
 
     def straight_value(self):

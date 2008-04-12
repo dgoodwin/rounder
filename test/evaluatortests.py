@@ -39,6 +39,27 @@ class FlushTests(FullHandTest):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s', '6c', '8h'))
         self.assertFalse(hand.is_flush())
 
+    def testSameHighCard(self):
+        board = ('as', '4s', 'qs', '3c', '9s')
+        hand1 = FullHand(('ks', '2s'), board)
+        hand2 = FullHand(('jd', '6s'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
+    def testSameTwoHighCards(self):
+        board = ('as', '4s', 'qs', '3c', '9s')
+        hand1 = FullHand(('10s', '2s'), board)
+        hand2 = FullHand(('jd', '6s'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
+    def testSameHighCardOneHandWithHighOfAnotherSuit(self):
+        board = ('as', '4s', 'js', '3c', '9s')
+        hand1 = FullHand(('qs', '6s'), board)
+        hand2 = FullHand(('kd', '2s'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
 
 class OnePairTests(FullHandTest):
 
