@@ -48,20 +48,20 @@ SEAT_BUTTON_INDEX = {
 # Most of the table UI is built on top of a GtkFixed where we must manually
 # place components:
 GUI_FIXED_COORDS = {
-    0: (5, 115),
-    1: (80, 35),
-    2: (170, 0),
-    3: (270, 0),
-    4: (360, 35),
-    5: (450, 115),
-    6: (360, 195),
-    7: (270, 230),
-    8: (170, 230),
-    9: (80, 195),
-    "board-label": (150, 115),
-    "pot-label": (150, 135),
-    "action-buttons": (500, 400),
-    "chat": (0, 400),
+    0: (5, 165),
+    1: (30, 45),
+    2: (250, 0),
+    3: (450, 0),
+    4: (655, 45),
+    5: (685, 165),
+    6: (655, 285),
+    7: (450, 330),
+    8: (250, 330),
+    9: (30, 285),
+    "board-label": (350, 140),
+    "pot-label": (350, 160),
+    "action-buttons": (400, 450),
+    "chat": (0, 450),
 }
 
 ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
@@ -136,13 +136,14 @@ class TableWindow(ClientTable):
 
         # Place the action buttons on the background image:
         actions_vbox = gtk.VBox()
-        actions_hbox = gtk.HBox()
+        actions_hbox = gtk.HBox(homogeneous=True)
         actions_hbox.add(self.fold_button)
         actions_hbox.add(self.call_button)
         actions_hbox.add(self.raise_button)
         actions_vbox.add(actions_hbox)
         actions_vbox.add(self.deal_button)
         coords = GUI_FIXED_COORDS["action-buttons"]
+        actions_vbox.set_size_request(400, 150)
         self.fixed_table.put(actions_vbox, coords[0], coords[1])
 
         # Create the chat textview:
@@ -571,6 +572,9 @@ class GuiSeat:
         self.sit_button.connect("clicked", 
                 self.parent_table.handle_sit_button)
         self.vbox.pack_start(self.sit_button)
+        # Do we want the sit button taking up the whole space?
+        self.vbox.set_size_request(115, 70)
+        #self.vbox.set_size_request(115, -1)
 
         self.vbox.show_all()
 
