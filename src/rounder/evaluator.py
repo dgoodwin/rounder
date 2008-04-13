@@ -182,7 +182,6 @@ class FullHand(object):
         return hand_value
 
     def flush_value(self):
-        # XXX Implement me
         hand_value = 0x500000
         for suit, ranks in self.suits.iteritems():
             if len(ranks) >= 5:
