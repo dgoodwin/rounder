@@ -236,6 +236,13 @@ class StraightTests(FullHandTest):
 
         self.assertHandGreaterThan(hand1, hand2)
 
+    def testBothStraightNonContiguousHighCard(self):
+        board = ['7c', '5d', '9d', '8c', '5h']
+        hand1 = FullHand(['ts', '6h'], board)
+        hand2 = FullHand(['jd', '6s'], board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
 
 class StraightFlushTests(FullHandTest):
 

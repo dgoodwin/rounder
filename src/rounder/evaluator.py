@@ -55,6 +55,9 @@ class FullHand(object):
         log.debug("Hand '%s' has relative value 0x%.6X" % (printable_hand,
             self._relative_value))
 
+        # XXX DIRTY HACK
+        self._used_straight_ranks = None
+
     def is_royal(self):
        return self.is_straight(suit_matters=True, ace_high_matters=True)
 
@@ -83,12 +86,12 @@ class FullHand(object):
         for key, value in self.ranks.iteritems():
            ranks.append((self.as_int(key), value))
 
-        ranks.sort(cmp=lambda x, y: cmp(x[0], y[0]))
+        ranks.sort(cmp=lambda x, y: cmp(x[0], y[0]), reverse=True)
 
         # Check for Ace being low case
-        if ranks[0][0] == 2 and ranks[-1][0] == 14:
+        if ranks[-1][0] == 2 and ranks[0][0] == 14:
             log.debug("Found possible ace low straight")
-            ranks = [(1, ranks[-1][1])] + ranks[:-1]
+            ranks = ranks[1:] + [(1, ranks[0][1])]
 
         # The len math is here for dupes we removed and the low ace we
         # may have added
@@ -99,19 +102,22 @@ class FullHand(object):
                 suit_hash[suit] += 1
 
             for i in range(j + 1, 5 + j):
-                if last[0] + 1 != ranks[i][0]:
+                if last[0] - 1 != ranks[i][0]:
                     break
                 for suit in ranks[i][1]:
                     suit_hash[suit] += 1
                 last = ranks[i]
             else:
-                if ace_high_matters and last[0] != 14:
+                # since we go backwards, we want to end on 10
+                if ace_high_matters and last[0] != 10:
                     continue
                 if suit_matters:
                     for value in suit_hash.itervalues():
                         if value == 5:
+                            self._used_straight_ranks = ranks[j + 1:j + 5]
                             return True
                 else:
+                    self._used_straight_ranks = ranks[j + 1:j + 5]
                     return True
         return False
 
@@ -196,21 +202,7 @@ class FullHand(object):
 
     def straight_value(self):
         hand_value = 0x400000
-
-        singles = []
-        for key, value in self.ranks.iteritems():
-            as_int = self.as_int(key)
-            if len(value) == 1:
-                singles.append(as_int)
-
-        singles.sort()
-
-        if singles[-1] == self.as_int('a') and singles[-2] != self.as_int('k'):
-            highest = singles[-2]
-        else:
-            highest = singles[-1]
-
-        hand_value += highest * 0x010000
+        hand_value += self._used_straight_ranks[0][0] * 0x010000
 
         return hand_value
 
