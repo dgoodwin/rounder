@@ -129,7 +129,9 @@ class FullHand(object):
         return len(self.ranks) == 6
 
     def as_int(self, rank):
-        if rank == 'j':
+        if rank =='t':
+            return 10
+        elif rank == 'j':
             return 11
         elif rank == 'q':
             return 12
@@ -298,13 +300,20 @@ class FullHand(object):
 
 class PokerEval(object):
 
-    def _is_royal(self, hand):
-        royals = [[r + s for r in ranks[5:]] for s in suits]
-
-        return hand in royals
-
     def winners(self, game=None, pockets=None, board=None):
         results = {}
         results['hi'] = []
+
+        hands = []
+        for i in range(len(pockets)):
+            hands.append((i, FullHand(pockets[i], board)))
+
+        hands.sort(reverse=True, cmp=lambda x, y: cmp(x[1], y[1]))
+
+        top_hand = hands[0][1]
+        for hand in hands:
+            if not hand[1] == top_hand:
+                break
+            results['hi'].append(hand[0])
 
         return results
