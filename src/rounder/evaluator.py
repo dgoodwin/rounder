@@ -91,7 +91,7 @@ class FullHand(object):
         # Check for Ace being low case
         if ranks[-1][0] == 2 and ranks[0][0] == 14:
             log.debug("Found possible ace low straight")
-            ranks = ranks[1:] + [(1, ranks[0][1])]
+            ranks = ranks + [(1, ranks[0][1])]
 
         # The len math is here for dupes we removed and the low ace we
         # may have added

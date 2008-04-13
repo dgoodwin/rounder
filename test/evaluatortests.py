@@ -236,6 +236,10 @@ class StraightTests(FullHandTest):
         hand = FullHand(('as', '3s'), ('2d', '4c', '5c', 'kd', '6c'))
         self.assertTrue(hand.is_straight())
 
+    def testIsStraightAceHighAndDeuce(self):
+        hand = FullHand(['2d', 'kd'], ['qd', 'as', 'th', '4d', 'js'])
+        self.assertTrue(hand.is_straight())
+
     def testBothStraightsHighestCardWins(self):
         board = ('ks', 'jc', '7s', '10c', '9d')
         hand1 = FullHand(('ah', 'qd'), board)
