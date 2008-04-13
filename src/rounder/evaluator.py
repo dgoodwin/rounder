@@ -165,8 +165,8 @@ class FullHand(object):
         return hand_value
 
     def straight_flush_value(self):
-        # XXX Implement me
         hand_value = 0x800000
+        hand_value += self._used_straight_ranks[0][0] * 0x010000
         return hand_value
 
     def quads_value(self):
