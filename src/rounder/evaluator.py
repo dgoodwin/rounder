@@ -292,8 +292,8 @@ class FullHand(object):
         else:
             return self.single_value()
 
-    def __gt__(self, other):
-        return self._relative_value > other._relative_value
+    def __cmp__(self, other):
+        return cmp(self._relative_value, other._relative_value)
 
 
 class PokerEval(object):
