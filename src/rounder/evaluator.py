@@ -140,6 +140,17 @@ class FullHand(object):
         else:
             return int(rank)
 
+    @staticmethod
+    def _compute_card_values(cards, count, scale):
+        hand_value = 0x0
+
+        cards.sort(reverse=True)
+        for card in cards[:count]:
+            hand_value += scale * card
+            scale /= 0x10
+
+        return hand_value
+
     def royal_value(self):
         # Only one royal flush, so only one value
         hand_value = 0x900000
@@ -162,17 +173,8 @@ class FullHand(object):
             else:
                 singles.append(as_int)
 
-        scale = 0x010000
-
-        quads.sort(reverse=True)
-        for card in quads[:1]:
-            hand_value += scale * card
-            scale /= 0x10
-
-        singles.sort(reverse=True)
-        for card in singles[:1]:
-            hand_value += scale * card
-            scale /= 0x10
+        hand_value += self._compute_card_values(quads, 1, 0x010000)
+        hand_value += self._compute_card_values(singles, 1, 0x001000)
 
         return hand_value
 
@@ -186,11 +188,7 @@ class FullHand(object):
         for suit, ranks in self.suits.iteritems():
             if len(ranks) >= 5:
                 new_ranks = [self.as_int(rank) for rank in ranks]
-                new_ranks.sort(reverse=True)
-                scale = 0x010000
-                for i in range(5):
-                    hand_value += new_ranks[i] * scale
-                    scale /= 0x10
+                hand_value += self._compute_card_values(new_ranks, 5, 0x010000)
                 break
         return hand_value
 
@@ -225,17 +223,8 @@ class FullHand(object):
             else:
                 singles.append(as_int)
 
-        scale = 0x010000
-
-        triples.sort(reverse=True)
-        for card in triples[:1]:
-            hand_value += scale * card
-            scale /= 0x10
-
-        singles.sort(reverse=True)
-        for card in singles[:2]:
-            hand_value += scale * card
-            scale /= 0x10
+        hand_value += self._compute_card_values(triples, 1, 0x010000)
+        hand_value += self._compute_card_values(singles, 2, 0x001000)
 
         return hand_value
 
@@ -250,18 +239,8 @@ class FullHand(object):
             else:
                 singles.append(as_int)
 
-        scale = 0x010000
-
-        doubles.sort(reverse=True)
-        for card in doubles:
-            hand_value += scale * card
-            scale /= 0x10
-
-        # XXX this is just one card, but we should be able to make a method
-        singles.sort(reverse=True)
-        for card in singles[:1]:
-            hand_value += scale * card
-            scale /= 0x10
+        hand_value += self._compute_card_values(doubles, 2, 0x010000)
+        hand_value += self._compute_card_values(singles, 1, 0x000100)
 
         return hand_value
 
@@ -275,11 +254,7 @@ class FullHand(object):
             else:
                 singles.append(as_int)
 
-        scale = 0x001000
-        singles.sort(reverse=True)
-        for i in range(3):
-            hand_value += scale * singles[i]
-            scale /= 0x10
+        hand_value += self._compute_card_values(singles, 3, 0x001000)
 
         return hand_value
 
@@ -287,11 +262,7 @@ class FullHand(object):
         hand_value = 0x000000
         singles = [self.as_int(x) for x in self.ranks.keys()]
 
-        scale = 0x010000
-        singles.sort(reverse=True)
-        for i in range(5):
-            hand_value += scale * singles[i]
-            scale /= 0x10
+        hand_value += self._compute_card_values(singles, 5, 0x010000)
 
         return hand_value
 
