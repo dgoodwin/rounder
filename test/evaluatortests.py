@@ -110,6 +110,20 @@ class FullHouseTests(FullHandTest):
         hand = FullHand(('as', '9s'), ('qs', 'jd', '4s', '10d', '9s'))
         self.assertFalse(hand.is_full_house())
 
+    def testBothFullHouseBestTripsWins(self):
+        board = ('8s', 'ks', '9s', '9c', '8d')
+        hand1 = FullHand(('kh', '9d'), board)
+        hand2 = FullHand(('kd', '8h'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
+    def testBothFullHouseSameTrips(self):
+        board = ('8s', '9s', '9s', '9c', '6d')
+        hand1 = FullHand(('kh', 'kd'), board)
+        hand2 = FullHand(('7d', '7h'), board)
+
+        self.assertHandGreaterThan(hand1, hand2)
+
 
 class QuadsTests(FullHandTest):
 
@@ -281,7 +295,6 @@ def testBothStraightsFlushHighestCardWins(self):
         hand2 = FullHand(('6d', '8h'), board)
 
         self.assertHandGreaterThan(hand1, hand2)
-
 
 
 class SinglesTests(FullHandTest):

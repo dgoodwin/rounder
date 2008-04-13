@@ -187,8 +187,16 @@ class FullHand(object):
         return hand_value
 
     def full_house_value(self):
-        # XXX Implement me
         hand_value = 0x600000
+
+        # Get the card ranks that can be part of the full house
+        ranks = [(self.as_int(key), len(value)) for key, value in \
+                self.ranks.iteritems()]
+        ranks.sort(reverse=True, cmp=lambda x, y: cmp(x[1], y[1]))
+
+        hand_value += ranks[0][0] * 0x010000
+        hand_value += ranks[1][0] * 0x001000
+
         return hand_value
 
     def flush_value(self):
