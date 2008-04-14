@@ -241,6 +241,9 @@ class FullHand(object):
             else:
                 singles.append(as_int)
 
+        if len(doubles) > 2:
+            singles += doubles[2:]
+
         hand_value += self._compute_card_values(doubles, 2, 0x010000)
         hand_value += self._compute_card_values(singles, 1, 0x000100)
 

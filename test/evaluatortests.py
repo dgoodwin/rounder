@@ -13,6 +13,13 @@ class FullHandTest(unittest.TestCase):
             self.fail("0x%.6X not greater than 0x%.6X" %
                     (hand1._relative_value, hand2._relative_value))
 
+    def assertHandEquals(self, hand1, hand2):
+        if not hand1 > hand2:
+            self.fail("0x%.6X not equal to 0x%.6X" %
+                    (hand1._relative_value, hand2._relative_value))
+
+
+
 
 class RoyalTests(FullHandTest):
 
@@ -184,6 +191,13 @@ class TwoPairTests(FullHandTest):
         hand2 = FullHand(('ad', '8d'), board)
 
         self.assertHandGreaterThan(hand1, hand2)
+
+    def testThreePairsUseThirdForSingle(self):
+        board  = ('7h', 'jc', '9s', 'td', 'jh')
+        hand1 = FullHand(('tc', '9h'), board)
+        hand2 = FullHand(('5d', 'th'), board)
+
+        self.assertHandEquals(hand1, hand2)
 
 
 class TripsTests(FullHandTest):
