@@ -189,13 +189,21 @@ class FullHand(object):
     def full_house_value(self):
         hand_value = 0x600000
 
-        # Get the card ranks that can be part of the full house
-        ranks = [(self.as_int(key), len(value)) for key, value in \
-                self.ranks.iteritems()]
-        ranks.sort(reverse=True, cmp=lambda x, y: cmp(x[1], y[1]))
+        triples = []
+        doubles = []
+        for key, value in self.ranks.iteritems():
+            as_int = self.as_int(key)
+            if len(value) == 3:
+                triples.append(as_int)
+            elif len(value) == 2:
+                doubles.append(as_int)
 
-        hand_value += ranks[0][0] * 0x010000
-        hand_value += ranks[1][0] * 0x001000
+        triples.sort(reverse=True)
+        if len(triples) > 1:
+            doubles += triples[1:]
+
+        hand_value += self._compute_card_values(triples, 1, 0x010000)
+        hand_value += self._compute_card_values(doubles, 1, 0x001000)
 
         return hand_value
 

@@ -19,8 +19,6 @@ class FullHandTest(unittest.TestCase):
                     (hand1._relative_value, hand2._relative_value))
 
 
-
-
 class RoyalTests(FullHandTest):
 
     def testIsRoyal(self):
@@ -130,6 +128,13 @@ class FullHouseTests(FullHandTest):
         hand2 = FullHand(('7d', '7h'), board)
 
         self.assertHandGreaterThan(hand1, hand2)
+
+    def testBothFullHouseTwoTrips(self):
+        board = ('as', 'th', 'tc', '2c', '2d')
+        hand1 = FullHand(('7d', 'ts'), board)
+        hand2 = FullHand(('2h', 'td'), board)
+
+        self.assertHandEquals(hand1, hand2)
 
 
 class QuadsTests(FullHandTest):
