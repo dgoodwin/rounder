@@ -18,14 +18,18 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" Tests exploring usage of the pypoker-eval library. """
+"""
+Tests originally for exploring usage of the pypoker-eval library,
+now kept for testing rounder.evaluator's pypoker-eval compatibility
+"""
 
 import unittest
+import settestpath
 
-from pokereval import PokerEval
+from rounder.evaluator import PokerEval
 
-class PyPokerEvalTests(unittest.TestCase):
-    """ Tests to get familar with how to use pypoker-eval. """
+class PyPokerEvalCompatTests(unittest.TestCase):
+    """ Tests for pypoker-eval compatibility. """
 
     def test_single_winner(self):
         evaluator = PokerEval()
@@ -73,7 +77,7 @@ class PyPokerEvalTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PyPokerEvalTests))
+    suite.addTest(unittest.makeSuite(PyPokerEvalCompatTests))
     return suite
 
 if __name__ == '__main__':
