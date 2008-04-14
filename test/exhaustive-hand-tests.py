@@ -63,8 +63,8 @@ def progress(total, good, match=True):
             failed_last_time_counter -= 1
     else:
         sys.stdout.write("          \t")
-    msg = "%d tests, %d passed (%3.2f%% good)" % (total, good,
-            float(good)/total * 100)
+    msg = "%d tests, %d passed, %d failed (%3.2f%% good)" % (total, good,
+            total - good, float(good)/total * 100)
     sys.stdout.write("%s%s%s" % (color_green, msg, color_normal))
     sys.stdout.flush()
 
