@@ -241,6 +241,7 @@ class FullHand(object):
             else:
                 singles.append(as_int)
 
+        doubles.sort(reverse=True)
         if len(doubles) > 2:
             singles += doubles[2:]
 
