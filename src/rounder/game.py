@@ -26,7 +26,6 @@ logger = getLogger("rounder.game")
 
 from collections import defaultdict
 
-from pokereval import PokerEval
 
 from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException, InvalidPlay
@@ -66,6 +65,20 @@ def find_next_to_act(players, last_actor_position, raise_count):
     logger.debug("next to act: %s" % str(next_to_act))
 
     return next_to_act
+
+def get_hand_evaluator():
+    """ Load a poker hand evaluator (either ours or pypoker-eval) """
+    # XXX When we have a config, make an option for this
+    evaluator_type = "rounder"
+    logger.debug("Using hand evaluator from %s" % evaluator_type)
+    if evaluator_type == "rounder":
+        import evaluator
+        return evaluator.PokerEval()
+    elif evaluator_type == "poker-eval":
+        import pokereval
+        return pokereval.PokerEval()
+    else:
+        assert False
 
 class GameStateMachine:
 
@@ -547,7 +560,7 @@ class TexasHoldemGame(Game):
         for c in self.community_cards:
             board.append(str(c).lower())
 
-        evaluator = PokerEval()
+        evaluator = get_hand_evaluator()
 
         # List of tuples, (PotState, [PotWinner, ...]):
         results = []
