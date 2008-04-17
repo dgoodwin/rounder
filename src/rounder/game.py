@@ -142,7 +142,8 @@ class Game(object):
 
     """ Parent class of all poker games. """
 
-    def __init__(self, limit, players, callback, table=None, deck=None):
+    def __init__(self, limit, players, callback, dealer_index, 
+            table=None, deck=None):
         """
         Constructor expects the list of players to all be active, no one
         sitting out. (TODO: add check for this)
@@ -170,7 +171,7 @@ class Game(object):
 
         # Create a new hand starting event and send to each player:
         new_hand_event = NewHandStarted(self.table, self.players, 
-                self.table.dealer.seat)
+                dealer_index)
         self.table.notify_all(new_hand_event)
 
     def process_action(self, action):
@@ -235,7 +236,7 @@ class TexasHoldemGame(Game):
         to one another.
         """
 
-        Game.__init__(self, limit, players, callback, table, deck)
+        Game.__init__(self, limit, players, callback, dealer_index, table, deck)
 
         self.dealer = self.players[dealer_index]
         self.small_blind = self.players[sb_index]
