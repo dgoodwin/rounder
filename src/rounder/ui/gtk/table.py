@@ -62,9 +62,21 @@ GUI_FIXED_COORDS = {
     "pot-label": (350, 160),
     "action-buttons": (400, 450),
     "chat": (0, 450),
+    "dealer-button-0": (110, 195),
+    "dealer-button-1": (140, 100),
+    "dealer-button-2": (290, 60),
+    "dealer-button-3": (490, 60),
+    "dealer-button-4": (640, 100),
+    "dealer-button-5": (660, 195),
+    "dealer-button-6": (640, 280),
+    "dealer-button-7": (490, 300),
+    "dealer-button-8": (290, 300),
+    "dealer-button-9": (140, 280),
+
 }
 
 ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
+DEALER_BUTTON_FILE = "rounder/ui/gtk/data/dealer-button.png"
 
 def colored_card(card):
     """
@@ -199,6 +211,8 @@ class TableWindow(ClientTable):
 
         self.clean_actions = False
 
+        self.dealer_button = None
+
         self.table_window.connect("delete_event", self.confirm_window_close)
 
         # Render the initial table state:
@@ -206,6 +220,9 @@ class TableWindow(ClientTable):
 
         # Clear these when a hand ends:
         self.my_hole_cards = None
+
+        # Enable to view where some gui elements will be drawn for all seats:
+        #self.__draw_stuff()
 
         self.fixed_table.show_all()
         self.table_window.show_all()
@@ -396,7 +413,8 @@ class TableWindow(ClientTable):
             # TODO: Show who's dealing better:
             self.chat_line("New hand!")
             self.chat_line("%s is dealing." % self.gui_seats[
-                event.table_state.dealer_seat].name_label.get_text())
+                event.dealer_seat_num].name_label.get_text())
+            self.render_dealer_button(event.dealer_seat_num)
             for seat_num in event.seats_dealt_in:
                 self.gui_seats[seat_num].show_hole_cards(None)
 
@@ -479,6 +497,24 @@ class TableWindow(ClientTable):
         else:
             logger.info("Recived unknown event type: %s" % event)
 
+    def render_dealer_button(self, dealer_seat_num):
+        """ Draw the dealer button for the given seat. """
+        coords = GUI_FIXED_COORDS["dealer-button-%s" % dealer_seat_num]
+        if self.dealer_button == None:
+            self.dealer_button = gtk.Image()
+            self.dealer_button.set_from_file(find_file_on_path(
+                DEALER_BUTTON_FILE))
+            self.fixed_table.put(self.dealer_button, coords[0], coords[1])
+        else:
+            self.fixed_table.move(self.dealer_button, coords[0], coords[1])
+
+    def __draw_stuff(self):
+        """ 
+        Draws the dealer buttons and pot contributions around the various
+        seats so we can see what they look like without actually playing.
+        """
+        for i in range(10):
+            self.render_dealer_button(i)
 
     def __render_table_state(self, state):
         """
@@ -505,6 +541,9 @@ class TableWindow(ClientTable):
             pots = pots + pot_state.amount
         pots = pots + state.round_bets
         self.pot_label.set_text("Pot: $%s" % pots)
+
+        if state.dealer_seat_num != None:
+            self.render_dealer_button(state.dealer_seat_num)
 
         for i in range(0, 10):
             seat = self.gui_seats[i]
@@ -623,7 +662,6 @@ class GuiSeat:
         self.vbox.show_all()
 
     def set_chips(self, chips):
-        logger.debug("updating chips")
         chips = '<span size="small">$%s</span>' % chips
         self.chips_label.set_markup(chips)
 

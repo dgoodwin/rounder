@@ -134,13 +134,13 @@ class NewHandStarted(Event):
     """
     Signals that a new hand is beginning.
     """
-
-    def __init__(self, table, players):
+    def __init__(self, table, players, dealer_seat_num):
 
         Event.__init__(self, table)
         self.seats_dealt_in = []
         for p in players:
             self.seats_dealt_in.append(p.seat)
+        self.dealer_seat_num = dealer_seat_num
 
 
 
