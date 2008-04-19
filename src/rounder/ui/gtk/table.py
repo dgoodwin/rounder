@@ -499,12 +499,15 @@ class TableWindow(ClientTable):
 
     def render_dealer_button(self, dealer_seat_num):
         """ Draw the dealer button for the given seat. """
+        logger.debug("Rendering dealer button for seat %s"
+            %  dealer_seat_num)
         coords = GUI_FIXED_COORDS["dealer-button-%s" % dealer_seat_num]
         if self.dealer_button == None:
             self.dealer_button = gtk.Image()
             self.dealer_button.set_from_file(find_file_on_path(
                 DEALER_BUTTON_FILE))
             self.fixed_table.put(self.dealer_button, coords[0], coords[1])
+            self.dealer_button.show()
         else:
             self.fixed_table.move(self.dealer_button, coords[0], coords[1])
 
