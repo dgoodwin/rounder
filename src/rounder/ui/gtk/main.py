@@ -84,6 +84,7 @@ class RounderGtk(Client):
 
         signals = {
             'on_connect_activate': self.show_connect_dialog,
+            'on_close_activate': self.shutdown,
             'on_main_window_destroy' : self.shutdown,
             'on_connect_button_clicked': self.show_connect_dialog,
             'on_quit_button_clicked': self.shutdown,

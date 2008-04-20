@@ -37,6 +37,15 @@
                         </child>
                       </widget>
                     </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="close">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">gtk-close</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_close_activate"/>
+                      </widget>
+                    </child>
                   </widget>
                 </child>
               </widget>
@@ -56,10 +65,11 @@
                 <child>
                   <widget class="GtkMenu" id="menuitem7_menu">
                     <child>
-                      <widget class="GtkMenuItem" id="about1">
+                      <widget class="GtkImageMenuItem" id="about1">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">_About</property>
+                        <property name="label" translatable="yes">gtk-about</property>
                         <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
                         <signal name="activate" handler="on_about1_activate"/>
                       </widget>
                     </child>
