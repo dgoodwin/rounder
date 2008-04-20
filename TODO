@@ -28,3 +28,5 @@ Other
 - Should PlayerLeftGame event be sent immediately if the player wasn't in the 
   current game? (rather than queued and sent after the hand ends)
 - Test players leaving mid-hand.
+- Optional logging of chat window to text file
+- /me chat window actions
