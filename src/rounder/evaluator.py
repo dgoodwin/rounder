@@ -24,7 +24,7 @@ PyPokerEval compatible hand ranker.
 
 import logging
 
-log = logging.getLogger("rounder.evaluator")
+logger = logging.getLogger("rounder.evaluator")
 
 
 class FullHand(object):
@@ -52,7 +52,7 @@ class FullHand(object):
         self._relative_value = self._get_relative_value()
 
         printable_hand = "(%s) (%s)" % (', '.join(hand), ', '.join(table))
-        log.debug("Hand '%s' has relative value 0x%.6X" % (printable_hand,
+        logger.debug("Hand '%s' has relative value 0x%.6X" % (printable_hand,
             self._relative_value))
 
         # XXX DIRTY HACK
@@ -90,7 +90,7 @@ class FullHand(object):
 
         # Check for Ace being low case
         if ranks[-1][0] == 2 and ranks[0][0] == 14:
-            log.debug("Found possible ace low straight")
+            logger.debug("Found possible ace low straight")
             ranks = ranks + [(1, ranks[0][1])]
 
         # The len math is here for dupes we removed and the low ace we
