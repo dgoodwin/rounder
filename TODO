@@ -14,6 +14,8 @@
 - Implement account creation.
 - Implement no-limit.
 - Implement sounds.
+- Color code the chat window. (maybe three levels, game messages, player
+  actions, and chat messages)
 
 =====
 Other
