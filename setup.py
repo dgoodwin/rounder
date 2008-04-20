@@ -24,7 +24,7 @@ setup(name="rounder",
         'rounder.ui.gtk': 'src/rounder/ui/gtk',
         'rounder.ui.curses': 'src/rounder/ui/curses',
     },
-    package_data={'rounder.ui.gtk': ['data/*.glade']},
+    package_data={'rounder.ui.gtk': ['data/*.glade', 'data/*.png']},
     scripts=['bin/rounder', 'bin/rounder-server', 'bin/rounder-txt',
         'bin/rounder-randombot'],
     # TODO: This sucks.
