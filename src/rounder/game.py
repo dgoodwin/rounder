@@ -35,6 +35,7 @@ from rounder.currency import Currency
 from rounder.event import *
 from rounder.utils import find_action_in_list
 from rounder.dto import PotWinner, PotState
+from rounder.evaluator import get_winners
 
 GAME_ID_COUNTER = 1
 
@@ -66,19 +67,6 @@ def find_next_to_act(players, last_actor_position, raise_count):
 
     return next_to_act
 
-def get_hand_evaluator():
-    """ Load a poker hand evaluator (either ours or pypoker-eval) """
-    # XXX When we have a config, make an option for this
-    evaluator_type = "rounder"
-    logger.debug("Using hand evaluator from %s" % evaluator_type)
-    if evaluator_type == "rounder":
-        import evaluator
-        return evaluator.PokerEval()
-    elif evaluator_type == "poker-eval":
-        import pokereval
-        return pokereval.PokerEval()
-    else:
-        assert False
 
 class GameStateMachine:
 
@@ -570,8 +558,6 @@ class TexasHoldemGame(Game):
         for c in self.community_cards:
             board.append(str(c).lower())
 
-        evaluator = get_hand_evaluator()
-
         # List of tuples, (PotState, [PotWinner, ...]):
         results = []
 
@@ -583,10 +569,11 @@ class TexasHoldemGame(Game):
                 winners = players
             else:
                 cards = self.__cards_for_players(players)
-                result = evaluator.winners(game="holdem", pockets=cards,
-                    board=board)
+                result = get_winners(cards, board)
 
-                for index in result['hi']:
+                for index, hand in result:
+                    logger.debug("%s wins with %s" % (players[index].username,
+                        hand))
                     winners.append(players[index])
 
             pot_winners = self.__payout_pot(pot, winners)

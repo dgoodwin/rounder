@@ -309,23 +309,54 @@ class FullHand(object):
     def __cmp__(self, other):
         return cmp(self._relative_value, other._relative_value)
 
+    def __repr__(self):
+        string_repr = ''
+        if self._relative_value == 0x900000:
+            string_repr = "a royal flush"
+        elif self._relative_value > 0x800000:
+            string_repr = "a straight flush"
+        elif self._relative_value > 0x700000:
+            string_repr = "quads"
+        elif self._relative_value > 0x600000:
+            string_repr = "a full house"
+        elif self._relative_value > 0x500000:
+            string_repr = "a flush"
+        elif self._relative_value > 0x400000:
+            string_repr = "a straight"
+        elif self._relative_value > 0x300000:
+            string_repr = "trips"
+        elif self._relative_value > 0x200000:
+            string_repr = "two pair"
+        elif self._relative_value > 0x100000:
+            string_repr = "one pair"
+        else:
+            string_repr = "a high card"
+
+        return string_repr
+
+
+def get_winners(pockets, board):
+    winners = []
+
+    hands = []
+    for i in range(len(pockets)):
+        hands.append((i, FullHand(pockets[i], board)))
+
+    hands.sort(reverse=True, cmp=lambda x, y: cmp(x[1], y[1]))
+
+    top_hand = hands[0][1]
+    for hand in hands:
+        if not hand[1] == top_hand:
+            break
+        winners.append(hand)
+
+    return winners
+
 
 class PokerEval(object):
 
     def winners(self, game=None, pockets=None, board=None):
         results = {}
-        results['hi'] = []
-
-        hands = []
-        for i in range(len(pockets)):
-            hands.append((i, FullHand(pockets[i], board)))
-
-        hands.sort(reverse=True, cmp=lambda x, y: cmp(x[1], y[1]))
-
-        top_hand = hands[0][1]
-        for hand in hands:
-            if not hand[1] == top_hand:
-                break
-            results['hi'].append(hand[0])
+        results['hi'] = [x[0] for x in get_winners(pockets, board)]
 
         return results
