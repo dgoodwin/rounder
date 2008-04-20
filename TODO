@@ -1,0 +1,32 @@
+=====
+0.0.1
+=====
+
+- GTK: Clear player actions each time community cards are dealt.
+- GTK: Hide sit buttons once you're seated.
+- Include graphics in setup.py.
+- Package for Fedora.
+- Add final hand rank and cards to the evaluation results.
+- Fixup the enabled/disabled status of the "Connect" button.
+
+=====
+0.0.2
+=====
+
+- Display player pot contribution for each round of betting, move into the
+  central pot when the round ends. (i.e. 4 times per hand)
+- Implement account creation.
+- Implement no-limit.
+- Implement sounds.
+
+=====
+Other
+=====
+
+- Add a Refresh Table List button to main window.
+- Clear actions on HandCancelled.
+- Handle re-logins.
+- Implement sitting out.
+- Should PlayerLeftGame event be sent immediately if the player wasn't in the 
+  current game? (rather than queued and sent after the hand ends)
+- Test players leaving mid-hand.
