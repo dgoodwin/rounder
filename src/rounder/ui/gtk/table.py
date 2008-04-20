@@ -672,16 +672,16 @@ class GuiSeat:
         """
         Player left the table, render their spot as a sit button again.
         """
-        self.display_button()
-        if i_am_seated:
-            self.disable_sit_button()
+        if not i_am_seated:
+            self.display_button()
 
     def disable_sit_button(self):
         """
         Disable our Sit button if we're displaying one.
         """
         if self.sit_button != None:
-            self.sit_button.set_sensitive(False)
+            #self.sit_button.set_sensitive(False)
+            self.sit_button.hide()
 
     def show_hole_cards(self, cards):
         """

@@ -2,8 +2,6 @@
 0.0.1
 =====
 
-- GTK: Clear player actions each time community cards are dealt.
-- GTK: Hide sit buttons once you're seated.
 - Include graphics in setup.py.
 - Package for Fedora.
 - Add final hand rank and cards to the evaluation results.
