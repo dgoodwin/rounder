@@ -495,7 +495,7 @@ class TableWindow(ClientTable):
             self.chat_line("<%s> %s" % (event.username, event.message))
 
         else:
-            logger.info("Recived unknown event type: %s" % event)
+            logger.info("Recieved unknown event type: %s" % event)
 
     def render_dealer_button(self, dealer_seat_num):
         """ Draw the dealer button for the given seat. """

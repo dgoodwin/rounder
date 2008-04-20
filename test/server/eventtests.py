@@ -152,6 +152,19 @@ class EventTests(BaseServerFixture):
         self.assertEquals(1, len(user2_events))
         self.assertEquals(3, len(user2_events[0].cards))
 
+        # Flop action:
+        self.clear_player_events()
+        self.user2.act(self.table.id, Call)
+        self.user1.act(self.table.id, Call)
+
+        user1_events = filter_event_type(self.user1, CommunityCardsDealt)
+        self.assertEquals(1, len(user1_events))
+        self.assertEquals(1, len(user1_events[0].cards))
+
+        user2_events = filter_event_type(self.user2, CommunityCardsDealt)
+        self.assertEquals(1, len(user2_events))
+        self.assertEquals(1, len(user2_events[0].cards))
+
     def test_player_sits_out_no_hand_underway(self):
         self.user1_table.view_sit(self.user1, 0)
         self.clear_player_events()

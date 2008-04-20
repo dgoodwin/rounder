@@ -417,13 +417,21 @@ class TexasHoldemGame(Game):
     def turn(self):
         """ Deal the turn and initiate the betting. """
         self._check_if_finished()
-        self.community_cards.append(self._deck.draw_card())
+        turn_card = self._deck.draw_card()
+        self.community_cards.append(turn_card)
+
+        event = CommunityCardsDealt(self.table, [turn_card])
+        self.table.notify_all(event)
         self.__continue_betting_round()
 
     def river(self):
         """ Deal the river and initiate the betting. """
         self._check_if_finished()
-        self.community_cards.append(self._deck.draw_card())
+        river_card = self._deck.draw_card()
+        self.community_cards.append(river_card)
+
+        event = CommunityCardsDealt(self.table, [river_card])
+        self.table.notify_all(event)
         self.__continue_betting_round()
 
     def prompt_player(self, player, actions_list):
