@@ -77,6 +77,7 @@ GUI_FIXED_COORDS = {
 
 ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
 DEALER_BUTTON_FILE = "rounder/ui/gtk/data/dealer-button.png"
+ROUNDER_ICON_FILE = "rounder/ui/gtk/data/rounder-icon.svg"
 
 def colored_card(card):
     """
@@ -118,6 +119,8 @@ class TableWindow(ClientTable):
         table_title = "%s: %s %s" % (table_uplink.state.name, 
                 table_uplink.state.limit, "Texas Hold'em")
         self.table_window.set_title(table_title)
+        self.table_window.set_icon_from_file(
+                find_file_on_path(ROUNDER_ICON_FILE))
 
         # GtkFixed where we render almost everything:
         self.fixed_table = self.glade_xml.get_widget('fixed-table')
