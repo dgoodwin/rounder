@@ -5,7 +5,6 @@
 - Include graphics in setup.py.
 - Package for Fedora.
 - Add final hand rank and cards to the evaluation results.
-- Fixup the enabled/disabled status of the "Connect" button.
 
 =====
 0.0.2

@@ -74,6 +74,7 @@ class RounderGtk(Client):
         main_window = self.glade_xml.get_widget('main-window')
         self.table_list = self.glade_xml.get_widget('table-list')
         self.statusbar = self.glade_xml.get_widget('statusbar')
+        self.connect_button = self.glade_xml.get_widget('connect-button')
         logo = self.glade_xml.get_widget("rounder-logo-image")
         logo.set_from_file(find_file_on_path(ROUNDER_LOGO_FILE))
 
@@ -153,6 +154,7 @@ class RounderGtk(Client):
         # Call also sets our reference to None:
         if self.connect_dialog != None:
             self.connect_dialog.destroy(None, None, None)
+        self.connect_button.set_sensitive(False)
 
         self.set_status("Connected to server: %s" % client.host)
 
