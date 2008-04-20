@@ -168,7 +168,7 @@ class TableWindow(ClientTable):
         self.chat_textview = gtk.TextView()
         self.chat_textview.set_name("chat-textview")
         self.chat_textview.set_wrap_mode(gtk.WRAP_WORD)
-        sw.add(self.chat_textview)
+        sw.add_with_viewport(self.chat_textview)
 
         # Create the chat entry:
         self.chat_entry = gtk.Entry()
