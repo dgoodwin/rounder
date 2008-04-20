@@ -1,3 +1,5 @@
+# encoding=utf-8
+#
 #   Rounder - Poker for the GNOME Desktop
 #
 #   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
@@ -86,6 +88,7 @@ class RounderGtk(Client):
             'on_connect_button_clicked': self.show_connect_dialog,
             'on_quit_button_clicked': self.shutdown,
             'on_table_list_row_activated': self.open_table,
+            'on_about1_activate': self.open_about_window,
         }
         self.glade_xml.signal_autoconnect(signals)
 
@@ -200,6 +203,31 @@ class RounderGtk(Client):
             self.table_list.append_column(columns[n])
 
         self.table_list.set_model(tables)
+
+    def open_about_window(self, menuitem):
+        # XXX set the url and email dialog hooks
+        about = gtk.AboutDialog()
+
+        about.set_name("Rounder")
+        about.set_version("0.0.1")
+        about.set_copyright("Copyright © 2008 Devan Goodwin & James Bowes")
+        about.set_comments("Poker for the GNOME Desktop")
+        # XXX Put the full license in here
+        about.set_license("GPLv2")
+        about.set_website("http://dangerouslyinc.com")
+        about.set_website_label("http://dangerouslyinc.com")
+        about.set_authors(('Devan Goodwin <dgoodwin@dangerouslyinc.com>',
+            'James Bowes <jbowes@dangerouslyinc.com>',
+            'Kenny MacDermid <kenny@kmdconsulting.ca>'))
+        about.set_artists(('Anette Goodwin <anette.goodwin@gmail.com>',
+            'James Bowes <jbowes@dangerouslyinc.com>'))
+        about.set_logo(gtk.gdk.pixbuf_new_from_file(
+            find_file_on_path(ROUNDER_LOGO_FILE)))
+
+        about.set_icon_from_file(find_file_on_path(ROUNDER_ICON_FILE))
+
+        about.connect('response', lambda x,y: about.destroy())
+        about.show_all()
 
     def __cell_table_id(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 0))
