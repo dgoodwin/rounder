@@ -165,10 +165,12 @@ class TableWindow(ClientTable):
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
         sw.set_size_request(400, 125)
+        sw.set_shadow_type(gtk.SHADOW_ETCHED_IN)
         self.chat_textview = gtk.TextView()
         self.chat_textview.set_name("chat-textview")
         self.chat_textview.set_wrap_mode(gtk.WRAP_WORD)
-        sw.add_with_viewport(self.chat_textview)
+        self.chat_textview.set_editable(False)
+        sw.add(self.chat_textview)
 
         # Create the chat entry:
         self.chat_entry = gtk.Entry()
