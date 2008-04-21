@@ -143,6 +143,10 @@ class NewHandStarted(Event):
         self.dealer_seat_num = dealer_seat_num
 
 
+    def __repr__(self):
+        return "NewHandStarted: seats dealt in: %s dealer: %s" \
+                % (self.seats_dealt_in, self.dealer_seat_num)
+
 
 class PlayerPostedBlind(Event):
 
