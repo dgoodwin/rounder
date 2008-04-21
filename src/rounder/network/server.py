@@ -128,12 +128,13 @@ class RounderNetworkServer:
 
     def prompt_player(self, table, username, actions):
         """ Called by a table to prompt a player with a list of actions. """
-        logger.debug("Table %s: Prompting %s with actions:" % (table.id,
-            username))
+        log_msg = "Table %s: Prompting %s with actions:" % (table.id,
+            username)
         serialized_actions = []
         for action in actions:
-            logger.debug("   %s" % action)
+            log_msg += "\n  %s" % action
             serialized_actions.append(dumps(action))
+        logger.debug(log_msg)
         self.users[username].prompt(table.id, serialized_actions)
 
     def notify(self, table_id, username, event):

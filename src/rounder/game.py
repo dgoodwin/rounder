@@ -230,9 +230,9 @@ class TexasHoldemGame(Game):
         self.small_blind = self.players[sb_index]
         self.big_blind = self.players[bb_index]
 
-        logger.info("Starting new TexasHoldemGame: " + str(self.id))
-        logger.info("   Limit: " + str(limit))
-        logger.info("   Players:")
+        log_msg = "Starting new TexasHoldemGame: " + str(self.id)
+        log_msg += "\n  Limit: " + str(limit)
+        log_msg += "\n  Players:"
         self.__positions = {} # TODO: Might need a better way to track seats
         i = 0
         for p in self.players:
@@ -243,10 +243,10 @@ class TexasHoldemGame(Game):
                 code += 'sb '
             if p == self.big_blind:
                 code += 'bb '
-            logger.info("      %s %s", p, code)
+            log_msg += "\n    %s %s" % (p, code)
             self.__positions[p] = i
             i += 1
-
+        logger.info(log_msg)
         # Map player to their pending actions. Players are popped as they act
         # so an empty map means no pending actions and we're clear to advance
         # to the next state.
