@@ -15,12 +15,6 @@ Python module for serializing objects for transmission. Used instead of
 Twisted's capabilities which didn't seem to actually do much of the heavy
 lifting for you.
 
-* PyPokerEval: http://pokersource.sourceforge.net/
-Part of the Poker Source project, this will hopefully be removed as a
-dependency someday. It depends on C code which is going to pose nothing but
-problems particularly if Rounder is ever to run on Windows. Using for hand
-ranking only temporarily.
-
 ===============
 GETTING STARTED
 ===============

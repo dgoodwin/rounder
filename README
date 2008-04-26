@@ -1,6 +1,26 @@
-This is rounder.
-
 Requirements:
 
 - Twisted
 - Cerealizer
+
+To play you'll need to connect to a server. You can start one by running:
+
+    rounder-server
+
+This will spawn a server with one or two limit holdem tables. The server will
+be listening on port 35100, and if this port is accessible to the internet you
+can invite friends to connect and play as well.
+
+To start playing just run:
+
+    rounder
+
+And enter the appropriate server information and a username of your choice.
+WARNING: At this point in time account creation isn't implemented. You can
+choose any login name you want, but you *MUST* use the password 'password'.
+Future releases will obviously correct this.
+
+If you're feeling lonely and would like a really unintelligent bot to play
+against, just run:
+
+   rounder-randombot --host localhost --port 35100 -u bot0 -p password
