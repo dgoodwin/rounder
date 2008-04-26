@@ -420,6 +420,48 @@ class HandClassComparisonTests(FullHandTest):
         
         self.assertHandGreaterThan(hand1, hand2)
 
+class FullHandReprTests(unittest.TestCase):
+
+    def testRoyal(self):
+        hand = FullHand(('qs', 'ts'), ('as', 'js', 'ks', '9s', '5d'))
+        self.assertEquals("a royal flush (AKQJT)", str(hand))
+
+    def testStraightFlush(self):
+        hand = FullHand(('qs', 'ts'), ('3s', 'js', 'ks', '9s', '5d'))
+        self.assertEquals("a straight flush (KQJT9)", str(hand))
+
+    def testQuads(self):
+        hand = FullHand(('qs', 'qd'), ('qh', 'qc', 'ks', '9s', '5d'))
+        self.assertEquals("quads (QQQQK)", str(hand))
+
+    def testFullHouse(self):
+        hand = FullHand(('qs', 'qd'), ('qh', 'kc', 'ks', '9s', '5d'))
+        self.assertEquals("a full house (QQQKK)", str(hand))
+
+    def testFlush(self):
+        hand = FullHand(('qs', 'qd'), ('8s', 'kc', 'ks', '9s', '2s'))
+        self.assertEquals("a flush (KQ982)", str(hand))
+
+    def testStraight(self):
+        hand = FullHand(('jh', 'qd'), ('th', 'kc', 'ks', '9s', '2s'))
+        self.assertEquals("a straight (KQJT9)", str(hand))
+
+    def testTrips(self):
+        hand = FullHand(('kh', '3d'), ('th', 'kc', 'ks', '9s', '2s'))
+        self.assertEquals("trips (KKKT9)", str(hand))
+
+    def testTwoPair(self):
+        hand = FullHand(('qh', 'qd'), ('7h', 'kc', 'ks', '5s', '2s'))
+        self.assertEquals("two pair (KKQQ7)", str(hand))
+
+    def testOnePair(self):
+        hand = FullHand(('jh', 'qd'), ('qh', 'tc', '6s', '4s', '2s'))
+        self.assertEquals("one pair (QQJT6)", str(hand))
+
+    def testHighCard(self):
+        hand = FullHand(('ah', 'qd'), ('th', '2c', '6s', '3s', '7s'))
+        self.assertEquals("a high card (AQT76)", str(hand))
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -434,6 +476,7 @@ def suite():
     suite.addTest(unittest.makeSuite(OnePairTests))
     suite.addTest(unittest.makeSuite(SinglesTests))
     suite.addTest(unittest.makeSuite(HandClassComparisonTests))
+    suite.addTest(unittest.makeSuite(FullHandReprTests))
     return suite
 
 if __name__ == '__main__':

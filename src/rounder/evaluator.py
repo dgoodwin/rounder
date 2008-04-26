@@ -114,10 +114,10 @@ class FullHand(object):
                 if suit_matters:
                     for value in suit_hash.itervalues():
                         if value == 5:
-                            self._used_straight_ranks = ranks[j + 1:j + 5]
+                            self._used_straight_ranks = ranks[j : j + 5]
                             return True
                 else:
-                    self._used_straight_ranks = ranks[j + 1:j + 5]
+                    self._used_straight_ranks = ranks[j : j + 5]
                     return True
         return False
 
@@ -148,6 +148,20 @@ class FullHand(object):
         else:
             return int(rank)
 
+    def as_str(self, int_rank):
+        if int_rank == 10:
+            return 'T'
+        elif int_rank == 11:
+            return 'J'
+        elif int_rank == 12:
+            return 'Q'
+        elif int_rank == 13:
+            return 'K'
+        elif int_rank == 14:
+            return 'A'
+        else:
+            return str(int_rank)
+
     @staticmethod
     def _compute_card_values(cards, count, scale):
         hand_value = 0x0
@@ -162,11 +176,16 @@ class FullHand(object):
     def royal_value(self):
         # Only one royal flush, so only one value
         hand_value = 0x900000
+        hand_value += 0x0EDCBA
         return hand_value
 
     def straight_flush_value(self):
         hand_value = 0x800000
         hand_value += self._used_straight_ranks[0][0] * 0x010000
+        hand_value += self._used_straight_ranks[1][0] * 0x001000
+        hand_value += self._used_straight_ranks[2][0] * 0x000100
+        hand_value += self._used_straight_ranks[3][0] * 0x000010
+        hand_value += self._used_straight_ranks[4][0] * 0x000001
         return hand_value
 
     def quads_value(self):
@@ -219,6 +238,10 @@ class FullHand(object):
     def straight_value(self):
         hand_value = 0x400000
         hand_value += self._used_straight_ranks[0][0] * 0x010000
+        hand_value += self._used_straight_ranks[1][0] * 0x001000
+        hand_value += self._used_straight_ranks[2][0] * 0x000100
+        hand_value += self._used_straight_ranks[3][0] * 0x000010
+        hand_value += self._used_straight_ranks[4][0] * 0x000001
 
         return hand_value
 
@@ -309,28 +332,39 @@ class FullHand(object):
     def __cmp__(self, other):
         return cmp(self._relative_value, other._relative_value)
 
+    def _nth_digit(self, n):
+        sig = 0x10 ** n
+        return self.as_str((self._relative_value / sig) % 0x10)
+
+    def _rank_string(self, *ranks):
+        rank_string = "("
+        for rank in ranks:
+            rank_string += self._nth_digit(rank)
+        rank_string += ")"
+        return rank_string
+
     def __repr__(self):
         string_repr = ''
-        if self._relative_value == 0x900000:
-            string_repr = "a royal flush"
+        if self._relative_value >= 0x900000:
+            string_repr = "a royal flush " + self._rank_string(4, 3, 2, 1, 0)
         elif self._relative_value > 0x800000:
-            string_repr = "a straight flush"
+            string_repr = "a straight flush " + self._rank_string(4, 3, 2, 1, 0)
         elif self._relative_value > 0x700000:
-            string_repr = "quads"
+            string_repr = "quads " + self._rank_string(4, 4, 4, 4, 3)
         elif self._relative_value > 0x600000:
-            string_repr = "a full house"
+            string_repr = "a full house " + self._rank_string(4, 4, 4, 3, 3)
         elif self._relative_value > 0x500000:
-            string_repr = "a flush"
+            string_repr = "a flush " + self._rank_string(4, 3, 2, 1, 0)
         elif self._relative_value > 0x400000:
-            string_repr = "a straight"
+            string_repr = "a straight " + self._rank_string(4, 3, 2, 1, 0)
         elif self._relative_value > 0x300000:
-            string_repr = "trips"
+            string_repr = "trips " + self._rank_string(4, 4, 4, 3, 2)
         elif self._relative_value > 0x200000:
-            string_repr = "two pair"
+            string_repr = "two pair " + self._rank_string(4, 4, 3, 3, 2)
         elif self._relative_value > 0x100000:
-            string_repr = "one pair"
+            string_repr = "one pair " + self._rank_string(4, 4, 3, 2, 1)
         else:
-            string_repr = "a high card"
+            string_repr = "a high card " + self._rank_string(4, 3, 2, 1, 0)
 
         return string_repr
 
