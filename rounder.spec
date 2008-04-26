@@ -46,7 +46,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 %{_bindir}/rounder
 %{_bindir}/rounder-server
-%{_bindir}/rounder-txt
 %{_bindir}/rounder-randombot
 %dir %{python_sitelib}/rounder
 %{python_sitelib}/rounder/*
