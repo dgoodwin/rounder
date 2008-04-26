@@ -565,16 +565,13 @@ class TexasHoldemGame(Game):
             winners = []
             players = filter(lambda x: x.folded == False, pot.players)
 
-            if len(players) == 1:
-                winners = players
-            else:
-                cards = self.__cards_for_players(players)
-                result = get_winners(cards, board)
+            cards = self.__cards_for_players(players)
+            result = get_winners(cards, board)
 
-                for index, hand in result:
-                    logger.debug("%s wins with %s" % (players[index].username,
-                        hand))
-                    winners.append(players[index])
+            for index, hand in result:
+                logger.debug("%s wins with %s" % (players[index].username,
+                    hand))
+                winners.append((players[index], str(hand)))
 
             pot_winners = self.__payout_pot(pot, winners)
             results.append((PotState(pot), pot_winners))
@@ -602,23 +599,24 @@ class TexasHoldemGame(Game):
 
         pot_winners = []
         if player_count == 1:
+            player, hand = players[0]
             logger.info("Single winner of pot amount %d" % pot.amount)
-            players[0].add_chips(pot.amount)
-            pot_winners.append(PotWinner(players[0].username, pot.amount))
+            player.add_chips(pot.amount)
+            pot_winners.append(PotWinner(player.username, pot.amount, hand))
         else:
             logger.info("Splitting pot of %d between %d winners" %
                 (pot.amount, player_count))
             per_player = pot.amount / player_count
             remainder = pot.amount - (per_player * player_count)
 
-            for player in players:
+            for player, hand in players:
                 winnings = per_player
                 if remainder:
                     winnings += 0.01
                     remainder -= 0.01
 
                 player.add_chips(winnings)
-                pot_winners.append(PotWinner(player.username, winnings))
+                pot_winners.append(PotWinner(player.username, winnings, hand))
                 logger.info(   "%s won %s" % (player.username, winnings))
 
         return pot_winners

@@ -158,10 +158,11 @@ class PotWinner:
     Winner of a pot.
     """
 
-    def __init__(self, username, amount):
+    def __init__(self, username, amount, hand):
         self.username = username
         self.amount = amount
+        self.hand = hand
 
     def __repr__(self):
-        return "PotWinner: %s won $%s" % (self.username, self.amount)
+        return "PotWinner: %s won $%s with %s" % (self.username, self.amount, self.hand)
 

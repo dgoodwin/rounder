@@ -491,9 +491,9 @@ class TableWindow(ClientTable):
                     pot_type = "main"
                     if not pot_state.is_main_pot:
                         pot_type = "side"
-                    self.chat_line("%s wins $%s from %s pot" %
+                    self.chat_line("%s wins $%s from %s pot with %s" %
                             (pot_winner.username, pot_winner.amount, 
-                                pot_type))
+                                pot_type, pot_winner.hand))
             self.deal_button.set_sensitive(True)
 
         elif isinstance(event, PlayerSentChatMessage):
