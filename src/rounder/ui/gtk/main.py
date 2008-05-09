@@ -22,6 +22,8 @@
 
 """ The Rounder GTK Client """
 
+import subprocess
+
 import pygtk
 pygtk.require('2.0')
 
@@ -205,8 +207,13 @@ class RounderGtk(Client):
 
         self.table_list.set_model(tables)
 
+    @staticmethod
+    def _open_url(dialog, url, data):
+        subprocess.call(['xdg-open', url])
+
     def open_about_window(self, menuitem):
-        # XXX set the url and email dialog hooks
+        # XXX set email dialog hooks
+        gtk.about_dialog_set_url_hook(self._open_url, None)
         about = gtk.AboutDialog()
 
         about.set_name("Rounder")
