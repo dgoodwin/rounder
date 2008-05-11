@@ -211,9 +211,13 @@ class RounderGtk(Client):
     def _open_url(dialog, url, data):
         subprocess.call(['xdg-open', url])
 
+    @staticmethod
+    def _open_email(dialog, email, data):
+        subprocess.call(['xdg-email', email])
+
     def open_about_window(self, menuitem):
-        # XXX set email dialog hooks
         gtk.about_dialog_set_url_hook(self._open_url, None)
+        gtk.about_dialog_set_email_hook(self._open_email, None)
         about = gtk.AboutDialog()
 
         about.set_name("Rounder")
