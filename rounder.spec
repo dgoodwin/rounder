@@ -6,7 +6,7 @@ Release:        1%{?dist}
 Summary: An online poker server and clients
 
 Group: Amusements/Games
-License: GPL
+License: GPLv2
 URL: http://dangerouslyinc.com/rounder
 Source0: http://dangerouslyinc.com/files/rounder/rounder-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -49,6 +49,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/rounder-randombot
 %dir %{python_sitelib}/rounder
 %{python_sitelib}/rounder/*
+%{python_sitelib}/rounder-*.egg-info
 
 
 %changelog

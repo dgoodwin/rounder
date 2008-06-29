@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from rounder.ui.curses.main import RounderNetworkClient
 
 
