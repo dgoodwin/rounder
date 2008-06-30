@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 FixedPoint objects support decimal arithmetic with a fixed number of
 digits (called the object's precision) after the decimal point.  The
