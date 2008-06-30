@@ -132,17 +132,14 @@ class TableWindow(ClientTable):
         # Create the "Fold" button:
         self.fold_button = gtk.Button(label="Fold")
         self.fold_button.set_name("fold-button")
-        self.fold_button.connect("clicked", self.handle_fold_button)
 
         # Create the "Call" button:
         self.call_button = gtk.Button(label="Call")
         self.call_button.set_name("call-button")
-        self.call_button.connect("clicked", self.handle_call_button)
 
         # Create the "Raise" button:
         self.raise_button = gtk.Button(label="Raise")
         self.raise_button.set_name("raise-button")
-        self.raise_button.connect("clicked", self.handle_raise_button)
 
         # Create the "Deal" button:
         self.deal_button = gtk.Button(label="Deal")

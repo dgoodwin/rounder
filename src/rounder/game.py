@@ -139,6 +139,8 @@ class Game(object):
         # Every hand played needs a unique ID:
         self.id = ++GAME_ID_COUNTER
 
+        self.dealer_index = dealer_index
+
         self.table = table
         self.limit = limit
         self._deck = deck
@@ -159,7 +161,7 @@ class Game(object):
 
         # Create a new hand starting event and send to each player:
         new_hand_event = NewHandStarted(self.table, self.players, 
-                dealer_index)
+                self.players[dealer_index].seat)
         self.table.notify_all(new_hand_event)
 
     def process_action(self, action):
