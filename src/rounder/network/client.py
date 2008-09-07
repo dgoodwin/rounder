@@ -60,7 +60,7 @@ class RounderNetworkClient(pb.Referenceable):
         self.tables = {} # Hash of table id's to TableUplink objects
         self.username = None
         self.host = None
-        self.port = None
+        elf.port = None
 
     def connect(self, host, port, username, password):
         """ Initiate connection to a server. """

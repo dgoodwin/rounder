@@ -24,7 +24,7 @@ import unittest
 
 import settestpath
 
-from rounder.limit import FixedLimit
+from rounder.limit import FixedLimit, NoLimit
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 from rounder.player import Player
@@ -118,9 +118,33 @@ class FixedLimitTests(unittest.TestCase):
         
 
 
+class NoLimitTests(unittest.TestCase):
+
+    def test_creation(self):
+        nl = NoLimit(small_blind=Currency(0.5), big_blind=Currency(1))
+        self.assertEquals("$0.50/1.00 no-limit", str(nl))
+
+    def test_normal_actions(self):
+        # Test the normal situation where a player has enough chips to cover
+        # the minimum raise and then some:
+        nl = NoLimit(small_blind=Currency(0.5), big_blind=Currency(1))
+        p = Player('Some Player', chips=1000)
+        actions = nl.create_actions(p, 0, Currency(100), 0)
+        self.assertEquals(3, len(actions))
+        c = find_action_in_list(Call, actions)
+        r = find_action_in_list(Raise, actions)
+        self.assertEquals(Currency(100), c.amount)
+        print r
+        print r.min_bet
+        self.assertEquals(Currency(100), r.min_bet)
+        self.assertNone(r.max_bet)
+
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(FixedLimitTests))
+    suite.addTest(unittest.makeSuite(NoLimitTests))
     return suite
 
 if __name__ == "__main__":

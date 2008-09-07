@@ -120,3 +120,53 @@ class FixedLimit(Limit):
         actions.append(Fold())
         return actions
 
+
+class NoLimit(Limit):
+
+    """ Representation of a no-limit poker game. """
+
+    def __init__(self, small_blind, big_blind):
+        Limit.__init__(self)
+        self.small_bet = small_blind
+        self.big_bet = big_blind
+        self.small_blind = small_blind
+        self.big_blind = big_blind
+
+    def __repr__(self):
+        return "$" + str(self.small_blind) + "/" + str(self.big_blind) + " no-limit"
+
+    def create_actions(self, player, in_pot, current_bet, bet_level):
+        # NOTE: bet_level ignored for no-limit
+        logger.debug("creating no-limit actions")
+        logger.debug("   player: %s" % player)
+        logger.debug("   in_pot: %s" % in_pot)
+        logger.debug("   current_bet: %s" % current_bet)
+
+        actions = []
+
+        if in_pot is None:
+            in_pot = Currency(0)
+
+        call_amount = current_bet - in_pot
+        if call_amount >= player.chips:
+            call_amount = player.chips
+        else:
+            # Default to standard raise amounts:
+            raise_amount = self.big_blind
+
+            # TODO: Adjust to minimum raise amount equal to the size of the
+            # last raise on this round, if there was one!
+
+            # Check if a raise would put the player all-in:
+            if raise_amount + current_bet > player.chips:
+                raise_amount = player.chips - current_bet # all-in!
+
+            # Create the raise action with no maximum bet
+            actions.append(Raise(None, raise_amount, current_bet))
+
+        actions.append(Call(call_amount))
+
+        actions.append(Fold())
+        return actions
+
+
