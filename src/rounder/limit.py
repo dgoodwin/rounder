@@ -33,7 +33,8 @@ class Limit:
     def __init__(self):
         pass
 
-    def create_actions(self, player, in_pot, current_bet, bet_level):
+    def create_actions(self, player, in_pot, current_bet, bet_level,
+            last_raise=None):
         """ 
         Create the appropriate actions for this limit, the given player,
         and the current bet.
@@ -74,7 +75,8 @@ class FixedLimit(Limit):
     def __repr__(self):
         return "$" + str(self.small_bet) + "/" + str(self.big_bet) + " limit"
 
-    def create_actions(self, player, in_pot, current_bet, bet_level):
+    def create_actions(self, player, in_pot, current_bet, bet_level,
+            last_raise=None):
         #logger.debug("creating actions")
         #logger.debug("   player: %s" % player)
         #logger.debug("   in_pot: %s" % in_pot)
@@ -135,7 +137,8 @@ class NoLimit(Limit):
     def __repr__(self):
         return "$" + str(self.small_blind) + "/" + str(self.big_blind) + " no-limit"
 
-    def create_actions(self, player, in_pot, current_bet, bet_level):
+    def create_actions(self, player, in_pot, current_bet, bet_level,
+            last_raise=None):
         # NOTE: bet_level ignored for no-limit
         logger.debug("creating no-limit actions")
         logger.debug("   player: %s" % player)
@@ -153,6 +156,8 @@ class NoLimit(Limit):
         else:
             # Default to standard raise amounts:
             raise_amount = self.big_blind
+            if last_raise:
+                raise_amount = last_raise
 
             # TODO: Adjust to minimum raise amount equal to the size of the
             # last raise on this round, if there was one!

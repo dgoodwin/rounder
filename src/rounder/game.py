@@ -231,6 +231,7 @@ class TexasHoldemGame(Game):
         self.dealer = self.players[dealer_index]
         self.small_blind = self.players[sb_index]
         self.big_blind = self.players[bb_index]
+        self.__last_raise_amount = None
 
         log_msg = "Starting new TexasHoldemGame: " + str(self.id)
         log_msg += "\n  Limit: " + str(limit)
@@ -280,6 +281,7 @@ class TexasHoldemGame(Game):
         """
         logger.debug("Resetting betting round state.")
         self.__last_actor = self.dealer # overridden in __collect_blinds
+        self.__last_raise_amount = None
         self.__current_bet = Currency(0)
         self.__raise_count = 0
 
@@ -365,7 +367,8 @@ class TexasHoldemGame(Game):
             in_pot = next_to_act.current_bet
 
             options = self.limit.create_actions(next_to_act,
-                in_pot, self.__current_bet, self.__get_bet_level())
+                in_pot, self.__current_bet, self.__get_bet_level(), 
+                self.__last_raise_amount)
             self.prompt_player(next_to_act, options)
             return
 
@@ -488,6 +491,7 @@ class TexasHoldemGame(Game):
             req_amount = self.__current_bet + action.amount - \
                     player.current_bet
             self.__raise_count += 1
+            self.__last_raise_amount = req_amount
 
             # This is also checked in limit.py, but I think here makes more 
             # sense:
