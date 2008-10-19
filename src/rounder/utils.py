@@ -22,14 +22,16 @@
 
 from optparse import OptionParser
 
+
 def find_action_in_list(action, action_list):
     for a in action_list:
         if isinstance(a, action):
             return a
     return None
 
+
 def build_cli_option_parser():
-    """ 
+    """
     Build an option parser with the options frequently requested from
     the command line scripts.
     """
@@ -44,4 +46,3 @@ def build_cli_option_parser():
         help="server password")
 
     return parser
-

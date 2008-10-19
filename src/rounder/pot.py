@@ -26,12 +26,14 @@ from collections import defaultdict
 logger = getLogger("rounder.pot")
 from currency import Currency
 
-class Pot:
-    """ 
-    A single pot, used for both main and side pots. 
-    
+
+class Pot(object):
+    """
+    A single pot, used for both main and side pots.
+
     NOTE: Do not try to smoke!
     """
+
     def __init__(self, players, is_main_pot=False):
         # Players eligible for this pot:
         self.players = players[:]
@@ -53,8 +55,8 @@ class Pot:
         logger.debug("Players: " + str(self.players))
 
 
+class PotManager(object):
 
-class PotManager:
     def __init__(self):
         self.pots = []
         self.createNew = True
@@ -72,6 +74,7 @@ class PotManager:
         self.pots[0] += amount * len(players)
 
     # Called only once per betting round
+
     def add(self, player_amounts):
         amounts = player_amounts.keys()
         amounts.sort()

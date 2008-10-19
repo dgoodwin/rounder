@@ -91,7 +91,7 @@ Methods unique to FixedPoints:
    .frac()              long(x) + x.frac() == x
    .get_precision()     return the precision(p) of this FixedPoint object
    .set_precision(p)    set the precision of this FixedPoint object
-   
+
 Provided as-is; use at your own risk; no warranty; no promises; enjoy!
 """
 
@@ -121,6 +121,7 @@ __copyright__ = "Copyright (C) Python Software Foundation"
 __author__ = "Tim Peters"
 __version__ = 0, 1, 0
 
+
 def bankersRounding(self, dividend, divisor, quotient, remainder):
     """
     rounding via nearest-even
@@ -133,6 +134,7 @@ def bankersRounding(self, dividend, divisor, quotient, remainder):
     if c > 0 or (c == 0 and (quotient & 1) == 1):
         quotient += 1
     return quotient
+
 
 def addHalfAndChop(self, dividend, divisor, quotient, remainder):
     """
@@ -147,12 +149,15 @@ def addHalfAndChop(self, dividend, divisor, quotient, remainder):
         quotient += 1
     return quotient
 
+
 # 2002-10-20 dougfort - fake classes for pre 2.2 compatibility
 try:
     object
 except NameError:
+
     class object:
         pass
+
     def property(x, y):
         return None
 
@@ -160,12 +165,14 @@ except NameError:
 # decimal point.  This only has effect at compile-time.
 DEFAULT_PRECISION = 2
 
+
 class FixedPoint(object):
     """Basic FixedPoint object class,
         The exact value is self.n / 10**self.p;
         self.n is a long; self.p is an int
     """
     __slots__ = ['n', 'p']
+
     def __init__(self, value=0, precision=DEFAULT_PRECISION):
         self.n = self.p = 0
         self.set_precision(precision)
@@ -340,7 +347,10 @@ class FixedPoint(object):
         return _mkFP(-self.n, self.p, type(self))
 
     def __abs__(self):
-        """ Returns new FixedPoint containing the absolute value of this FixedPoint"""
+        """
+        Returns new FixedPoint containing the absolute value of
+        this FixedPoint
+        """
         if self.n >= 0:
             return self.copy()
         else:
@@ -402,7 +412,7 @@ class FixedPoint(object):
         return _mkFP(n2, p, type(self)).__mod__(self)
 
     def __float__(self):
-        """Return the floating point representation of this FixedPoint. 
+        """Return the floating point representation of this FixedPoint.
             Caution! float can lose precision.
         """
         n, p = self.__reduce()
@@ -422,7 +432,7 @@ class FixedPoint(object):
     def __int__(self):
         """Return integer value of FixedPoint object."""
         return int(self.__long__())
-    
+
     def frac(self):
         """Return fractional portion as a FixedPoint.
 
@@ -451,10 +461,12 @@ class FixedPoint(object):
             n = n / 10
         return n, p
 
+
 # 2002-10-04 dougfort - Default to Banker's Rounding for backward compatibility
 FixedPoint.round = bankersRounding
 
 # return 10L**n
+
 
 def _tento(n, cache={}):
     """Cached computation of 10**n"""
@@ -463,6 +475,7 @@ def _tento(n, cache={}):
     except KeyError:
         answer = cache[n] = 10L ** n
         return answer
+
 
 def _norm(x, y, isinstance=isinstance, FixedPoint=FixedPoint,
                 _tento=_tento):
@@ -474,7 +487,8 @@ def _norm(x, y, isinstance=isinstance, FixedPoint=FixedPoint,
         x must be FixedPoint to begin with; if y is not FixedPoint,
         it inherits its precision from x.
 
-        Note that this method is called a lot, so default-arg tricks are helpful.
+        Note that this method is called a lot, so default-arg tricks
+        are helpful.
     """
     assert isinstance(x, FixedPoint)
     if not isinstance(y, FixedPoint):
@@ -491,13 +505,18 @@ def _norm(x, y, isinstance=isinstance, FixedPoint=FixedPoint,
         p = xp  # same as yp
     return xn, yn, p
 
+
 def _mkFP(n, p, FixedPoint=FixedPoint):
-    """Make FixedPoint objext - Return a new FixedPoint object with the selected precision."""
+    """
+    Make FixedPoint objext - Return a new FixedPoint object with the selected
+    precision.
+    """
     f = FixedPoint()
     #print '_mkFP Debug: %s, value=%s' % (type(f),n)
     f.n = n
     f.p = p
     return f
+
 
 # crud for parsing strings
 import re
@@ -556,6 +575,7 @@ def _string2exact(s):
 
     return i, exp
 
+
 def _test():
     """Unit testing framework"""
     fp = FixedPoint
@@ -613,6 +633,6 @@ def _test():
     assert fp("5.5") % fp("1.1") == fp("5.5e100") % fp("1.1e100") == 0
     assert divmod(fp("1e100"), 3) == (long(fp("1e100")/3), 1)
 
+
 if __name__ == '__main__':
     _test()
-

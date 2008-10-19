@@ -18,10 +18,10 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-""" 
+"""
 Rounder Data Transfer Objects
 
-Various objects used to safely transmit game state or activity to clients. 
+Various objects used to safely transmit game state or activity to clients.
 In cases where an engine object is considered safe to transmit to a client,
 a DTO should still be created as child class of the engine object. Even if
 initially empty it provides a hook for us to change the DTO should the
@@ -30,9 +30,10 @@ engine object later grow to contain sensitive information.
 
 from rounder.currency import Currency
 
-class TableState:
-    """ 
-    Representation of a table fit for sending to a table's observers. 
+
+class TableState(object):
+    """
+    Representation of a table fit for sending to a table's observers.
     Must be careful not to expose any engine internals, this WILL be
     transferred over the wire.
     """
@@ -87,9 +88,10 @@ class TableState:
             i = i + 1
         return '\n'.join(output)
 
-class TableListing:
+
+class TableListing(object):
     """
-    Minimal representation of a table for use in the server window's table 
+    Minimal representation of a table for use in the server window's table
     list.
 
     Contains only necessary information such as table ID, name, limit, and
@@ -108,9 +110,8 @@ class TableListing:
             self.limit, self.player_count)
 
 
-
-class PlayerState:
-    """ 
+class PlayerState(object):
+    """
     Representation of a Player safe for transmitting over the wire.
     """
 
@@ -130,12 +131,11 @@ class PlayerState:
             self.num_cards = 0
 
     def __str__(self):
-        return "%s - %s - cards: %s" % (self.username, self.chips, 
+        return "%s - %s - cards: %s" % (self.username, self.chips,
                 self.num_cards)
 
 
-
-class PotState:
+class PotState(object):
     """
     Representaton of a Pot safe for transmitting over the wire.
 
@@ -152,8 +152,7 @@ class PotState:
         return "Pot: $%s" % self.amount
 
 
-
-class PotWinner:
+class PotWinner(object):
     """
     Winner of a pot.
     """
@@ -164,5 +163,6 @@ class PotWinner:
         self.hand = hand
 
     def __repr__(self):
-        return "PotWinner: %s won $%s with %s" % (self.username, self.amount, self.hand)
-
+        return "PotWinner: %s won $%s with %s" % (self.username,
+                                                  self.amount,
+                                                  self.hand)

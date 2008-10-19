@@ -30,6 +30,7 @@ from rounder.core import InvalidPlay
 from rounder.currency import Currency
 from utils import create_players
 
+
 class PlayerTests(unittest.TestCase):
 
     def setUp(self):
@@ -63,11 +64,11 @@ class PlayerTests(unittest.TestCase):
         pass
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(PlayerTests))
     return suite
+
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")

@@ -33,12 +33,13 @@ from utils import create_table
 
 register_message_classes()
 
+
 class CerealizerTests(unittest.TestCase):
 
     """ Tests exercising the rounder serialization code. """
 
     def test_simple_serialize(self):
-        tuple = create_table([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 
+        tuple = create_table([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000,
             1000, 1000], 0)
         table = tuple[1]
         state = TableState(table)
@@ -49,12 +50,11 @@ class CerealizerTests(unittest.TestCase):
         self.assertEquals(10, len(new_state.seats))
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(CerealizerTests))
     return suite
 
+
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")
-

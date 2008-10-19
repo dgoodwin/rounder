@@ -36,10 +36,10 @@ Likewise the events do not need an actual reference to the table as this is
 handled by the networking code.
 """
 
-
 from rounder.dto import TableState
 
-class Event:
+
+class Event(object):
 
     """
     Parent Event class. Events represent anything happening at a table that
@@ -48,7 +48,6 @@ class Event:
 
     def __init__(self, table):
         self.table_state = TableState(table)
-
 
 
 class PlayerJoinedTable(Event):
@@ -67,7 +66,6 @@ class PlayerJoinedTable(Event):
             self.seat_num)
 
 
-
 class PlayerLeftTable(Event):
 
     """
@@ -84,7 +82,6 @@ class PlayerLeftTable(Event):
             self.seat_num)
 
 
-
 class PlayerSatOut(Event):
 
     """
@@ -97,7 +94,6 @@ class PlayerSatOut(Event):
 
     def __repr__(self):
         return "PlayerSatOut: %s" % (self.username)
-
 
 
 class PlayerPrompted(Event):
@@ -115,7 +111,6 @@ class PlayerPrompted(Event):
         return "PlayerPrompted: %s" % self.username
 
 
-
 class HandCancelled(Event):
 
     """
@@ -128,12 +123,12 @@ class HandCancelled(Event):
         Event.__init__(self, table)
 
 
-
 class NewHandStarted(Event):
 
     """
     Signals that a new hand is beginning.
     """
+
     def __init__(self, table, players, dealer_seat_num):
 
         Event.__init__(self, table)
@@ -141,7 +136,6 @@ class NewHandStarted(Event):
         for p in players:
             self.seats_dealt_in.append(p.seat)
         self.dealer_seat_num = dealer_seat_num
-
 
     def __repr__(self):
         return "NewHandStarted: seats dealt in: %s dealer: %s" \
@@ -165,7 +159,6 @@ class PlayerPostedBlind(Event):
 
     def __repr__(self):
         return "PlayerPostedBlind: %s posted %s" % (self.username, self.amount)
-
 
 
 class HoleCardsDealt(Event):
@@ -197,7 +190,6 @@ class CommunityCardsDealt(Event):
         self.cards = cards
 
 
-
 class PlayerCalled(Event):
 
     """
@@ -214,7 +206,6 @@ class PlayerCalled(Event):
         self.amount = amount
 
 
-
 class PlayerRaised(Event):
 
     """
@@ -228,7 +219,6 @@ class PlayerRaised(Event):
         Event.__init__(self, table)
         self.username = username
         self.amount = amount
-
 
 
 class PlayerFolded(Event):
@@ -251,16 +241,15 @@ class GameEnding(Event):
     Game is ending.
 
     Clients should not interpret this as the actual end of the game, but
-    rather wait for incoming PlayerShowedCards events, and finally a 
+    rather wait for incoming PlayerShowedCards events, and finally a
     GameResults event with information about who won each pot.
     """
-    
+
     def __init__(self, table):
         Event.__init__(self, table)
 
     def __repr__(self):
         return "GameEnding"
-
 
 
 class GameOver(Event):
@@ -270,7 +259,7 @@ class GameOver(Event):
     Contains all the final results of the hand, who won with what hand
     and how much.
     """
-    
+
     def __init__(self, table, results):
         Event.__init__(self, table)
 
@@ -279,7 +268,6 @@ class GameOver(Event):
 
     def __repr__(self):
         return "GameOver"
-
 
 
 class PlayerShowedCards(Event):
@@ -332,4 +320,3 @@ ALL_EVENTS = [
     GameOver,
     PlayerSentChatMessage,
 ]
-

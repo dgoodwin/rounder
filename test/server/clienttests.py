@@ -27,6 +27,7 @@ import unittest
 
 import settestpath
 
+
 class RounderNetworkClientTests(unittest.TestCase):
 
     """ Tests exercising the client network controller. """
@@ -35,11 +36,11 @@ class RounderNetworkClientTests(unittest.TestCase):
         pass
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(RounderNetworkClientTests))
     return suite
+
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")

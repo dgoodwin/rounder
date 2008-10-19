@@ -45,6 +45,7 @@ STATE_TURN = "turn"
 STATE_RIVER = "river"
 STATE_GAMEOVER = "gameover"
 
+
 def find_next_to_act(players, last_actor_position, raise_count):
     """
     Return the next player to act, or None if this round of betting
@@ -68,7 +69,7 @@ def find_next_to_act(players, last_actor_position, raise_count):
     return next_to_act
 
 
-class GameStateMachine:
+class GameStateMachine(object):
 
     """
     State machine to represent the current game state. Game instances
@@ -126,11 +127,12 @@ class GameStateMachine:
             return None
         return self.states[self.current]
 
+
 class Game(object):
 
     """ Parent class of all poker games. """
 
-    def __init__(self, limit, players, callback, dealer_index, 
+    def __init__(self, limit, players, callback, dealer_index,
             table=None, deck=None):
         """
         Constructor expects the list of players to all be active, no one
@@ -160,7 +162,7 @@ class Game(object):
         self.pot_mgr = PotManager()
 
         # Create a new hand starting event and send to each player:
-        new_hand_event = NewHandStarted(self.table, self.players, 
+        new_hand_event = NewHandStarted(self.table, self.players,
                 self.players[dealer_index].seat)
         self.table.notify_all(new_hand_event)
 
@@ -208,8 +210,6 @@ class Game(object):
     active_players = property(__get_active_players, None)
 
 
-
-
 class TexasHoldemGame(Game):
 
     """ Texas Hold'em, the Cadillac of poker. """
@@ -226,7 +226,8 @@ class TexasHoldemGame(Game):
         to one another.
         """
 
-        Game.__init__(self, limit, players, callback, dealer_index, table, deck)
+        Game.__init__(self, limit, players, callback,
+                      dealer_index, table, deck)
 
         self.dealer = self.players[dealer_index]
         self.small_blind = self.players[sb_index]
@@ -321,7 +322,9 @@ class TexasHoldemGame(Game):
         # -1 is used as the pre-betting round
         self.big_blind.bet(self.limit.big_blind, -1)
         logger.info("Table %s: %s posts the big blind: %s",
-            self.__get_table_id(), self.big_blind.username, self.limit.big_blind)
+                    self.__get_table_id(),
+                    self.big_blind.username,
+                    self.limit.big_blind)
 
         self.__last_actor = self.big_blind
         self.__current_bet = self.limit.big_blind
@@ -367,7 +370,7 @@ class TexasHoldemGame(Game):
             in_pot = next_to_act.current_bet
 
             options = self.limit.create_actions(next_to_act,
-                in_pot, self.__current_bet, self.__get_bet_level(), 
+                in_pot, self.__current_bet, self.__get_bet_level(),
                 self.__last_raise_amount)
             self.prompt_player(next_to_act, options)
             return
@@ -430,7 +433,7 @@ class TexasHoldemGame(Game):
     def prompt_player(self, player, actions_list):
         """ Prompt the player with a list of actions. """
         self._check_if_finished()
-        if (self.pending_actions.has_key(player)):
+        if (player in self.pending_actions.keys()):
             # Shouldn't happen, but just in case:
             logger.error("Error adding pending actions for player: " +
                 str(player))
@@ -465,7 +468,7 @@ class TexasHoldemGame(Game):
         # If the player sitting out is the one we were currently awaiting a
         # response from, simulate a fold:
         logger.debug("Player sitting out: %s" % player.username)
-        if self.pending_actions.has_key(player):
+        if player in self.pending_actions.keys():
             logger.debug("   player had pending actions, simulating fold.")
             fold = find_action_in_list(Fold, self.pending_actions[player])
             self.process_action(player, fold)
@@ -482,7 +485,7 @@ class TexasHoldemGame(Game):
             player.bet(req_amount, self.__raise_count)
 
             if action.amount == 0:
-                logger.debug("Table %s: %s checks" % (self.table.id, 
+                logger.debug("Table %s: %s checks" % (self.table.id,
                     player.username))
             event = PlayerCalled(self.table, player.username, action.amount)
             self.table.notify_all(event)
@@ -493,10 +496,11 @@ class TexasHoldemGame(Game):
             self.__raise_count += 1
             self.__last_raise_amount = req_amount
 
-            # This is also checked in limit.py, but I think here makes more 
+            # This is also checked in limit.py, but I think here makes more
             # sense:
             if action.amount > player.chips:
-                raise InvalidPlay("Player tried to raise more then their chips")
+                raise InvalidPlay(
+                    "Player tried to raise more then their chips")
 
             self.__current_bet += action.amount
             player.bet(req_amount, self.__raise_count)
@@ -553,7 +557,8 @@ class TexasHoldemGame(Game):
             # Show hole cards for anyone who hasn't folded:
             # TODO: Implement optional showing of cards before we process hand
             # winners here?
-            # TODO: Start with last player to push the action, or small blind, and
+            # TODO: Start with last player to push the action, or small
+            # blind, and
             # loop through from there:
             for p in self.players:
                 if p.in_hand:
@@ -592,7 +597,7 @@ class TexasHoldemGame(Game):
         self.callback()
 
     def __payout_pot(self, pot, players):
-        """ 
+        """
         Split the pot as evenly as possible amongst the list of winners.
 
         Potential remaining cent is given to first player in the list.
@@ -623,7 +628,7 @@ class TexasHoldemGame(Game):
 
                 player.add_chips(winnings)
                 pot_winners.append(PotWinner(player.username, winnings, hand))
-                logger.info(   "%s won %s" % (player.username, winnings))
+                logger.info("%s won %s" % (player.username, winnings))
 
         return pot_winners
 
@@ -635,4 +640,3 @@ class TexasHoldemGame(Game):
             cards.append(str(player.cards[1]).lower())
             pockets.append(cards)
         return pockets
-

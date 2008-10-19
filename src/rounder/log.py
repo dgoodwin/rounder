@@ -28,6 +28,7 @@ logging.StreamHandler = colorhandler.ColorStreamHandler
 
 from os.path import expanduser, exists, abspath
 
+
 def setup_logging(conf_file_locations):
     """ Configure logging by searching for a logging configuration file
     in the provided list of locations. If none are found, default to no
@@ -46,4 +47,3 @@ def setup_logging(conf_file_locations):
             "following locations:")
         for location in conf_file_locations:
             print("   " + abspath(expanduser(location)))
-

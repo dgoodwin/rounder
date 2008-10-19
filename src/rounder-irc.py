@@ -20,21 +20,22 @@ connect to, and file to log to, e.g.:
 will log channel #test to the file 'test.log'.
 """
 
+# system imports
+import time
+import sys
 
 # twisted imports
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 from twisted.python import log
 
-# system imports
-import time, sys
 
-
-class MessageLogger:
+class MessageLogger(object):
     """
     An independent logger class (because separation of application
     and protocol logic is a good thing).
     """
+
     def __init__(self, file):
         self.file = file
 
@@ -50,22 +51,22 @@ class MessageLogger:
 
 class RounderBot(irc.IRCClient):
     """A logging IRC bot."""
-    
+
     nickname = "rounder"
 
     def __init__(self):
         self.playing_game = False
         self.starting_game = False
-    
+
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.logger = MessageLogger(open(self.factory.filename, "a"))
-        self.logger.log("[connected at %s]" % 
+        self.logger.log("[connected at %s]" %
                         time.asctime(time.localtime(time.time())))
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
-        self.logger.log("[disconnected at %s]" % 
+        self.logger.log("[disconnected at %s]" %
                         time.asctime(time.localtime(time.time())))
         self.logger.close()
 
@@ -84,7 +85,7 @@ class RounderBot(irc.IRCClient):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
         self.logger.log("<%s> %s" % (user, msg))
-        
+
         # Check to see if they're sending me a private message
         if channel == self.nickname:
             msg = "It isn't nice to whisper!  Play nice with the group."
@@ -96,7 +97,8 @@ class RounderBot(irc.IRCClient):
             cmd = msg[len(self.nickname) + 2:].lower()
             if cmd == "new game" and not self.starting_game \
                     and not self.playing_game:
-                msg = "Ok %s, I'm starting a new poker game. Who else is playing?" % user
+                msg = "Ok %s, I'm starting a new poker game. \
+Who else is playing?" % user
                 self.players = []
                 self.players.append(user)
                 self.starting_game = True
@@ -154,7 +156,7 @@ class RounderBotFactory(protocol.ClientFactory):
 if __name__ == '__main__':
     # initialize logging
     log.startLogging(sys.stdout)
-    
+
     # create factory protocol and application
     f = RounderBotFactory(sys.argv[1], sys.argv[2])
 

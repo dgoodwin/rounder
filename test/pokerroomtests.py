@@ -26,11 +26,11 @@ import settestpath
 
 from rounder.pokerroom import PokerRoom
 
+
 class PokerRoomTests(unittest.TestCase):
 
     def test_create_poker_room(self):
         poker_room = PokerRoom()
-
 
 
 def suite():
@@ -40,4 +40,3 @@ def suite():
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")
-

@@ -32,8 +32,10 @@ from rounder.card import CLUB
 from rounder.card import Card
 from rounder.core import RounderException
 
+
 def create_cards_from_list(value_list):
     return [Card(value) for value in value_list]
+
 
 class CardTests(unittest.TestCase):
 
@@ -76,11 +78,11 @@ class CardTests(unittest.TestCase):
         self.assertEquals("Kh", str(kingOfHearts))
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(CardTests))
     return suite
+
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")

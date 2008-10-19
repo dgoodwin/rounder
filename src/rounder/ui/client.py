@@ -20,7 +20,8 @@
 
 """ Rounder Client - Everything needed for a UI. """
 
-class Client:
+
+class Client(object):
     """ Everything you need to implement to be a client. """
 
     def __init__(self):
@@ -31,14 +32,15 @@ class Client:
         raise NotImplementedError
 
     # TODO: some type of error message?
+
     def connect_failure(self):
         """ Called when a connection fails. """
         raise NotImplementedError
 
     def list_tables_success(self, table_listings):
-        """ 
-        Called when you get a list of tables from the server. 
-        
+        """
+        Called when you get a list of tables from the server.
+
         table_listings - List of rounder.dto.TableListing objects.
         """
         raise NotImplementedError
@@ -48,8 +50,8 @@ class Client:
         raise NotImplementedError
 
     def open_table_success(self, client_table):
-        """ 
-        Table opened successfully. 
+        """
+        Table opened successfully.
 
         client_table - Network client object specific to a particular table.
             See rounder.network.client.ClientTable.
@@ -60,12 +62,13 @@ class Client:
         """ Called any time you want the client to log an error message. """
         return failure
 
-class ClientTable:
-    """ 
+
+class ClientTable(object):
+    """
     Client UI representation of a table.
 
     Many server actions are specific to a particular table. Rather than
-    return and send a table ID with every one of these requests we use an 
+    return and send a table ID with every one of these requests we use an
     object to encapsualte this info for us.
     """
 
@@ -81,7 +84,7 @@ class ClientTable:
         raise NotImplementedError
 
     def log_error(self, failure):
-        """ 
+        """
         Called any time an error message is returned - will likely disappear.
         """
         return failure
@@ -89,4 +92,3 @@ class ClientTable:
     def prompt(self, actions):
         """ Prompt user to choose from the given actions. """
         raise NotImplementedError
-

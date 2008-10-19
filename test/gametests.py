@@ -47,6 +47,7 @@ from decktests import reorder_deck
 
 CHIPS = 1000
 
+
 class NextToActTests(unittest.TestCase):
 
     def setUp(self):
@@ -65,7 +66,9 @@ class NextToActTests(unittest.TestCase):
         self.__set_bet(self.players[1], 1, -1)
         self.__set_bet(self.players[2], 2, -1)
 
-        self.assertEquals(self.players[3], find_next_to_act(self.players, 2, 0))
+        self.assertEquals(self.players[3], find_next_to_act(self.players,
+                                                            2,
+                                                            0))
 
     def test_middle_table(self):
         self.__set_bet(self.players[1], 1, -1)
@@ -73,12 +76,14 @@ class NextToActTests(unittest.TestCase):
         self.__set_bet(self.players[3], 2, 0)
         self.__set_bet(self.players[4], 2, 0)
 
-        self.assertEquals(self.players[5], find_next_to_act(self.players, 4, 0))
+        self.assertEquals(self.players[5],
+                          find_next_to_act(self.players, 4, 0))
 
     def test_wraparound(self):
         self.__set_bet(self.players[9], 2, 0)
 
-        self.assertEquals(self.players[0], find_next_to_act(self.players, 9, 0))
+        self.assertEquals(self.players[0],
+                          find_next_to_act(self.players, 9, 0))
 
     def test_everybody_in(self):
         for p in self.players:
@@ -101,7 +106,9 @@ class NextToActTests(unittest.TestCase):
                 self.__set_bet(p, 2, 0)
             # seat 9 raises:
         self.__set_bet(self.players[9], 4, 1)
-        self.assertEquals(self.players[0], find_next_to_act(self.players, 9, 1))
+        self.assertEquals(self.players[0],
+                          find_next_to_act(self.players, 9, 1))
+
 
 class GameStateMachineTests(unittest.TestCase):
 
@@ -157,7 +164,6 @@ class GameStateMachineTests(unittest.TestCase):
         machine.add_state("postblinds", self.callback)
         machine.advance()
         self.assertEquals(True, self.called_back)
-
 
 
 class TexasHoldemTests(unittest.TestCase):
@@ -387,14 +393,14 @@ class TexasHoldemTests(unittest.TestCase):
         self.__call(self.players[3], 2, CHIPS - 2)
         self.__call(self.players[0], 2, CHIPS - 2)
 
-        self.assertTrue(self.game.pending_actions.has_key(self.players[1]))
+        self.assertTrue(self.players[1] in self.game.pending_actions.keys())
         self.players[1].sit_out() # table does this normally
         self.game.sit_out(self.players[1])
-        self.assertFalse(self.game.pending_actions.has_key(self.players[1]))
+        self.assertFalse(self.players[1] in self.game.pending_actions.keys())
         self.assertTrue(self.players[1].folded)
 
         # Action should have moved on to the next player:
-        self.assertTrue(self.game.pending_actions.has_key(self.players[2]))
+        self.assertTrue(self.players[2] in self.game.pending_actions.keys())
 
     def test_non_pending_player_sits_out(self):
         self.__create_game([1000, 1000, 1000, 1000], 0, 1, 2)

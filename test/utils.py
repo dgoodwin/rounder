@@ -27,14 +27,18 @@ from rounder.limit import FixedLimit
 
 CHIPS = 1000
 
+
 def create_players_list(size, chips):
     """
     Create a list of players of the given size.
     """
     l = []
     for i in range(size):
-        l.append(Player(username='player' + str(i), seat=i, chips=Currency(chips)))
+        l.append(Player(username='player' + str(i),
+                        seat=i,
+                        chips=Currency(chips)))
     return l
+
 
 def create_players(chip_counts):
     """
@@ -48,6 +52,7 @@ def create_players(chip_counts):
         i = i + 1
     return l
 
+
 def create_table(chip_counts, dealer_index):
     limit = FixedLimit(small_bet=Currency(2), big_bet=Currency(4))
     table = Table(name="Test Table", limit=limit, seats=10)
@@ -55,10 +60,10 @@ def create_table(chip_counts, dealer_index):
     players = []
     i = 0
     for chip_count in chip_counts:
-        new_player = Player(username='player' + str(i), chips=Currency(chip_count))
+        new_player = Player(username='player' + str(i),
+                            chips=Currency(chip_count))
         table.seat_player(new_player, i)
         players.append(new_player)
         i = i + 1
 
     return (limit, table, players)
-

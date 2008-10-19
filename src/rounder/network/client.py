@@ -29,6 +29,7 @@ logger = getLogger("rounder.network.client")
 
 from rounder.network.serialize import loads
 
+
 class RounderNetworkClient(pb.Referenceable):
     """
     Focal point for all client side network communication.
@@ -60,7 +61,7 @@ class RounderNetworkClient(pb.Referenceable):
         self.tables = {} # Hash of table id's to TableUplink objects
         self.username = None
         self.host = None
-        elf.port = None
+        self.port = None
 
     def connect(self, host, port, username, password):
         """ Initiate connection to a server. """
@@ -100,7 +101,7 @@ class RounderNetworkClient(pb.Referenceable):
         """ Request a list of tables from the server. """
         logger.debug("requesting table list")
         d = self.perspective.callRemote("list_tables")
-        d.addCallbacks(self.get_table_list_success_cb, 
+        d.addCallbacks(self.get_table_list_success_cb,
             self.get_table_list_failure_cb)
         d.addErrback(self.log_error)
 
@@ -140,7 +141,7 @@ class RounderNetworkClient(pb.Referenceable):
         """
         Prompt player to choose one of the given actions for a table.
         """
-        # TODO: I don't yet see a way to get the server a reference to the 
+        # TODO: I don't yet see a way to get the server a reference to the
         # TableUplink, but I'm sure there's a way. Until this is adressed,
         # will delegate the call there manually:
         self.tables[table_id].prompt(actions)
@@ -159,7 +160,6 @@ class RounderNetworkClient(pb.Referenceable):
         logger.warn("Server said: %s" % msg)
 
 
-
 class TableUplink(pb.Referenceable):
     """
     A client side table object maintaining state of the table and exposing
@@ -170,7 +170,7 @@ class TableUplink(pb.Referenceable):
 
     def __init__(self, table_view, table_state):
         """
-        Initialize the table with the given remote view and state received 
+        Initialize the table with the given remote view and state received
         from the server.
         """
         self.__view = table_view
@@ -183,7 +183,7 @@ class TableUplink(pb.Referenceable):
 
     def sit(self, seat):
         """ Request the specified seat index at the specified table. """
-        logger.debug("Requesting seat %s at table %s" % (seat, 
+        logger.debug("Requesting seat %s at table %s" % (seat,
             self.state.id))
         d = self.__view.callRemote("sit", seat)
         d.addCallback(self.sit_success_cb)
@@ -206,8 +206,8 @@ class TableUplink(pb.Referenceable):
         d = self.__view.callRemote("leave")
 
     def prompt(self, serialized_actions):
-        """ 
-        Deserialize the given actions and prompt the ui to choose one. 
+        """
+        Deserialize the given actions and prompt the ui to choose one.
         """
         logger.debug("Table %s: received actions:" % self.state.id)
         try:

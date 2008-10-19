@@ -28,6 +28,7 @@ def make_deck():
 
     return deck
 
+
 def get_random_cards(deck, num_cards):
     cards = []
     while len(cards) < num_cards:
@@ -36,6 +37,7 @@ def get_random_cards(deck, num_cards):
         cards.append(card)
 
     return cards
+
 
 def get_random_setup(deck, num_players):
     board = get_random_cards(deck, 5)
@@ -49,13 +51,17 @@ def get_random_setup(deck, num_players):
 def error(msg):
     print >> error_file, msg
 
+
 failed_last_time_counter = 0
+
 
 def progress(total, good, match=True):
     global failed_last_time_counter
     sys.stdout.write("\r")
     if not match or failed_last_time_counter > 0:
-        sys.stdout.write("  %s%s%s\t" %(color_red, "☠☠FAIL☠☠", color_normal))
+        sys.stdout.write("  %s%s%s\t" % (color_red,
+                                         "☠☠FAIL☠☠",
+                                         color_normal))
         if not match:
             failed_last_time_counter = 50
         else:
@@ -67,6 +73,7 @@ def progress(total, good, match=True):
     sys.stdout.write("%s%s%s" % (color_green, msg, color_normal))
     sys.stdout.flush()
 
+
 def timed_progress(start_time, total):
     current_time = time.time()
 
@@ -75,6 +82,7 @@ def timed_progress(start_time, total):
     sys.stdout.write("\r")
     sys.stdout.write("%s%s%s" % (color_green, msg, color_normal))
     sys.stdout.flush()
+
 
 def test_one(test_type, num_players):
     deck = make_deck()

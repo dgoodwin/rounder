@@ -20,13 +20,13 @@
 
 """ The Rounder Poker Room Module """
 
-class PokerRoom:
 
-    """ 
+class PokerRoom(object):
+
+    """
     Representation of a poker room. One object exists per server.
     Home for all active tables on the server.
     """
 
     def __init__(self):
         self.tables = None
-        

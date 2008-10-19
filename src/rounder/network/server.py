@@ -39,11 +39,12 @@ from rounder.network.serialize import register_message_classes, dumps
 
 DEFAULT_SERVER_PORT = 35100
 
-class RounderNetworkServer:
 
-    """ 
-    Core Rounder Server 
-    
+class RounderNetworkServer(object):
+
+    """
+    Core Rounder Server
+
     Maintains the internal engine objects, as well as the lists of connected
     clients etc.
 
@@ -55,14 +56,14 @@ class RounderNetworkServer:
         self.table_views = {}
 
     def add_user(self, username, perspective):
-        """ 
+        """
         Add a user perspective.
-        
+
         Called when a user successfully authenticates and connects to the
         server.
         """
         logger.info("User connected to server: %s" % username)
-        assert(not self.users.has_key(username))
+        assert(not username in self.users.keys())
         self.users[username] = perspective
 
     def remove_user(self, username):
@@ -72,7 +73,7 @@ class RounderNetworkServer:
         Called when a user has disconnected.
         """
         logger.info("User disconnected from server: %s" % username)
-        assert(self.users.has_key(username))
+        assert(username in self.users.keys())
         self.users.pop(username)
 
     def create_table(self, name):
@@ -93,14 +94,15 @@ class RounderNetworkServer:
         return tables
 
     def open_table(self, table_id, user):
-        """ 
-        Subscribe a user to a table. 
+        """
+        Subscribe a user to a table.
 
-        Returns a tuple of the user's newly created table view, and a 
+        Returns a tuple of the user's newly created table view, and a
         TableState snapshot the client can use to draw the current table
         state.
         """
-        logger.debug("Opening table %s for user %s" % (table_id, user.username))
+        logger.debug("Opening table %s for user %s" % (table_id,
+                                                       user.username))
         # TODO: check if user should be allowed to observe this table.
         table = self.table_views[table_id].table
         table.add_observer(user.username)
@@ -148,21 +150,20 @@ class RounderNetworkServer:
         table.process_action(user.username, action_index, params)
 
 
-
-class RounderRealm:
+class RounderRealm(object):
 
     """ Creates perspectives/avatars. """
 
     def __init__(self):
         self.server = None
 
-    implements(portal.IRealm) 
+    implements(portal.IRealm)
+
     def requestAvatar(self, avatarId, mind, *interfaces):
         assert pb.IPerspective in interfaces
         avatar = User(avatarId, self.server)
         avatar.attached(mind)
-        return pb.IPerspective, avatar, lambda a = avatar : a.detached(mind)
-
+        return pb.IPerspective, avatar, lambda a = avatar: a.detached(mind)
 
 
 class User(pb.Avatar):
@@ -200,9 +201,9 @@ class User(pb.Avatar):
         return tuple
 
     def prompt(self, table_id, serialized_actions):
-        """ 
-        Prompt the player with a call to their remote perspective. 
-        
+        """
+        Prompt the player with a call to their remote perspective.
+
         Remote could be None in the case of testing, in which case we do
         nothing.
         """
@@ -235,11 +236,10 @@ class User(pb.Avatar):
         logger.debug("Notify failed.")
 
 
-
 class TableView(pb.Viewable):
 
-    """ 
-    User's perspective of a table. Created at the same time a 
+    """
+    User's perspective of a table. Created at the same time a
     rounder.table.Table would be.
 
     One created per table, not per user.
@@ -266,7 +266,7 @@ class TableView(pb.Viewable):
         from_user.table_views.pop(self.table.id)
 
     def view_start_game(self, from_user):
-        """ 
+        """
         Called when a user requests a new hand be started.
 
         Verifies that when this request is received, a hand is not already
@@ -282,7 +282,7 @@ class TableView(pb.Viewable):
         """
         Called by clients attempting to perform an action.
         """
-        self.server.process_action(self.table, from_user, action_index, 
+        self.server.process_action(self.table, from_user, action_index,
                 params)
 
     def view_chat_message(self, from_user, message):
@@ -292,7 +292,7 @@ class TableView(pb.Viewable):
         self.table.chat_message(from_user.username, message)
 
 
-class OnDemandCredentialsChecker:
+class OnDemandCredentialsChecker(object):
     """
     Our temporary credential checker.
 
@@ -300,7 +300,7 @@ class OnDemandCredentialsChecker:
     validate that it's password matches. If not, add the username and the
     current password. First come, first serve.
 
-    Problems storing the md5 passwords we receive and using them to compare 
+    Problems storing the md5 passwords we receive and using them to compare
     directly. All accounts are assumed to use "password" for now.
     """
     implements(checkers.ICredentialsChecker)
@@ -333,11 +333,10 @@ class OnDemandCredentialsChecker:
             self._cbPasswordMatch, str(credentials.username))
 
 
-
 def run_server():
     logger.info("Starting Rounder server on port %s" % (DEFAULT_SERVER_PORT))
     register_message_classes()
-    
+
     realm = RounderRealm()
     realm.server = RounderNetworkServer()
     checker = OnDemandCredentialsChecker()
@@ -347,4 +346,3 @@ def run_server():
 
     reactor.listenTCP(DEFAULT_SERVER_PORT, pb.PBServerFactory(p))
     reactor.run()
-

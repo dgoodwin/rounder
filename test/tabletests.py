@@ -37,6 +37,7 @@ from utils import create_table
 
 CHIPS = 1000
 
+
 class SeatsTests(unittest.TestCase):
 
     def test_create_seats(self):
@@ -128,7 +129,6 @@ class SeatsTests(unittest.TestCase):
         self.assertEquals(player1, seats.big_blind_to_prompt())
 
 
-
 class TableTests(unittest.TestCase):
 
     def __create_table(self, num_players, dealer_index):
@@ -155,7 +155,8 @@ class TableTests(unittest.TestCase):
     def test_standard_post_blinds(self):
         self.__create_table(3, 0)
         self.table.begin()
-        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(STATE_SMALL_BLIND,
+                          self.table.gsm.get_current_state())
         sb = self.players[1]
         self.assertEquals(1, len(sb.pending_actions))
         self.assertEquals(None, self.table.small_blind)
@@ -181,7 +182,8 @@ class TableTests(unittest.TestCase):
         self.table.begin()
 
         # Player 1 rejects the small blind and chooses to sit out:
-        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(STATE_SMALL_BLIND,
+                          self.table.gsm.get_current_state())
         self.assertEquals(1, len(self.players[1].pending_actions))
         self.table.sit_out(self.players[1])
         self.assertEquals(0, len(self.players[1].pending_actions))
@@ -189,7 +191,8 @@ class TableTests(unittest.TestCase):
         self.assertEquals(None, self.table.small_blind)
 
         # Player 0 (not 2) becomes the small blind:
-        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(STATE_SMALL_BLIND,
+                          self.table.gsm.get_current_state())
         self.assertEquals(1, len(self.players[0].pending_actions))
         self.table.process_action(self.players[0].username, 0, [])
         self.assertEquals(0, len(self.players[0].pending_actions))
@@ -222,7 +225,8 @@ class TableTests(unittest.TestCase):
         self.assertEquals(STATE_BIG_BLIND, self.table.gsm.get_current_state())
         self.table.sit_out(self.players[2])
         self.assertEquals(None, self.table.small_blind)
-        self.assertEquals(STATE_SMALL_BLIND, self.table.gsm.get_current_state())
+        self.assertEquals(STATE_SMALL_BLIND,
+                          self.table.gsm.get_current_state())
         self.assertEquals(1, len(self.players[0].pending_actions))
 
     def test_heads_up_blinds(self):
@@ -257,11 +261,10 @@ class TableTests(unittest.TestCase):
     def test_invalid_action_index(self):
         self.__create_table(2, 0)
         self.table.begin()
-        self.assertRaises(RounderException, self.table.process_action, 
+        self.assertRaises(RounderException, self.table.process_action,
             self.players[0].username, 1, [])
-        self.assertRaises(RounderException, self.table.process_action, 
+        self.assertRaises(RounderException, self.table.process_action,
             self.players[0].username, -1, [])
-
 
 
 def suite():

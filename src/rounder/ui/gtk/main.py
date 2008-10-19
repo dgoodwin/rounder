@@ -44,6 +44,7 @@ from rounder.ui.gtk.table import TableWindow
 ROUNDER_LOGO_FILE = "rounder/ui/gtk/data/rounder-logo.png"
 ROUNDER_ICON_FILE = "rounder/ui/gtk/data/rounder-icon.svg"
 
+
 def connect(host, port, username, password, app):
         # Attempt to connect to the specified server by creating a client
         # object. If successful pass the client back to the main application,
@@ -55,9 +56,10 @@ def connect(host, port, username, password, app):
         except Exception, e:
             logger.error("Unable to login to %s as %s" % (host, username))
 
+
 class RounderGtk(Client):
-    """ 
-    The Rounder GTK Client 
+    """
+    The Rounder GTK Client
 
     Represents the main Rounder interface to connect to a server, view
     available tables, and join them. (opening a separate window)
@@ -87,7 +89,7 @@ class RounderGtk(Client):
         signals = {
             'on_connect_activate': self.show_connect_dialog,
             'on_close_activate': self.shutdown,
-            'on_main_window_destroy' : self.shutdown,
+            'on_main_window_destroy': self.shutdown,
             'on_connect_button_clicked': self.show_connect_dialog,
             'on_quit_button_clicked': self.shutdown,
             'on_table_list_row_activated': self.open_table,
@@ -126,7 +128,7 @@ class RounderGtk(Client):
         gtk.main_quit()
 
     def open_table(self, treeview, row, column):
-        """ 
+        """
         Open a table window.
 
         Connected to the table list and called when the user selected a table
@@ -151,11 +153,11 @@ class RounderGtk(Client):
             logger.debug("Connect dialog already open.")
 
     def connect_success(self, client):
-        """ 
+        """
         Callback used by the connect dialog after a connection to a server
         has been successfully made.
         """
-        logger.info("Connected to %s:%s as %s" % (client.host, client.port, 
+        logger.info("Connected to %s:%s as %s" % (client.host, client.port,
             client.username))
         self.client = client
 
@@ -179,8 +181,8 @@ class RounderGtk(Client):
         self.connect_dialog.set_status("Login failed.")
 
     def list_tables_success(self, table_listings):
-        """ 
-        Populate the list of tables in the main server window. 
+        """
+        Populate the list of tables in the main server window.
 
         GTK TreeView's aren't fun but this works in conjunction with the
         __cell_* methods to populate the columns.
@@ -188,18 +190,18 @@ class RounderGtk(Client):
 
         logger.debug("Populating table list")
         column_names = ["Table ID", "Name", "Limit", "Players"]
-        cell_data_funcs = [self.__cell_table_id, self.__cell_table, 
+        cell_data_funcs = [self.__cell_table_id, self.__cell_table,
             self.__cell_limit, self.__cell_players]
 
         tables = gtk.ListStore(int, str, str, str)
         for table in table_listings:
-            tables.append([table.id, table.name, table.limit, 
+            tables.append([table.id, table.name, table.limit,
                 table.player_count])
 
         columns = [None] * len(column_names)
 
         # Populate the table columns and cells:
-        for n in range (0, len(column_names)):
+        for n in range(0, len(column_names)):
             cell = gtk.CellRendererText()
             columns[n] = gtk.TreeViewColumn(column_names[n], cell)
             columns[n].set_cell_data_func(cell, cell_data_funcs[n])
@@ -238,7 +240,7 @@ class RounderGtk(Client):
 
         about.set_icon_from_file(find_file_on_path(ROUNDER_ICON_FILE))
 
-        about.connect('response', lambda x,y: about.destroy())
+        about.connect('response', lambda x, y: about.destroy())
         about.show_all()
 
     def __cell_table_id(self, column, cell, model, iter):
@@ -259,8 +261,7 @@ class RounderGtk(Client):
         self.statusbar.show()
 
 
-
-class ConnectDialog:
+class ConnectDialog(object):
     """ Dialog for connecting to a server. """
 
     def __init__(self, app):

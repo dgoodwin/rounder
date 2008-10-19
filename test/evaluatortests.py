@@ -198,19 +198,18 @@ class TwoPairTests(FullHandTest):
         self.assertHandGreaterThan(hand1, hand2)
 
     def testThreePairsUseThirdForSingle(self):
-        board  = ('7h', 'jc', '9s', 'td', 'jh')
+        board = ('7h', 'jc', '9s', 'td', 'jh')
         hand1 = FullHand(('tc', '9h'), board)
         hand2 = FullHand(('5d', 'th'), board)
 
         self.assertHandEquals(hand1, hand2)
 
     def testThreePairsDontUseThirdForSingle(self):
-        board  = ('2h', 'jc', '2s', 'td', 'jh')
+        board = ('2h', 'jc', '2s', 'td', 'jh')
         hand1 = FullHand(('tc', '9h'), board)
         hand2 = FullHand(('5d', 'th'), board)
 
         self.assertHandGreaterThan(hand1, hand2)
-
 
 
 class TripsTests(FullHandTest):
@@ -320,6 +319,7 @@ class StraightFlushTests(FullHandTest):
         hand = FullHand(('as', '6d'), ('5d', '4d', '3d', '2d'))
         self.assertTrue(hand.is_straight_flush())
 
+
 def testBothStraightsFlushHighestCardWins(self):
         board = ('6h', 'jh', 'qh', '10h', '9h')
         hand1 = FullHand(('kh', 'qd'), board)
@@ -382,43 +382,44 @@ class HandClassComparisonTests(FullHandTest):
         board = ('ks', 'kd', 'kh', '3c', '5d')
         hand1 = FullHand(('9s', '9d'), board)
         hand2 = FullHand(('as', '9s'), ('7s', '4s', '2s', '8h', '6c'))
-        
+
         self.assertHandGreaterThan(hand1, hand2)
 
     def testFlushGreaterThanStraight(self):
         board = ('6s', '4s', '2s', '9c', 'kh')
-        hand1 = FullHand(('as', '9s'), board) 
+        hand1 = FullHand(('as', '9s'), board)
         hand2 = FullHand(('3s', '5d'), board)
-        
+
         self.assertHandGreaterThan(hand1, hand2)
 
     def testStraightGreaterThanTrips(self):
         board = ('6s', '4s', '2s', 'kh', 'jd')
         hand1 = FullHand(('3s', '5d'), board)
-        hand2 = FullHand(('4h', '4d'), board) 
-        
+        hand2 = FullHand(('4h', '4d'), board)
+
         self.assertHandGreaterThan(hand1, hand2)
 
     def testTripsGreaterThanTwoPair(self):
         board = ('6s', '4s', '2s', '3c', 'kh')
-        hand1 = FullHand(('4h', '4d'), board) 
+        hand1 = FullHand(('4h', '4d'), board)
         hand2 = FullHand(('6d', '4h'), board)
-        
+
         self.assertHandGreaterThan(hand1, hand2)
 
     def testTwoPairGreaterThanOnePair(self):
         board = ('6s', '4s', '2s', 'kh', 'jd')
         hand1 = FullHand(('6d', '4h'), board)
-        hand2 = FullHand(('4h', '7d'), board) 
-        
+        hand2 = FullHand(('4h', '7d'), board)
+
         self.assertHandGreaterThan(hand1, hand2)
 
     def testOnePairGreaterThanHighCard(self):
         board = ('6s', '4s', '2s', '3c', '8d')
-        hand1 = FullHand(('4h', '7d'), board) 
+        hand1 = FullHand(('4h', '7d'), board)
         hand2 = FullHand(('7d', 'kh'), board)
-        
+
         self.assertHandGreaterThan(hand1, hand2)
+
 
 class FullHandReprTests(unittest.TestCase):
 
@@ -478,6 +479,7 @@ def suite():
     suite.addTest(unittest.makeSuite(HandClassComparisonTests))
     suite.addTest(unittest.makeSuite(FullHandReprTests))
     return suite
+
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()

@@ -29,12 +29,13 @@ from rounder.player import Player
 
 CHIPS = 1000
 
+
 class RaiseTests(unittest.TestCase):
 
     def test_too_many_validation_params(self):
         p = Player(username="Player", chips=CHIPS)
         action = Raise(2, 2, 0)
-        self.assertRaises(ActionValidationException, action.validate, 
+        self.assertRaises(ActionValidationException, action.validate,
             ["2", "lkl", "kkak"])
 
     def test_bogus_limit_raise(self):
@@ -51,11 +52,11 @@ class RaiseTests(unittest.TestCase):
         self.assertEquals(2, action.amount)
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(RaiseTests))
     return suite
+
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")

@@ -21,6 +21,7 @@
 
 """ Core Rounder module. """
 
+
 class RounderException(Exception):
     """ Parent of all our custom exceptions. """
 
@@ -30,9 +31,11 @@ class RounderException(Exception):
     def __str__(self):
         return repr(self.value)
 
+
 class InvalidPlay(RounderException):
     """ Client did something they are not aloud to do. """
     pass
+
 
 def array_to_string(array):
     output = ""

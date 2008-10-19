@@ -30,6 +30,7 @@ from rounder.utils import find_action_in_list
 from rounder.player import Player
 from rounder.action import Call, Raise, Fold
 
+
 class FixedLimitTests(unittest.TestCase):
 
     def test_two_four(self):
@@ -115,7 +116,6 @@ class FixedLimitTests(unittest.TestCase):
         self.assertTrue(r != None)
         self.assertEqual(0.5, r.max_bet)
         self.assertEqual(0.5, r.min_bet)
-        
 
 
 class NoLimitTests(unittest.TestCase):
@@ -138,13 +138,12 @@ class NoLimitTests(unittest.TestCase):
         self.assertEquals(None, r.max_bet)
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(FixedLimitTests))
     suite.addTest(unittest.makeSuite(NoLimitTests))
     return suite
 
+
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")
-

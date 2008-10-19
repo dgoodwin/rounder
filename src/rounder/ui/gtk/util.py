@@ -22,6 +22,7 @@
 import os
 import sys
 
+
 def find_file_on_path(pathname):
     """
     Scan the Python path and locate a file with the given name.
@@ -38,5 +39,3 @@ def find_file_on_path(pathname):
             return candidate
     raise Exception("Could not find %s on the Python path."
         % pathname)
-
-

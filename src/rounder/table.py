@@ -39,8 +39,9 @@ MIN_PLAYERS_FOR_HAND = 2
 # a database auto-increment down the road.
 table_id_counter = 0
 
+
 class Seats(object):
-    """ 
+    """
     Data structure to manage players seated at the table.
     Tracks the dealer, small blind, big blind, and provides convenience
     functionality for navigating taking into account who is sitting out.
@@ -64,7 +65,8 @@ class Seats(object):
         if seat_number >= len(self.__seats):
             raise RounderException("Invalid seat number: " + str(seat_number))
         if self.__seats[seat_number] != None:
-            raise RounderException("Seat already occupied: " + str(seat_number))
+            raise RounderException("Seat already occupied: %s" % (
+                                   str(seat_number)))
 
         # Ensure a player can't get seated twice at one table:
         for seat in self.__seats:
@@ -88,7 +90,7 @@ class Seats(object):
         """
         Check if a player with the given username is seated at the table.
         """
-        return self.players_by_username.has_key(username)
+        return username in self.players_by_username.keys()
 
     def get_player(self, seat_number):
         return self.__seats[seat_number]
@@ -109,7 +111,7 @@ class Seats(object):
         return seated
     seated_players = property(__get_seated_players, None)
 
-    def __get_active_players(self):    
+    def __get_active_players(self):
         active_players = []
         for p in self.__seats:
             if p != None and not p.sitting_out:
@@ -118,9 +120,9 @@ class Seats(object):
     active_players = property(__get_active_players, None)
 
     def __get_first_active_seat(self, start_at):
-        """ 
+        """
         Returns the next seat index occupied by a player who isn't
-        sitting out, starting at the given index. 
+        sitting out, starting at the given index.
         """
         for i in range(len(self.__seats)):
             seat_num = int((i + start_at) % len(self.__seats))
@@ -139,13 +141,13 @@ class Seats(object):
         logger.debug("New dealer: %s" % self.dealer)
 
     def small_blind_to_prompt(self):
-        """ 
-        Return the next appropriate player for prompting the small blind. 
+        """
+        Return the next appropriate player for prompting the small blind.
         May be called multiple times in the event we prompt and the player
         chooses to sit out rather than post.
         """
         if self.small_blind != None:
-            raise RounderException("Small blind already defined: %s" % 
+            raise RounderException("Small blind already defined: %s" %
                 self.small_blind)
 
         if self.dealer == None:
@@ -159,13 +161,13 @@ class Seats(object):
         return self.__seats[self.__get_first_active_seat(start_at)]
 
     def big_blind_to_prompt(self):
-        """ 
-        Return the next appropriate player for prompting the big blind. 
+        """
+        Return the next appropriate player for prompting the big blind.
         May be called multiple times in the event we prompt and the player
         chooses to sit out rather than post.
         """
         if self.big_blind != None:
-            raise RounderException("Big blind already defined: %s" % 
+            raise RounderException("Big blind already defined: %s" %
                 self.get_player(self.__big_blind_index))
 
         if self.dealer == None:
@@ -181,10 +183,9 @@ class Seats(object):
         return self.__seats[seat_index]
 
 
-
 class Table(object):
 
-    """ 
+    """
     Representation of a table at which a poker game is taking place.
     """
 
@@ -207,19 +208,19 @@ class Table(object):
         self.game_over_event_queue = []
         self.game = None
 
-        # Optional server object represents a parent object that creates tables.
-        # If provided, it will be used for any communication with players,
-        # as well as notified whenever a hand has ended.
+        # Optional server object represents a parent object that creates
+        # tables. If provided, it will be used for any communication with
+        # players, as well as notified whenever a hand has ended.
         self.server = server
 
     def __repr__(self):
         return "%s (#%s)" % (self.name, self.id)
 
     def begin(self):
-        """ 
+        """
         Select a new dealer and prompt for players to agree to post
         their blinds. Once we receive the appropriate responses the hand
-        will be started. 
+        will be started.
 
         Intended to be called by a parent object, usually a server.
         """
@@ -244,21 +245,21 @@ class Table(object):
         return None
 
     def __begin_hand(self):
-        """ 
+        """
         GameStateMachine callback to actually begin a game.
         """
         logger.info("Table %s: New game starting" % self.id)
         active_players = self.seats.active_players
 
-        dealer_index = self.__find_players_index(active_players, 
+        dealer_index = self.__find_players_index(active_players,
                 self.seats.dealer)
-        sb_index = self.__find_players_index(active_players, 
+        sb_index = self.__find_players_index(active_players,
                 self.small_blind)
-        bb_index = self.__find_players_index(active_players, 
+        bb_index = self.__find_players_index(active_players,
                 self.big_blind)
 
-        self.game = TexasHoldemGame(limit=self.limit, 
-            players=self.seats.active_players, dealer_index=dealer_index, 
+        self.game = TexasHoldemGame(limit=self.limit,
+            players=self.seats.active_players, dealer_index=dealer_index,
             sb_index=sb_index, bb_index=bb_index,
             callback=self.game_over, table=self)
         self.game.advance()
@@ -294,8 +295,8 @@ class Table(object):
         self.gsm.advance()
 
     def wait(self):
-        """ 
-        Put the table on hold while we wait for more players. 
+        """
+        Put the table on hold while we wait for more players.
 
         Parent will normally restart the action. Should never be called when
         a hand is already underway.
@@ -360,8 +361,8 @@ class Table(object):
         self.prompt_player(bb, [post_bb])
 
     def sit_out(self, player, left_table=False):
-        """ 
-        Called by a player who wishes to sit out. 
+        """
+        Called by a player who wishes to sit out.
 
         Because the edge case code for when a player sits out is so similar
         to when they leave the table, handling both in this one method.
@@ -375,13 +376,12 @@ class Table(object):
         if left_table:
             seat_num = self.seats.get_seat_number(player.username)
             self.seats.remove_player(player.username)
-            event = PlayerLeftTable(self, player.username, seat_num) 
+            event = PlayerLeftTable(self, player.username, seat_num)
 
         if self.hand_underway():
             self.game_over_event_queue.append(event)
             self.game.sit_out(player)
         else:
-            
             self.notify_all(event)
             # Check if this players departure interferes with our gathering
             # blinds for a new hand:
@@ -408,7 +408,7 @@ class Table(object):
         """
         Process an incoming action from a player.
 
-        Actions are supplied to the player as a list, but to ensure a player 
+        Actions are supplied to the player as a list, but to ensure a player
         never performs an action they weren't allowed to in the first place,
         clients return an action index into the original list.
 
@@ -419,7 +419,7 @@ class Table(object):
         it's parameters. The game will handle the action.
         """
         if not self.seats.has_username(username):
-            raise RounderException("Unable to find player %s at table %s" % 
+            raise RounderException("Unable to find player %s at table %s" %
                 (username, self.id))
         p = self.seats.players_by_username[username]
 
@@ -429,7 +429,7 @@ class Table(object):
         action = p.pending_actions[action_index]
 
         action.validate(params)
-        
+
         pending_actions_copy = []
         pending_actions_copy.extend(p.pending_actions)
         p.clear_pending_actions()
@@ -438,8 +438,8 @@ class Table(object):
             if self.gsm.get_current_state() == STATE_SMALL_BLIND:
                 self.small_blind = p
                 # Game actually collects the blinds, but it makes more sense
-                # for the client to see the event as soon as they agree to post,
-                # as they already saw that they were prompted.
+                # for the client to see the event as soon as they agree to
+                # post, as they already saw that they were prompted.
                 blind_event = PlayerPostedBlind(self, p.username,
                     self.limit.small_blind)
                 self.notify_all(blind_event)
@@ -455,15 +455,16 @@ class Table(object):
 
     # Setup two properties for the small and big blinds, which are actually
     # stored on the tables seat object.
+
     def __get_small_blind(self):
-        return self.seats.small_blind 
+        return self.seats.small_blind
 
     def __set_small_blind(self, small_blind):
         self.seats.small_blind = small_blind
     small_blind = property(__get_small_blind, __set_small_blind)
 
     def __get_big_blind(self):
-        return self.seats.big_blind 
+        return self.seats.big_blind
 
     def __set_big_blind(self, big_blind):
         self.seats.big_blind = big_blind
@@ -478,14 +479,14 @@ class Table(object):
         # Sanity check: make sure this user isn't already observing:
         logger.info("Table %s: %s observing table" % (self.id, username))
         if username in self.observers:
-            raise RounderException("%s already observing table %s" % 
+            raise RounderException("%s already observing table %s" %
                 (username, self.id))
         self.observers.append(username)
 
     def remove_observer(self, username):
-        """ 
-        Remove a username from the list of observers. 
-        
+        """
+        Remove a username from the list of observers.
+
         Called both when a user disconnects and leaves the table.
         """
         logger.info("Table %s: %s left table." % (self.id, username))

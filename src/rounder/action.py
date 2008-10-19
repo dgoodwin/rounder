@@ -26,6 +26,7 @@ from rounder.currency import Currency
 from logging import getLogger
 logger = getLogger("rounder.action")
 
+
 class ActionValidationException(RounderException):
 
     """ Exception thrown when invalid action parameters are received. """
@@ -37,11 +38,10 @@ class ActionValidationException(RounderException):
         return repr(self.value)
 
 
+class Action(object):
 
-class Action:
-
-    """ 
-    Parent Action class. Actions represent any decision a player 
+    """
+    Parent Action class. Actions represent any decision a player
     sitting at a table can be faced with.
     """
 
@@ -49,7 +49,7 @@ class Action:
         pass
 
     def validate(self, params):
-        """ 
+        """
         Validate an incoming action response to ensure the paramaters
         it contains are valid. This is done to ensure nobody can
         modify the source for their client and submit invalid
@@ -63,20 +63,19 @@ class Action:
 
     @staticmethod
     def _check_params_length(params, expected_length):
-        """ 
+        """
         Raise an ActionValidationException if the params list is not of the
         expected length.
         """
         if len(params) != expected_length:
             raise ActionValidationException(
-                "Expected %s params but got %s" % (expected_length, 
+                "Expected %s params but got %s" % (expected_length,
                     len(params)))
-
 
 
 class PostBlind(Action):
 
-    """ 
+    """
     Action a player can take to post a blind and take part in the
     next hand.
     """
@@ -90,10 +89,9 @@ class PostBlind(Action):
         return "PostBlind: " + " $" + str(self.amount)
 
 
-
 class Call(Action):
 
-    """ 
+    """
     Action a player can take to call the current bet.
     next hand.
     """
@@ -106,12 +104,11 @@ class Call(Action):
         return "Call: " + " $" + str(self.amount)
 
 
-
 class Raise(Action):
 
-    """ 
+    """
     Action a player can take to raise the current bet.
-    
+
     The raise is specified by an amount over the current bet.
     """
 
@@ -122,10 +119,11 @@ class Raise(Action):
         self.current_bet = current_bet
 
         # TODO: protect the amount better?
-        self.amount = None # unknown until we receive a response from the player
+        # unknown until we receive a response from the player
+        self.amount = None
 
     def __repr__(self):
-        return "Raise ($%s - $%s): $%s" % (self.min_bet, self.max_bet, 
+        return "Raise ($%s - $%s): $%s" % (self.min_bet, self.max_bet,
             self.amount)
 
     def validate(self, params):
@@ -134,15 +132,14 @@ class Raise(Action):
         self._check_params_length(params, 1)
         amount = Currency(params[0])
         if amount < self.min_bet or amount > self.max_bet:
-            raise ActionValidationException("Invalid raise amount: %s" 
+            raise ActionValidationException("Invalid raise amount: %s"
                 % (amount))
         self.amount = amount
 
 
-
 class Fold(Action):
 
-    """ 
+    """
     Action a player can take to fold the current hand.
     """
 
@@ -151,6 +148,3 @@ class Fold(Action):
 
     def __repr__(self):
         return "Fold: "
-
-
-

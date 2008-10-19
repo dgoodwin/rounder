@@ -28,6 +28,7 @@ import settestpath
 
 from rounder.evaluator import PokerEval
 
+
 class PyPokerEvalCompatTests(unittest.TestCase):
     """ Tests for pypoker-eval compatibility. """
 
@@ -72,7 +73,6 @@ class PyPokerEvalCompatTests(unittest.TestCase):
         result = evaluator.winners(game="holdem", pockets=pockets, board=board)
         self.assertEquals(1, len(result['hi']))
         self.assertEquals(0, result['hi'][0])
-
 
 
 def suite():

@@ -38,7 +38,8 @@ from rounder.ui.client import Client
 
 from rounder.ui.curses import commands
 
-class TxtRounderState:
+
+class TxtRounderState(object):
 
     def __init__(self, screen):
         self.client = None
@@ -73,6 +74,7 @@ class TxtRounderClientServerCallback(Client):
         self.state = state
 
     # Server Callbacks
+
     def log_error(self, failure):
         self.screen.write("ERROR")
         self.screen.write(str(failure.getTraceback()))
@@ -103,7 +105,7 @@ class TxtRounderClientServerCallback(Client):
         pass
 
 
-class CursesStdIO:
+class CursesStdIO(object):
     """fake fd to be registered as a reader with the twisted reactor. """
 
     def fileno(self):
@@ -113,9 +115,12 @@ class CursesStdIO:
     def doRead(self):
         """called when input is ready"""
 
-    def logPrefix(self): return 'CursesClient'
+    def logPrefix(self):
+        return 'CursesClient'
+
 
 class RounderScreen(CursesStdIO):
+
     def __init__(self, stdscr):
         self.stdscr = stdscr
         self.stdscr.idlok(1)
@@ -185,7 +190,7 @@ class RounderScreen(CursesStdIO):
 
     def doRead(self):
         c = self.stdscr.getch()
-        
+
         if c in (8, 127, 263): # Backspace
             if len(self.input):
                 self.input = self.input[:-1]
@@ -218,7 +223,8 @@ class RounderScreen(CursesStdIO):
                 self.stdscr.deleteln()
                 self.input = ""
         elif c < 256 and chr(c) in string.printable:
-            if len(self.input) == self.cols - 2: return
+            if len(self.input) == self.cols - 2:
+                return
             self.input = self.input + chr(c)
             self.stdscr.insch(self.rows - 1, len(self.input) - 1, chr(c))
         else:
@@ -236,7 +242,8 @@ class RounderScreen(CursesStdIO):
     def connectionLost(self, why):
         pass
 
-class RounderCurses:
+
+class RounderCurses(object):
 
     def __init__(self, host=None, port=None, username=None, password=None):
         self.host = host

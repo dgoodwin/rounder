@@ -33,6 +33,7 @@ from rounder.pot import PotManager
 from rounder.core import RounderException
 from utils import create_players_list, create_players
 
+
 class PotTests(unittest.TestCase):
 
     def setUp(self):
@@ -41,7 +42,7 @@ class PotTests(unittest.TestCase):
     def test_simple_pot(self):
         """ Test simple 2 player, 1 round pot. """
         potmgr = PotManager()
-        potmgr.add({10 : self.players[:2]})
+        potmgr.add({10: self.players[:2]})
         pots = potmgr.pots
 
         self.assertEquals(1, len(pots))
@@ -52,8 +53,8 @@ class PotTests(unittest.TestCase):
     def test_two_round_simple_pot(self):
         """ Test simple 2 player, 2 round pot. """
         potmgr = PotManager()
-        potmgr.add({10 : self.players[:2]})
-        potmgr.add({10 : self.players[:2]})
+        potmgr.add({10: self.players[:2]})
+        potmgr.add({10: self.players[:2]})
         pots = potmgr.pots
 
         self.assertEquals(1, len(pots))
@@ -64,9 +65,9 @@ class PotTests(unittest.TestCase):
     def test_one_allin(self):
         """ Test 2 player, one allin. """
         potmgr = PotManager()
-        potmgr.add({10 : self.players[:2]})
+        potmgr.add({10: self.players[:2]})
         self.players[0].allin = True
-        potmgr.add({10 : self.players[:2]})
+        potmgr.add({10: self.players[:2]})
         pots = potmgr.pots
 
         self.assertEquals(1, len(pots))
@@ -78,9 +79,9 @@ class PotTests(unittest.TestCase):
         """ Test 2 players pushing in in different rounds. """
         potmgr = PotManager()
         self.players[2].allin = True
-        potmgr.add({15 : self.players[:3]})
+        potmgr.add({15: self.players[:3]})
         self.players[1].allin = True
-        potmgr.add({10 : self.players[:2]})
+        potmgr.add({10: self.players[:2]})
         pots = potmgr.pots
 
         self.assertEquals(2, len(pots))
@@ -103,9 +104,9 @@ class PotTests(unittest.TestCase):
         """
         potmgr = PotManager()
         self.players[2].allin = True
-        potmgr.add({15 : [self.players[2]], 31 : self.players[:2]})
+        potmgr.add({15: [self.players[2]], 31: self.players[:2]})
         self.players[1].allin = True
-        potmgr.add({10 : self.players[:2]})
+        potmgr.add({10: self.players[:2]})
         pots = potmgr.pots
 
         self.assertEquals(2, len(pots))
@@ -115,6 +116,7 @@ class PotTests(unittest.TestCase):
         self.assertEquals(set(self.players[:3]), set(pots[1].players))
         self.assertEquals((31 - 15) * 2 + 20, pots[0].amount)
         self.assertEquals(45, pots[1].amount)
+
 
 def suite():
     suite = unittest.TestSuite()

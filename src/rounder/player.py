@@ -28,7 +28,8 @@ logger = getLogger("rounder.player")
 
 from rounder.core import RounderException
 
-class Player:
+
+class Player(object):
 
     """
     Player at a poker table. Note one account could be playing at
@@ -91,7 +92,7 @@ class Player:
     def bet(self, amount, raise_count):
         """ A bet made by a client. """
         # TODO: Maybe this is too much state for the player to be worried about
-        if (amount + self.current_bet == 0 and raise_count > 0    ):
+        if (amount + self.current_bet == 0 and raise_count > 0):
             logger.debug("Client tried to bet 0")
             raise InvalidPlay("Client cannot bet 0")
 
@@ -140,7 +141,7 @@ class Player:
         """ Add chips to the players stack. """
         if amount < 0:
             raise RounderException("Negative amount, subtract_chips instead.")
-        logger.debug("Adding chips to " + str(self.username) + ": " + 
+        logger.debug("Adding chips to " + str(self.username) + ": " +
                 str(amount))
         self.chips = self.chips + amount
 
@@ -156,5 +157,3 @@ class Player:
     def __in_hand(self):
         return (not self.sitting_out) and (not self.folded)
     in_hand = property(__in_hand, None)
-
-

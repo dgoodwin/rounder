@@ -28,6 +28,8 @@ from cardtests import create_cards_from_list
 
 
 #Deck Utiltiy methods useful for testing
+
+
 def reorder_deck(deck, card_list):
     """Pull the list of values to the front of the deck
 
@@ -46,6 +48,7 @@ def reorder_deck(deck, card_list):
         deck.cards[count] = card
         count += 1
 
+
 class DeckTests(unittest.TestCase):
 
     def test_out_of_cards(self):
@@ -58,13 +61,15 @@ class DeckTests(unittest.TestCase):
         while d.has_more_cards():
             c.append(d.draw_card())
         self.assertEquals(52, len(c))
-    
+
     def draw_too_many_cards(self):
         d = Deck()
         for i in range(0, 53):
             d.draw_card()
 
+
 class DeckTestUtilsTests(unittest.TestCase):
+
     def test_reorder_deck_one(self):
         deck = Deck()
         cards = create_cards_from_list(['Ad', 'As', 'Ah'])
@@ -73,7 +78,7 @@ class DeckTestUtilsTests(unittest.TestCase):
         for i in range(3):
             self.assertEquals(deck.cards[i], cards[i], "Card %d incorrect" % i)
 
-        for i in range(3,52):
+        for i in range(3, 52):
             for j in range(3):
                 self.assertNotEquals(deck.cards[i], cards[j],
                     "Card %d in deck twice" % j)

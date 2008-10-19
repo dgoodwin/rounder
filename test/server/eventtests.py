@@ -29,6 +29,7 @@ from server.servertests import BaseServerFixture
 from rounder.event import *
 from rounder.action import *
 
+
 class EventTests(BaseServerFixture):
 
     def setUp(self):
@@ -288,7 +289,7 @@ class EventTests(BaseServerFixture):
         self.user2.act_randomly(self.table.id)
 
         # Preflop action:
-        self.user1.act(self.table.id, Call) 
+        self.user1.act(self.table.id, Call)
         self.user2.act(self.table.id, Call) # more like a check
 
         # Flop action:
@@ -302,7 +303,6 @@ class EventTests(BaseServerFixture):
         # River action:
         self.user2.act(self.table.id, Call) # more like a check
         self.user1.act(self.table.id, Call) # more like a check
-
 
     def test_game_ending(self):
         self.__run_complete_hand()
@@ -326,7 +326,6 @@ class EventTests(BaseServerFixture):
         self.assertEquals(1, len(events))
 
 
-
 def filter_event_type(user, event_type):
     """
     Filter the users list of received events and return only those that
@@ -338,10 +337,12 @@ def filter_event_type(user, event_type):
             events_of_type.append(e)
     return events_of_type
 
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(EventTests))
     return suite
+
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")

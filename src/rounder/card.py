@@ -24,8 +24,9 @@ import types
 
 from rounder.core import RounderException
 
-class Suit:
-    
+
+class Suit(object):
+
     """ Object representation of a card suit. """
 
     def __init__(self, uniqueInt, shortDisplay, longDisplay):
@@ -35,7 +36,6 @@ class Suit:
 
     def __str__(self):
         return self.display
-
 
 
 SPADE = Suit(0, "s", "spade")
@@ -62,7 +62,7 @@ RANK_TO_STRING = {
     11: 'J',
     12: 'Q',
     13: 'K',
-    14: 'A'
+    14: 'A',
 }
 STRING_TO_RANK = {
     '2': 2,
@@ -77,21 +77,24 @@ STRING_TO_RANK = {
     'J': 11,
     'Q': 12,
     'K': 13,
-    'A': 14
+    'A': 14,
 }
 
 STRING_TO_SUIT = {
     's': SPADE,
     'd': DIAMOND,
     'c': CLUB,
-    'h': HEART
+    'h': HEART,
 }
+
 
 def get_rank_display(intRank):
     return RANK_TO_STRING[intRank]
 
-class Card:
+
+class Card(object):
     """ Standard playing card. """
+
     def __init__(self, rank, suit=None):
         """
         Create a standard playing card. Card can be created in a number
@@ -120,7 +123,7 @@ class Card:
         """ Check the rank value to ensure it is valid. """
         if type(rank) == types.IntType and rank >= 2 and rank <= 14:
             return rank
-        elif STRING_TO_RANK.has_key(str(rank)):
+        elif str(rank) in STRING_TO_RANK.keys():
             return STRING_TO_RANK.get(str(rank))
         else:
             raise RounderException("Bad card rank: " + str(rank))
@@ -130,7 +133,7 @@ class Card:
         """ Check the suit value to ensure it is valid. """
         if isinstance(suit, Suit):
             return suit
-        elif STRING_TO_SUIT.has_key(str(suit)):
+        elif str(suit) in STRING_TO_SUIT.keys():
             return STRING_TO_SUIT.get(str(suit))
         else:
             raise RounderException("Bad card suit: " + str(suit))

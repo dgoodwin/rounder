@@ -85,7 +85,7 @@ class SitCommand(object):
     summary = "sit in a seat"
 
     @staticmethod
-    def do (state, args):
+    def do(state, args):
         seatid = int(args[0])
 
         if not state.is_connected():
@@ -104,8 +104,8 @@ class EvalCommand(object):
     @staticmethod
     def do(state, args):
         expression = " ".join(args)
-        res = eval(expression, {'state' : state})
+        res = eval(expression, {'state': state})
         state.screen.write(str(res))
 
 commands = (HelpCommand, ConnectCommand, ListCommand, JoinCommand, SitCommand,
-        QuitCommand, EvalCommand)
+            QuitCommand, EvalCommand)

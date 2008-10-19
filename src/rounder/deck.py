@@ -29,13 +29,14 @@ from random import shuffle
 from rounder.card import Card
 from rounder.core import RounderException
 
+
 class OutOfCardsException(RounderException):
 
     """
     Thrown when someone tries to draw a card from the deck, but there aren't
     any left.
     """
-    
+
     def __init__(self):
         self.value = "Ran out of cards."
 
@@ -43,8 +44,7 @@ class OutOfCardsException(RounderException):
         return repr(self.value)
 
 
-
-class Deck:
+class Deck(object):
 
     """ Standard 52 card deck. """
 
@@ -65,7 +65,7 @@ class Deck:
             i += 1
         output += "\n"
         return output
-    
+
     def shuffle(self):
         """ Shuffle the deck. """
         # TODO: Currently this uses the list shuffle method. Alot of room for
@@ -80,7 +80,7 @@ class Deck:
         c = self.cards[self.__topCard]
         self.__topCard += 1
         return c
-    
+
     def has_more_cards(self):
         if self.__topCard < 52:
             return True

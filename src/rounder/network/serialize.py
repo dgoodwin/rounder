@@ -32,6 +32,7 @@ from rounder.action import PostBlind, Call, Raise, Fold
 from rounder.limit import Limit, FixedLimit
 from rounder.event import ALL_EVENTS
 
+
 def register_message_classes():
     """ Registers all classes we'll be serializing with cerealizer. """
     l = [
@@ -48,7 +49,7 @@ def register_message_classes():
         Raise,
         Fold,
 
-        Limit, 
+        Limit,
         FixedLimit,
     ]
     l.extend(ALL_EVENTS)
@@ -56,10 +57,12 @@ def register_message_classes():
     for message_class in l:
         cerealizer.register(message_class)
 
+
 def dumps(obj):
     """ Serialize the given object and return it's string form. """
     objstr = cerealizer.dumps(obj)
     return objstr
+
 
 def loads(objstr):
     """ De-serialize the given string into it's original form. """

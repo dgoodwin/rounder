@@ -31,7 +31,7 @@ from rounder.network.server import DEFAULT_SERVER_PORT
 
 
 class RandomBot(Client):
-    """ 
+    """
     An extremely stupid bot.
 
     Connects to the given server, opens the first table it can, takes an
@@ -46,7 +46,7 @@ class RandomBot(Client):
         self.password = password
 
         self.client = RounderNetworkClient(self)
-        self.client.connect(self.host, self.port, self.username, 
+        self.client.connect(self.host, self.port, self.username,
             self.password)
 
     def connect_success(self, perspective):
@@ -70,7 +70,6 @@ class RandomBot(Client):
                 break
 
 
-
 class RandomBotTable(ClientTable):
 
     def __init__(self, table_uplink):
@@ -87,7 +86,7 @@ class RandomBotTable(ClientTable):
         logger.info("Event: %s" % event)
 
     def prompt(self, actions):
-        """ 
+        """
         Choose one of the actions in the given list, return it's index and any
         parameters required.
 
@@ -115,7 +114,6 @@ class RandomBotTable(ClientTable):
             break
 
         self.table_uplink.act(r, params)
-
 
 
 def find_action_index(actions, type):

@@ -64,6 +64,7 @@ import server.eventtests
 
 from unittest import TestSuite
 
+
 def suite():
     # Append all test suites here:
     return TestSuite((

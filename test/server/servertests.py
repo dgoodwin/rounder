@@ -33,6 +33,7 @@ from rounder.table import STATE_SMALL_BLIND
 from rounder.network.serialize import loads
 from rounder.action import Raise, Call, Fold
 
+
 class BaseServerFixture(unittest.TestCase):
 
     """ Base class for tests that require a server object. """
@@ -52,13 +53,12 @@ class BaseServerFixture(unittest.TestCase):
         self.users = [self.user1, self.user2]
 
     def clear_player_events(self):
-        """ 
-        Clears the stored events for each player. Used in a test 
+        """
+        Clears the stored events for each player. Used in a test
         immediately before doing something we expect to trigger events.
         """
         for user in self.users:
             user.events = []
-
 
 
 class RounderNetworkServerTests(BaseServerFixture):
@@ -75,7 +75,7 @@ class RounderNetworkServerTests(BaseServerFixture):
         raise Exception("Unable to find a player with pending actions.")
 
     def test_open_table(self):
-        self.assertTrue(isinstance(self.user1.table_views[self.table.id], 
+        self.assertTrue(isinstance(self.user1.table_views[self.table.id],
             TableView))
 
     def test_list_tables(self):
@@ -89,7 +89,7 @@ class RounderNetworkServerTests(BaseServerFixture):
         self.user2_table.view_sit(self.user2, 1)
 
         self.user1_table.view_start_game(self.user1)
-        self.assertEquals(STATE_SMALL_BLIND, 
+        self.assertEquals(STATE_SMALL_BLIND,
             self.table.gsm.get_current_state())
 
     def test_cannot_start_game_only_one_player(self):
@@ -110,10 +110,9 @@ class RounderNetworkServerTests(BaseServerFixture):
             user.act_randomly(self.table.id)
 
     def test_remove_user(self):
-        self.assertTrue(self.server.users.has_key(self.user1.username))
+        self.assertTrue(self.user1.username in self.server.users.keys())
         self.user1.detached(None)
-        self.assertFalse(self.server.users.has_key(self.user1.username))
-
+        self.assertFalse(self.user1.username in self.server.users.keys())
 
 
 class TestUser(User):
@@ -168,7 +167,6 @@ class TestUser(User):
         User.notify(self, table_id, serialized_event)
         self.events.append(loads(serialized_event))
 
-
     def act(self, table_id, action_type, param=None):
         """
         Locate an action of the specified type in the pending list and submit
@@ -191,11 +189,11 @@ class TestUser(User):
             raise Exception("Unable to locate action of type: %s", action_type)
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(RounderNetworkServerTests))
     return suite
+
 
 if __name__ == "__main__":
     unittest.main(defaultTest="suite")

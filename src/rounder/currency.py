@@ -22,13 +22,13 @@
 
 from rounder.fixedpoint import FixedPoint, DEFAULT_PRECISION
 
+
 class Currency(FixedPoint):
 
-    """ 
+    """
     Representation of a monetary amount. Simple subclass of FixedPoint because
     I prefer the name. :)
     """
 
     def __init__(self, value=0, precision=DEFAULT_PRECISION):
         FixedPoint.__init__(self, value, precision)
-

@@ -38,14 +38,14 @@ class FullHand(object):
         self.ranks = {}
         for card in self.cards:
             rank = card[:-1]
-            if not self.ranks.has_key(rank):
+            if not rank in self.ranks.keys():
                 self.ranks[rank] = []
             self.ranks[rank].append(card[-1])
 
         self.suits = {}
         for card in self.cards:
             suit = card[-1]
-            if not self.suits.has_key(suit):
+            if not suit in self.suits.keys():
                 self.suits[suit] = []
             self.suits[suit].append(card[:-1])
 
@@ -59,7 +59,7 @@ class FullHand(object):
         self._used_straight_ranks = None
 
     def is_royal(self):
-       return self.is_straight(suit_matters=True, ace_high_matters=True)
+        return self.is_straight(suit_matters=True, ace_high_matters=True)
 
     def is_straight_flush(self):
         return self.is_straight(suit_matters=True)
@@ -84,7 +84,7 @@ class FullHand(object):
         # XXX This needs cleanup, esp for these extra arguments
         ranks = []
         for key, value in self.ranks.iteritems():
-           ranks.append((self.as_int(key), value))
+            ranks.append((self.as_int(key), value))
 
         ranks.sort(cmp=lambda x, y: cmp(x[0], y[0]), reverse=True)
 
@@ -97,7 +97,7 @@ class FullHand(object):
         # may have added
         for j in range(len(ranks) - 4):
             last = ranks[j]
-            suit_hash = {'s' : 0, 'c' : 0, 'd' : 0, 'h' : 0}
+            suit_hash = {'s': 0, 'c': 0, 'd': 0, 'h': 0}
             for suit in last[1]:
                 suit_hash[suit] += 1
 
@@ -114,10 +114,10 @@ class FullHand(object):
                 if suit_matters:
                     for value in suit_hash.itervalues():
                         if value == 5:
-                            self._used_straight_ranks = ranks[j : j + 5]
+                            self._used_straight_ranks = ranks[j:j + 5]
                             return True
                 else:
-                    self._used_straight_ranks = ranks[j : j + 5]
+                    self._used_straight_ranks = ranks[j:j + 5]
                     return True
         return False
 
@@ -125,7 +125,7 @@ class FullHand(object):
         values = [len(x) for x in self.ranks.values()]
         values.sort()
         return values == [1, 1, 1, 1, 3]
-   
+
     def is_two_pair(self):
         values = [len(x) for x in self.ranks.values()]
         values.sort()
@@ -303,7 +303,6 @@ class FullHand(object):
 
         return hand_value
 
-
     def _get_relative_value(self):
         """
         Arbitrary numeric weights assigned to hands for comparing
@@ -348,7 +347,8 @@ class FullHand(object):
         if self._relative_value >= 0x900000:
             string_repr = "a royal flush " + self._rank_string(4, 3, 2, 1, 0)
         elif self._relative_value > 0x800000:
-            string_repr = "a straight flush " + self._rank_string(4, 3, 2, 1, 0)
+            string_repr = "a straight flush " + self._rank_string(4, 3, 2,
+                                                                  1, 0)
         elif self._relative_value > 0x700000:
             string_repr = "quads " + self._rank_string(4, 4, 4, 4, 3)
         elif self._relative_value > 0x600000:

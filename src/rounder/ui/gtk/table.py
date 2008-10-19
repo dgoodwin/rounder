@@ -79,10 +79,11 @@ ROUNDER_TABLE_FILE = "rounder/ui/gtk/data/rounder-table.png"
 DEALER_BUTTON_FILE = "rounder/ui/gtk/data/dealer-button.png"
 ROUNDER_ICON_FILE = "rounder/ui/gtk/data/rounder-icon.svg"
 
+
 def colored_card(card):
     """
     Return a colored representation of the given card's suit.
-    Uses red for hearts, black for spades, blue for diamonds, and green 
+    Uses red for hearts, black for spades, blue for diamonds, and green
     for clubs.
     """
     suit_char = str(card)[1]
@@ -96,6 +97,7 @@ def colored_card(card):
     elif suit_char == "c":
         color = "green"
     return '<span foreground="%s">%s</span>' % (color, str(card))
+
 
 class TableWindow(ClientTable):
     """ Dialog for a poker table. """
@@ -116,7 +118,7 @@ class TableWindow(ClientTable):
         glade_file = 'rounder/ui/gtk/data/table.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         self.table_window = self.glade_xml.get_widget('table-window')
-        table_title = "%s: %s %s" % (table_uplink.state.name, 
+        table_title = "%s: %s %s" % (table_uplink.state.name,
                 table_uplink.state.limit, "Texas Hold'em")
         self.table_window.set_title(table_title)
         self.table_window.set_icon_from_file(
@@ -231,7 +233,7 @@ class TableWindow(ClientTable):
 
     def confirm_window_close(self, widget, event, data=None):
         logger.debug("Confirming window close.")
-        # NOTE: Just closing the window here for now, confirmation comes 
+        # NOTE: Just closing the window here for now, confirmation comes
         # later:
         self.table_uplink.leave()
         return False # set to true for confirm screen
@@ -266,7 +268,7 @@ class TableWindow(ClientTable):
         buf.insert(buf.get_end_iter(), msg + "\n")
         mark = buf.create_mark("end", buf.get_end_iter())
         self.chat_textview.scroll_to_mark(mark, 0.0)
-    
+
     def __disable_action_buttons(self):
         self.call_button.set_label("Call")
         self.call_button.set_sensitive(False)
@@ -344,7 +346,7 @@ class TableWindow(ClientTable):
                 self.call_button.set_sensitive(True)
                 if self.__call_handler_id != None:
                     self.call_button.disconnect(self.__call_handler_id)
-                self.__call_handler_id = self.call_button.connect('clicked', 
+                self.__call_handler_id = self.call_button.connect('clicked',
                         self.handle_call_button, (index, action))
 
             elif isinstance(action, Raise):
@@ -356,8 +358,8 @@ class TableWindow(ClientTable):
                 self.raise_button.set_sensitive(True)
                 if self.__raise_handler_id != None:
                     self.raise_button.disconnect(self.__raise_handler_id)
-                self.__raise_handler_id = self.raise_button.connect('clicked', 
-                        self.handle_raise_button, (index, action, 
+                self.__raise_handler_id = self.raise_button.connect('clicked',
+                        self.handle_raise_button, (index, action,
                             action.min_bet, action.current_bet))
 
             elif isinstance(action, Fold):
@@ -365,8 +367,8 @@ class TableWindow(ClientTable):
                 self.fold_button.set_sensitive(True)
                 if self.__fold_handler_id != None:
                     self.fold_button.disconnect(self.__fold_handler_id)
-                self.__fold_handler_id = self.fold_button.connect('clicked', 
-                        self.handle_fold_button, (index, action)) 
+                self.__fold_handler_id = self.fold_button.connect('clicked',
+                        self.handle_fold_button, (index, action))
 
             index = index + 1
 
@@ -388,13 +390,13 @@ class TableWindow(ClientTable):
         if isinstance(event, PlayerJoinedTable):
             self.__username_to_seat[event.username] = \
                 self.gui_seats[event.seat_num]
-            self.chat_line("%s took seat %s." % (event.username, 
+            self.chat_line("%s took seat %s." % (event.username,
                     event.seat_num))
 
         if isinstance(event, PlayerLeftTable):
             self.__username_to_seat.pop(event.username)
-            self.chat_line("%s left table." % event.username) 
-            self.gui_seats[event.seat_num].player_left(self.my_seat 
+            self.chat_line("%s left table." % event.username)
+            self.gui_seats[event.seat_num].player_left(self.my_seat
                     != None)
 
         elif isinstance(event, PlayerPrompted):
@@ -456,7 +458,7 @@ class TableWindow(ClientTable):
             seat.folded()
 
         elif isinstance(event, HoleCardsDealt):
-            self.chat_line("Dealt hole cards: %s %s" % (event.cards[0], 
+            self.chat_line("Dealt hole cards: %s %s" % (event.cards[0],
                 event.cards[1]))
             self.my_hole_cards = event.cards
             self.my_seat.show_hole_cards(self.my_hole_cards)
@@ -489,7 +491,7 @@ class TableWindow(ClientTable):
                     if not pot_state.is_main_pot:
                         pot_type = "side"
                     self.chat_line("%s wins $%s from %s pot with %s" %
-                            (pot_winner.username, pot_winner.amount, 
+                            (pot_winner.username, pot_winner.amount,
                                 pot_type, pot_winner.hand))
             self.deal_button.set_sensitive(True)
 
@@ -502,7 +504,7 @@ class TableWindow(ClientTable):
     def render_dealer_button(self, dealer_seat_num):
         """ Draw the dealer button for the given seat. """
         logger.debug("Rendering dealer button for seat %s"
-            %  dealer_seat_num)
+            % dealer_seat_num)
         coords = GUI_FIXED_COORDS["dealer-button-%s" % dealer_seat_num]
         if self.dealer_button == None:
             self.dealer_button = gtk.Image()
@@ -514,7 +516,7 @@ class TableWindow(ClientTable):
             self.fixed_table.move(self.dealer_button, coords[0], coords[1])
 
     def __draw_stuff(self):
-        """ 
+        """
         Draws the dealer buttons and pot contributions around the various
         seats so we can see what they look like without actually playing.
         """
@@ -531,7 +533,7 @@ class TableWindow(ClientTable):
         """
         #logger.debug("Rendering table state:\n%s",
         #        state.print_state_as_string())
-    
+
         # Render board cards:
         cards_string = ""
         for c in state.community_cards:
@@ -559,19 +561,19 @@ class TableWindow(ClientTable):
                     # First time we've seen this seat occupied:
                     seat.display_player_state(player_state)
                 else:
-                    assert(seat.name_label.get_text() == 
+                    assert(seat.name_label.get_text() ==
                             player_state.username)
                     # Set only what we need to frequently update:
                     # TODO: get updated player chip counts from events!
                     seat.set_chips(player_state.chips)
 
 
-
-class GuiSeat:
+class GuiSeat(object):
     """
     Tiny object to encapsulate hard coded assumptions about the widgets
     that compose a seat.
     """
+
     def __init__(self, parent_table, seat_number):
         self.parent_table = parent_table
         self.seat_number = seat_number
@@ -613,7 +615,7 @@ class GuiSeat:
 
         self.sit_button = gtk.Button(label="Sit")
         self.sit_button.set_name("seat%s-sit-button" % self.seat_number)
-        self.sit_button.connect("clicked", 
+        self.sit_button.connect("clicked",
                 self.parent_table.handle_sit_button)
         self.vbox.pack_start(self.sit_button)
         # Do we want the sit button taking up the whole space?
@@ -626,7 +628,7 @@ class GuiSeat:
         """
         Switch this seat to display actual player info.
 
-        Called only once per player occupation. If a player leaves we 
+        Called only once per player occupation. If a player leaves we
         must switch back to Sit button mode. Otherwise we just update
         the fields we need to change.
         """
@@ -696,7 +698,7 @@ class GuiSeat:
         if cards == None:
             self.cards_label.set_text("XX XX")
         else:
-            self.cards_label.set_markup("%s %s" % (colored_card(cards[0]), 
+            self.cards_label.set_markup("%s %s" % (colored_card(cards[0]),
                 colored_card(cards[1])))
 
     def clear_hole_cards(self):
@@ -733,6 +735,3 @@ class GuiSeat:
     def raised(self, amount):
         """ Indicate that this player has raised. """
         self.__set_action("raise $%s" % amount)
-
-
-
