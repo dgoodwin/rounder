@@ -8,7 +8,7 @@ __revision__ = "$Revision$"
 from distutils.core import setup
 
 setup(name="rounder",
-    version='0.0.1b',
+    version='0.0.1',
     description='Poker for the Gnome desktop.',
     author='Devan Goodwin & James Bowes',
     author_email='dgoodwin@dangerouslyinc.com & jbowes@dangerouslyinc.com',
