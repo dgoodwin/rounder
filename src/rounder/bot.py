@@ -27,7 +27,6 @@ logger = getLogger("rounder.ui.bot")
 from rounder.ui.client import Client, ClientTable
 from rounder.action import *
 from rounder.network.client import RounderNetworkClient
-from rounder.network.server import DEFAULT_SERVER_PORT
 
 
 class RandomBot(Client):

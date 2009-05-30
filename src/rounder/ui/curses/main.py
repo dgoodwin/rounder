@@ -23,14 +23,11 @@
 
 import string
 import traceback
-import sys
 
 from curses.wrapper import wrapper
 import curses
 
 from twisted.internet import reactor
-from twisted.internet.protocol import ClientFactory
-from twisted.python import log
 
 from rounder.network.serialize import register_message_classes
 from rounder.network.client import RounderNetworkClient

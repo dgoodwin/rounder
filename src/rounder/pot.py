@@ -22,7 +22,6 @@
 """ The Rounder Pot Module (the kind you have at a poker table) """
 
 from logging import getLogger
-from collections import defaultdict
 logger = getLogger("rounder.pot")
 from currency import Currency
 
