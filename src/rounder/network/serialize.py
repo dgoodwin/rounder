@@ -55,7 +55,11 @@ def register_message_classes():
     l.extend(ALL_EVENTS)
 
     for message_class in l:
-        cerealizer.register(message_class)
+        try:
+            cerealizer.register(message_class)
+        except ValueError:
+            logger.debug("Class already registered w/ cerealizer: %s"
+                    % message_class)
 
 
 def dumps(obj):

@@ -25,7 +25,7 @@ logger = getLogger("rounder.test.network.servertests")
 
 import unittest
 
-from server.servertests import BaseServerFixture
+from server import BaseServerFixture
 from rounder.event import *
 from rounder.action import *
 

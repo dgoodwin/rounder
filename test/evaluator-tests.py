@@ -320,7 +320,7 @@ class StraightFlushTests(FullHandTest):
         self.assertTrue(hand.is_straight_flush())
 
 
-def testBothStraightsFlushHighestCardWins(self):
+    def testBothStraightsFlushHighestCardWins(self):
         board = ('6h', 'jh', 'qh', '10h', '9h')
         hand1 = FullHand(('kh', 'qd'), board)
         hand2 = FullHand(('6d', '8h'), board)
