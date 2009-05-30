@@ -22,8 +22,6 @@
 
 import unittest
 
-import settestpath
-
 from rounder.pokerroom import PokerRoom
 
 
@@ -33,10 +31,3 @@ class PokerRoomTests(unittest.TestCase):
         poker_room = PokerRoom()
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PokerRoomTests))
-    return suite
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

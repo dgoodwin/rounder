@@ -24,7 +24,6 @@ from logging import getLogger
 logger = getLogger("rounder.test.serialize")
 
 import unittest
-import settestpath
 
 from rounder.network.serialize import dumps, loads, register_message_classes
 from rounder.dto import TableState
@@ -50,11 +49,3 @@ class CerealizerTests(unittest.TestCase):
         self.assertEquals(10, len(new_state.seats))
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(CerealizerTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

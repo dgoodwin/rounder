@@ -337,12 +337,3 @@ def filter_event_type(user, event_type):
             events_of_type.append(e)
     return events_of_type
 
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(EventTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

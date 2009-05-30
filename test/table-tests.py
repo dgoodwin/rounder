@@ -22,8 +22,6 @@
 
 import unittest
 
-import settestpath
-
 from rounder.table import Seats
 from rounder.player import Player
 from rounder.core import RounderException
@@ -265,13 +263,3 @@ class TableTests(unittest.TestCase):
             self.players[0].username, 1, [])
         self.assertRaises(RounderException, self.table.process_action,
             self.players[0].username, -1, [])
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(TableTests))
-    suite.addTest(unittest.makeSuite(SeatsTests))
-    return suite
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

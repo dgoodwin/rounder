@@ -21,7 +21,6 @@
 #   02110-1301  USA
 
 import unittest
-import settestpath
 from rounder.deck import OutOfCardsException
 from rounder.deck import Deck
 from utils import *
@@ -65,12 +64,3 @@ class DeckTestUtilsTests(unittest.TestCase):
                     "Card %d in deck twice" % j)
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(DeckTests))
-    suite.addTest(unittest.makeSuite(DeckTestUtilsTests))
-    return suite
-
-if __name__ == '__main__':
-    runner = unittest.TextTestRunner()
-    unittest.main(testRunner=runner)

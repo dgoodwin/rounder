@@ -21,8 +21,6 @@
 
 import unittest
 
-import settestpath
-
 from rounder.action import Raise
 from rounder.action import ActionValidationException
 from rounder.player import Player
@@ -52,11 +50,3 @@ class RaiseTests(unittest.TestCase):
         self.assertEquals(2, action.amount)
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(RaiseTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

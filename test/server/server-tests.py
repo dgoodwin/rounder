@@ -25,8 +25,6 @@ logger = getLogger("rounder.test.network.servertests")
 
 import unittest
 
-import settestpath
-
 from rounder.network.server import TableView
 from rounder.table import STATE_SMALL_BLIND
 
@@ -88,12 +86,3 @@ class RounderNetworkServerTests(BaseServerFixture):
         self.user1.detached(None)
         self.assertFalse(self.user1.username in self.server.users.keys())
 
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(RounderNetworkServerTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

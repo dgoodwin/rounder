@@ -24,7 +24,6 @@ now kept for testing rounder.evaluator's pypoker-eval compatibility
 """
 
 import unittest
-import settestpath
 
 from rounder.evaluator import PokerEval
 
@@ -75,11 +74,3 @@ class PyPokerEvalCompatTests(unittest.TestCase):
         self.assertEquals(0, result['hi'][0])
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PyPokerEvalCompatTests))
-    return suite
-
-if __name__ == '__main__':
-    runner = unittest.TextTestRunner()
-    unittest.main(testRunner=runner)

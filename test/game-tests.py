@@ -26,8 +26,6 @@ logger = getLogger("rounder.test.gametests")
 
 import unittest
 
-import settestpath
-
 from rounder.action import Call, Raise, Fold
 from rounder.core import RounderException
 from rounder.limit import FixedLimit
@@ -437,13 +435,3 @@ class TexasHoldemTests(unittest.TestCase):
         self.assertEquals(CHIPS + 2, self.players[2].chips)
         self.assertEquals(CHIPS + 2, self.players[1].chips)
 
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(NextToActTests))
-    suite.addTest(unittest.makeSuite(GameStateMachineTests))
-    suite.addTest(unittest.makeSuite(TexasHoldemTests))
-    return suite
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

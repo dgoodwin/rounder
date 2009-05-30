@@ -23,8 +23,6 @@
 
 import unittest
 
-import settestpath
-
 from rounder.player import Player
 from rounder.core import InvalidPlay
 from rounder.currency import Currency
@@ -63,12 +61,3 @@ class PlayerTests(unittest.TestCase):
     def test_something(self):
         pass
 
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PlayerTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

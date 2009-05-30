@@ -22,8 +22,6 @@
 
 import unittest
 
-import settestpath
-
 from rounder.card import SPADE
 from rounder.card import DIAMOND
 from rounder.card import HEART
@@ -73,13 +71,3 @@ class CardTests(unittest.TestCase):
 
         kingOfHearts = Card("Kh")
         self.assertEquals("Kh", str(kingOfHearts))
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(CardTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

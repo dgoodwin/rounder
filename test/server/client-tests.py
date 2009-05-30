@@ -25,8 +25,6 @@ logger = getLogger("rounder.test.network.clienttests")
 
 import unittest
 
-import settestpath
-
 
 class RounderNetworkClientTests(unittest.TestCase):
 
@@ -36,11 +34,3 @@ class RounderNetworkClientTests(unittest.TestCase):
         pass
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(RounderNetworkClientTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

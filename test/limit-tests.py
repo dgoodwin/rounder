@@ -22,8 +22,6 @@
 
 import unittest
 
-import settestpath
-
 from rounder.limit import FixedLimit, NoLimit
 from rounder.currency import Currency
 from rounder.utils import find_action_in_list
@@ -136,14 +134,3 @@ class NoLimitTests(unittest.TestCase):
         self.assertEquals(Currency(100), c.amount)
         self.assertEquals(Currency(100), r.min_bet)
         self.assertEquals(None, r.max_bet)
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(FixedLimitTests))
-    suite.addTest(unittest.makeSuite(NoLimitTests))
-    return suite
-
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")

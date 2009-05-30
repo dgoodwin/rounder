@@ -26,8 +26,6 @@ logger = getLogger("rounder.test.gametests")
 
 import unittest
 
-import settestpath
-
 from rounder.currency import Currency
 from rounder.pot import PotManager
 from rounder.core import RounderException
@@ -117,11 +115,3 @@ class PotTests(unittest.TestCase):
         self.assertEquals((31 - 15) * 2 + 20, pots[0].amount)
         self.assertEquals(45, pots[1].amount)
 
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PotTests))
-    return suite
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="suite")
