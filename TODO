@@ -11,6 +11,7 @@
 - Implement sounds.
 - Color code the chat window. (maybe three levels, game messages, player
   actions, and chat messages)
+- Clean up logging. (some unecessary initialization code laying around)
 
 =====
 Other
