@@ -24,6 +24,7 @@ from rounder.table import Table
 from rounder.currency import Currency
 from rounder.player import Player
 from rounder.limit import FixedLimit
+from rounder.card import Card
 
 CHIPS = 1000
 
@@ -67,3 +68,28 @@ def create_table(chip_counts, dealer_index):
         i = i + 1
 
     return (limit, table, players)
+
+
+def create_cards_from_list(value_list):
+    return [Card(value) for value in value_list]
+
+
+def reorder_deck(deck, card_list):
+    """Pull the list of values to the front of the deck
+
+    It should be noted that this will reorder the deck and therefore
+    should not be run after any cards are handed out to players.
+
+    """
+    count = 0
+    for card in card_list:
+        index = deck.cards.index(card)
+
+        # Take the actual card instead of the list because they could just
+        # compare the same.
+        card = deck.cards[index]
+        deck.cards[index] = deck.cards[count]
+        deck.cards[count] = card
+        count += 1
+
+

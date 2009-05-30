@@ -41,9 +41,7 @@ from rounder.currency import Currency
 from rounder.utils import find_action_in_list
 from rounder.pot import PotManager
 
-from utils import create_players_list, create_table
-from cardtests import create_cards_from_list
-from decktests import reorder_deck
+from utils import *
 
 CHIPS = 1000
 
