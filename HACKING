@@ -22,7 +22,7 @@ GETTING STARTED
 Best to start with running the tests, this will give you a pretty good idea if
 you have all the dependencies installed:
 
-    ./runtests
+    nosetests (part of the python-nose package)
 
 Various executables installed with rounder can be found in the bin/ directory.
 If you would like to run them from your source checkout, without actually
